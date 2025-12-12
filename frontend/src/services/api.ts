@@ -2,7 +2,9 @@ import axios from 'axios';
 
 // Create axios instance
 const api = axios.create({
-  baseURL: '/api', // Proxy configured in vite.config.ts
+  // In dev we proxy /api -> http://localhost:5000 via vite.config.ts.
+  // In prod set VITE_API_URL to your backend (e.g. https://your-backend.onrender.com/api).
+  baseURL: import.meta.env.VITE_API_URL ?? '/api',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -29,7 +31,7 @@ api.interceptors.response.use(
     // Handle 401 Unauthorized (token expired or invalid)
     if (error.response && error.response.status === 401) {
       localStorage.removeItem('token');
-      window.location.href = '/login';
+      window.location.href = `${import.meta.env.BASE_URL}login`;
     }
     return Promise.reject(error);
   }

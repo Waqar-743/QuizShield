@@ -25,7 +25,7 @@ const Sidebar = ({ isOpen, closeSidebar }: SidebarProps) => {
     try {
       await switchRole(newRole);
       toast.success(`Switched to ${newRole} mode!`);
-      window.location.href = '/dashboard';
+      window.location.href = `${import.meta.env.BASE_URL}dashboard`;
     } catch {
       toast.error('Failed to switch role');
     }

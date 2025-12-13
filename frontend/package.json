@@ -2,6 +2,7 @@
   "name": "adaptive-learning-frontend",
   "private": true,
   "version": "0.0.0",
+   "homepage": "https://Waqar-743.github.io/adaptive-learning-frontend",
   "type": "module",
   "scripts": {
     "dev": "vite",

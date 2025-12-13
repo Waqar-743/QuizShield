@@ -61,6 +61,15 @@ app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok', timestamp: new Date() });
 });
 
+// Root route for basic verification
+app.get('/', (req, res) => {
+  res.status(200).json({
+    message: 'Adaptive Learning API is running',
+    environment: config.nodeEnv,
+    version: '1.0.0'
+  });
+});
+
 // Error handling
 app.use(notFoundHandler);
 app.use(errorHandler);

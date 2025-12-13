@@ -2,7 +2,7 @@
   "name": "adaptive-learning-frontend",
   "private": true,
   "version": "0.0.0",
-   "homepage": "https://Waqar-743/QuizShield.github.io/adaptive-learning-frontend",
+  "homepage": "https://Waqar-743.github.io/QuizShield",
   "type": "module",
   "scripts": {
     "dev": "node node_modules/vite/bin/vite.js",

@@ -14,6 +14,9 @@ COPY backend/tsconfig.json ./
 COPY backend/src ./src
 RUN npm run build
 
+# Verify we are using this Dockerfile
+RUN echo "============== BUILDING WITH RAILWAY-BACKEND.DOCKERFILE =============="
+
 FROM node:20-bookworm-slim AS runner
 ENV NODE_ENV=production
 WORKDIR /app
@@ -25,4 +28,4 @@ COPY --from=build /app/dist ./dist
 COPY backend/package.json ./
 
 EXPOSE 5000
-CMD ["node", "dist/index.js"]
+CMD ["npm", "start"]

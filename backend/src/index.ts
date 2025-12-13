@@ -21,8 +21,26 @@ const app = express();
 connectDatabase();
 
 // Middleware
+// Allow strictly defined origins
+const allowedOrigins = [
+  config.frontendUrl,
+  'https://Waqar-743.github.io',
+  'http://localhost:3000',
+  'http://localhost:5173'
+];
+
+console.log('CORS Configured for origins:', allowedOrigins);
+
 app.use(cors({
-  origin: config.frontendUrl,
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.some(o => origin.startsWith(o))) {
+      return callback(null, true);
+    }
+    console.warn(`Blocked CORS request from: ${origin}`);
+    return callback(new Error('Not allowed by CORS'), false);
+  },
   credentials: true,
 }));
 app.use(express.json());

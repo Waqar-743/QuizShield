@@ -67,8 +67,25 @@ app.use(errorHandler);
 
 // Start server
 const PORT = config.port;
-app.listen(Number(PORT), '0.0.0.0', () => {
+
+console.log('--- SERVER INITIALIZATION ---');
+console.log('Process CWD:', process.cwd());
+console.log('Attempting to bind port:', PORT);
+try {
+  // Debug check to verify dist structure
+  const fs = require('fs');
+  console.log('Dist contents:', fs.readdirSync('./dist'));
+} catch (err) {
+  console.log('Directory check failed:', err);
+}
+
+const server = app.listen(Number(PORT), '0.0.0.0', () => {
   console.log(`Server running in ${config.nodeEnv} mode on port ${PORT}`);
+  console.log(`Health check available at http://0.0.0.0:${PORT}/health`);
+});
+
+server.on('error', (error) => {
+  console.error('FATAL: Server failed to start:', error);
 });
 
 // Handle unhandled promise rejections

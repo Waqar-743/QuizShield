@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "description": "Backend for AI-Powered Adaptive Learning Platform",
   "main": "src/index.ts",
-  "scripts": {
-    "start": "node dist/index.js",
-    "dev": "nodemon src/index.ts",
-    "build": "tsc"
-  },
+  "prestart": "echo '--- PRESTART CHECK ---' && ls -la && ls -la dist || echo 'Dist missing'",
+  "start": "node dist/index.js",
+  "dev": "nodemon src/index.ts",
+  "build": "tsc",
+  "test:debug": "echo 'Debug script running'",
   "keywords": [],
   "author": "",
   "license": "ISC",

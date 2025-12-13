@@ -49,7 +49,7 @@ app.use(errorHandler);
 
 // Start server
 const PORT = config.port;
-app.listen(PORT, () => {
+app.listen(Number(PORT), '0.0.0.0', () => {
   console.log(`Server running in ${config.nodeEnv} mode on port ${PORT}`);
 });
 

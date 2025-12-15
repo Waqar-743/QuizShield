@@ -92,7 +92,7 @@ const TeacherOverview = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
       </div>
     );
   }
@@ -100,15 +100,15 @@ const TeacherOverview = () => {
   return (
     <div className="space-y-6">
       {/* Welcome Header */}
-      <header className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-xl p-6 text-white">
+      <header className="bg-gradient-to-r from-primary-600 to-primary-700 rounded-xl p-6 text-white">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold">Welcome, {user?.name}!</h1>
-            <p className="mt-1 text-emerald-100">Create quizzes and share them with your students using access codes.</p>
+            <p className="mt-1 text-white/90">Create quizzes and share them with your students using access codes.</p>
           </div>
           <Link
             to="/dashboard/teacher/quizzes"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-white text-emerald-600 rounded-lg font-medium hover:bg-emerald-50 transition-colors"
+            className="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 font-medium text-primary-700 transition-colors hover:bg-primary-50"
           >
             <PlusIcon className="h-5 w-5" />
             Create Quiz
@@ -136,7 +136,7 @@ const TeacherOverview = () => {
           icon={<QuestionMarkCircleIcon className="h-6 w-6" />}
           label="Questions Created"
           value={stats?.totalQuestions || 0}
-          color="purple"
+          color="primary"
         />
         <StatCard
           icon={<ChartBarIcon className="h-6 w-6" />}
@@ -172,7 +172,7 @@ const TeacherOverview = () => {
                     borderRadius: '8px',
                   }}
                 />
-                <Bar dataKey="avgScore" fill="#6366f1" name="Avg Score %" radius={[0, 4, 4, 0]} />
+                <Bar dataKey="avgScore" fill="#4ca1af" name="Avg Score %" radius={[0, 4, 4, 0]} />
                 <Bar dataKey="completionRate" fill="#10b981" name="Completion %" radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>
@@ -214,7 +214,7 @@ const TeacherOverview = () => {
             <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
             <Link
               to="/dashboard/teacher/analytics"
-              className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
+              className="text-sm font-medium text-primary-700 hover:text-primary-600"
             >
               View All
             </Link>
@@ -227,8 +227,8 @@ const TeacherOverview = () => {
                 { type: 'milestone', text: 'Python course reached 50 enrollments!', time: '1 day ago' },
               ].map((activity, index) => (
                 <div key={index} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                  <div className="p-2 bg-indigo-100 rounded-full">
-                    <ArrowTrendingUpIcon className="h-4 w-4 text-indigo-600" />
+                  <div className="p-2 bg-primary-100 rounded-full">
+                    <ArrowTrendingUpIcon className="h-4 w-4 text-primary-700" />
                   </div>
                   <div>
                     <p className="text-sm text-gray-900">{activity.text}</p>
@@ -246,16 +246,16 @@ const TeacherOverview = () => {
           <div className="grid grid-cols-2 gap-4">
             <Link
               to="/dashboard/teacher/quizzes"
-              className="flex flex-col items-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl hover:from-blue-100 hover:to-indigo-100 transition-colors"
+              className="flex flex-col items-center p-4 bg-gradient-to-br from-primary-50 to-primary-100 rounded-xl hover:from-primary-100 hover:to-primary-200 transition-colors"
             >
-              <QuestionMarkCircleIcon className="h-8 w-8 text-indigo-600 mb-2" />
+              <QuestionMarkCircleIcon className="h-8 w-8 text-primary-700 mb-2" />
               <span className="text-sm font-medium text-gray-900">Create Quiz</span>
             </Link>
             <Link
               to="/dashboard/teacher/analytics"
-              className="flex flex-col items-center p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl hover:from-purple-100 hover:to-pink-100 transition-colors"
+              className="flex flex-col items-center p-4 bg-gradient-to-br from-primary-50 to-primary-100 rounded-xl hover:from-primary-100 hover:to-primary-200 transition-colors"
             >
-              <ChartBarIcon className="h-8 w-8 text-purple-600 mb-2" />
+              <ChartBarIcon className="h-8 w-8 text-primary-700 mb-2" />
               <span className="text-sm font-medium text-gray-900">View Analytics</span>
             </Link>
           </div>

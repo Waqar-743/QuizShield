@@ -3,4 +3,5 @@ export { default as DataTable } from './DataTable';
 export { default as RoleSidebar } from './RoleSidebar';
 export { default as DashboardLayout } from './DashboardLayout';
 export { default as CourseCard } from './CourseCard';
+export { default as Brand } from './Brand';
 export type { SidebarItem } from './RoleSidebar';

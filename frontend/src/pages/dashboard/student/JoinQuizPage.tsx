@@ -174,8 +174,8 @@ const JoinQuizPage = () => {
         {!quizDetails ? (
           <>
             <div className="flex justify-center mb-6">
-              <div className="h-16 w-16 bg-indigo-100 rounded-full flex items-center justify-center">
-                <KeyIcon className="h-8 w-8 text-indigo-600" />
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary-100">
+                <KeyIcon className="h-8 w-8 text-primary-700" />
               </div>
             </div>
 
@@ -192,7 +192,7 @@ const JoinQuizPage = () => {
                   value={code}
                   onChange={handleCodeChange}
                   placeholder="1234"
-                  className="w-full px-4 py-4 border border-gray-300 rounded-xl text-center text-4xl tracking-[0.5em] font-mono focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full rounded-xl border border-gray-300 px-4 py-4 text-center font-mono text-4xl tracking-[0.5em] focus:border-primary-500 focus:ring-2 focus:ring-primary-500"
                   maxLength={4}
                   autoComplete="off"
                 />
@@ -211,7 +211,7 @@ const JoinQuizPage = () => {
               <button
                 type="submit"
                 disabled={loading || code.length !== 4}
-                className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-xl text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-xl text-base font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {loading ? (
                   <span className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full" />
@@ -228,15 +228,15 @@ const JoinQuizPage = () => {
               <h4 className="text-sm font-medium text-gray-700 mb-3">How it works:</h4>
               <ul className="space-y-2 text-sm text-gray-500">
                 <li className="flex items-start gap-2">
-                  <span className="inline-flex items-center justify-center h-5 w-5 bg-indigo-100 text-indigo-600 rounded-full text-xs font-medium">1</span>
+                  <span className="inline-flex items-center justify-center h-5 w-5 bg-primary-100 text-primary-700 rounded-full text-xs font-medium">1</span>
                   Get the 4-digit code from your teacher
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="inline-flex items-center justify-center h-5 w-5 bg-indigo-100 text-indigo-600 rounded-full text-xs font-medium">2</span>
+                  <span className="inline-flex items-center justify-center h-5 w-5 bg-primary-100 text-primary-700 rounded-full text-xs font-medium">2</span>
                   Enter the code above and click "Access Quiz"
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="inline-flex items-center justify-center h-5 w-5 bg-indigo-100 text-indigo-600 rounded-full text-xs font-medium">3</span>
+                  <span className="inline-flex items-center justify-center h-5 w-5 bg-primary-100 text-primary-700 rounded-full text-xs font-medium">3</span>
                   Review quiz details and start when ready
                 </li>
               </ul>
@@ -277,7 +277,7 @@ const JoinQuizPage = () => {
                 )}
               </div>
               {quizDetails.quiz?.scheduledStart && (
-                <div className="flex items-center gap-2 text-indigo-600 font-medium">
+                <div className="flex items-center gap-2 text-primary-700 font-medium">
                   <CalendarIcon className="h-5 w-5" />
                   <span>Scheduled: {new Date(quizDetails.quiz.scheduledStart).toLocaleString()}</span>
                 </div>
@@ -300,9 +300,9 @@ const JoinQuizPage = () => {
             )}
 
             {!isExpired && !canStart && timeUntilStart && (
-              <div className="bg-indigo-50 rounded-lg p-4 text-center">
-                <p className="text-sm text-indigo-700 mb-2">Quiz starts in:</p>
-                <p className="text-3xl font-bold text-indigo-600">{timeUntilStart}</p>
+              <div className="bg-primary-50 rounded-lg p-4 text-center">
+                <p className="text-sm text-primary-800 mb-2">Quiz starts in:</p>
+                <p className="text-3xl font-bold text-primary-700">{timeUntilStart}</p>
               </div>
             )}
 
@@ -317,7 +317,7 @@ const JoinQuizPage = () => {
               <button
                 onClick={handleTryAnother}
                 disabled={starting}
-                className="flex-1 py-3 px-4 border border-gray-300 rounded-xl text-base font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors disabled:opacity-50"
+                className="flex-1 py-3 px-4 border border-gray-300 rounded-xl text-base font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors disabled:opacity-50"
               >
                 Try Another Code
               </button>
@@ -327,7 +327,7 @@ const JoinQuizPage = () => {
                 className={`flex-1 py-3 px-4 border border-transparent rounded-xl text-base font-medium text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                   isExpired 
                     ? 'bg-gray-400 cursor-not-allowed' 
-                    : 'bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
+                    : 'bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500'
                 }`}
               >
                 {starting ? (

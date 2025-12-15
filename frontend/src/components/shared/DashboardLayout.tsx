@@ -11,6 +11,7 @@ import {
   ClipboardDocumentListIcon,
 } from '@heroicons/react/24/outline';
 import RoleSidebar, { SidebarItem } from './RoleSidebar';
+import Brand from './Brand';
 import { useAuthStore } from '../../store/authStore';
 import api from '../../services/api';
 
@@ -116,9 +117,18 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ role }) => {
               >
                 <Bars3Icon className="h-6 w-6" />
               </button>
-              <h1 className="ml-2 lg:ml-0 text-lg font-semibold text-gray-900 capitalize">
-                {role} Dashboard
-              </h1>
+              <div className="ml-2 lg:ml-0 flex items-center gap-3">
+                <Brand
+                  to="/"
+                  textClassName="text-lg font-semibold text-gray-900"
+                  iconWrapperClassName="bg-primary-50 ring-1 ring-primary-100"
+                  iconClassName="h-5 w-5 text-primary-700"
+                />
+                <span className="hidden sm:inline text-sm text-gray-500">/</span>
+                <h1 className="hidden sm:block text-lg font-semibold text-gray-900 capitalize">
+                  {role} Dashboard
+                </h1>
+              </div>
             </div>
 
             {/* Right side */}
@@ -149,7 +159,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ role }) => {
                         {unreadCount > 0 && (
                           <button 
                             onClick={markAllAsRead}
-                            className="text-xs text-indigo-600 hover:text-indigo-800"
+                            className="text-xs text-primary-700 hover:text-primary-900"
                           >
                             Mark all read
                           </button>
@@ -167,13 +177,13 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ role }) => {
                               key={notif.id}
                               onClick={() => !notif.is_read && markAsRead(notif.id)}
                               className={`px-4 py-3 border-b border-gray-50 cursor-pointer hover:bg-gray-50 ${
-                                !notif.is_read ? 'bg-indigo-50' : ''
+                                !notif.is_read ? 'bg-primary-50' : ''
                               }`}
                             >
                               <p className="text-sm font-medium text-gray-900">{notif.title}</p>
                               <p className="text-xs text-gray-600 mt-1 line-clamp-2">{notif.message}</p>
                               {notif.quiz_code && (
-                                <p className="text-xs font-mono font-bold text-indigo-600 mt-1">
+                                <p className="text-xs font-mono font-bold text-primary-700 mt-1">
                                   Code: {notif.quiz_code}
                                 </p>
                               )}
@@ -188,7 +198,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ role }) => {
                         <Link
                           to="/dashboard/student/join-quiz"
                           onClick={() => setShowNotifications(false)}
-                          className="block px-4 py-3 text-center text-sm text-indigo-600 hover:bg-gray-50 border-t"
+                          className="block px-4 py-3 text-center text-sm text-primary-700 hover:bg-gray-50 border-t"
                         >
                           Join a Quiz
                         </Link>

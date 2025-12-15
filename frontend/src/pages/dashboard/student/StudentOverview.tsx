@@ -90,7 +90,7 @@ const StudentOverview = () => {
   if (analyticsLoading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
       </div>
     );
   }
@@ -98,25 +98,25 @@ const StudentOverview = () => {
   return (
     <div className="space-y-6">
       {/* Welcome Header */}
-      <header className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl p-6 text-white">
+      <header className="bg-gradient-to-r from-primary-600 to-primary-700 rounded-xl p-6 text-white">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold">Welcome back, {user?.name}!</h1>
-            <p className="mt-1 text-indigo-100">Ready to take a quiz? Enter a code shared by your teacher.</p>
+            <p className="mt-1 text-white/90">Ready to take a quiz? Enter a code shared by your teacher.</p>
             <div className="mt-4 flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <FireIcon className="h-5 w-5 text-orange-300" />
                 <span className="font-medium">{analytics?.streakDays || 0} day streak</span>
               </div>
-              <div className="h-4 w-px bg-indigo-300"></div>
-              <span className="text-sm text-indigo-100">
+              <div className="h-4 w-px bg-white/30"></div>
+              <span className="text-sm text-white/90">
                 {analytics?.totalQuizzes || 0} quizzes completed
               </span>
             </div>
           </div>
           <Link
             to="/dashboard/student/join-quiz"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-white text-indigo-600 rounded-lg font-medium hover:bg-indigo-50 transition-colors"
+            className="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 font-medium text-primary-700 transition-colors hover:bg-primary-50"
           >
             <AcademicCapIcon className="h-5 w-5" />
             Join Quiz
@@ -136,7 +136,7 @@ const StudentOverview = () => {
           icon={<ChartBarIcon className="h-6 w-6" />}
           label="Average Score"
           value={analytics?.avgScore ? `${analytics.avgScore}%` : 'N/A'}
-          color="purple"
+          color="primary"
           trend={analytics?.avgScore && analytics.avgScore >= 60 ? 'up' : 'down'}
         />
         <StatCard
@@ -169,9 +169,9 @@ const StudentOverview = () => {
                   <Line
                     type="monotone"
                     dataKey="score"
-                    stroke="#6366f1"
+                    stroke="#4ca1af"
                     strokeWidth={2}
-                    dot={{ fill: '#6366f1', strokeWidth: 2 }}
+                    dot={{ fill: '#4ca1af', strokeWidth: 2 }}
                     activeDot={{ r: 8 }}
                   />
                 </LineChart>
@@ -191,7 +191,7 @@ const StudentOverview = () => {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-gray-900">Notifications</h3>
-            <span className="inline-flex items-center justify-center h-6 w-6 bg-indigo-100 text-indigo-600 rounded-full text-xs font-medium">
+            <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-primary-100 text-xs font-medium text-primary-700">
               {notifications.filter(n => !n.is_read).length}
             </span>
           </div>
@@ -212,13 +212,13 @@ const StudentOverview = () => {
                   className={`p-3 rounded-lg border-l-4 ${
                     notif.is_read
                       ? 'border-gray-300 bg-gray-50'
-                      : 'border-indigo-500 bg-indigo-50'
+                      : 'border-primary-500 bg-primary-50'
                   }`}
                 >
                   <p className="text-sm font-medium text-gray-900">{notif.title}</p>
                   <p className="text-xs text-gray-600 mt-1">{notif.message}</p>
                   {notif.quiz_code && (
-                    <p className="text-xs font-mono font-bold text-indigo-600 mt-2">
+                    <p className="mt-2 text-xs font-mono font-bold text-primary-700">
                       Code: {notif.quiz_code}
                     </p>
                   )}
@@ -239,10 +239,10 @@ const StudentOverview = () => {
         <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
           <Link
             to="/dashboard/student/join-quiz"
-            className="flex items-center gap-4 p-4 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl hover:from-indigo-100 hover:to-purple-100 transition-colors"
+            className="flex items-center gap-4 rounded-xl bg-gradient-to-br from-primary-50 to-primary-100 p-4 transition-colors hover:from-primary-100 hover:to-primary-200"
           >
-            <div className="p-3 bg-indigo-100 rounded-lg">
-              <AcademicCapIcon className="h-8 w-8 text-indigo-600" />
+            <div className="rounded-lg bg-primary-100 p-3">
+              <AcademicCapIcon className="h-8 w-8 text-primary-700" />
             </div>
             <div>
               <h4 className="font-medium text-gray-900">Join Quiz</h4>

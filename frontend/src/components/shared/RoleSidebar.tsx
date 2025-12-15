@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { XMarkIcon } from '@heroicons/react/24/outline';
+import Brand from './Brand';
 
 export interface SidebarItem {
   label: string;
@@ -56,7 +57,12 @@ const RoleSidebar: React.FC<RoleSidebarProps> = ({ items, isOpen, onClose, role 
       >
         {/* Mobile close button */}
         <div className="flex items-center justify-between p-4 lg:hidden">
-          <span className="text-white font-semibold text-lg">Menu</span>
+          <Brand
+            to="/"
+            textClassName="text-white font-semibold text-lg"
+            iconWrapperClassName="bg-white/10 ring-1 ring-white/20"
+            iconClassName="h-5 w-5 text-white"
+          />
           <button
             onClick={onClose}
             className="text-white hover:text-gray-200"
@@ -67,7 +73,12 @@ const RoleSidebar: React.FC<RoleSidebarProps> = ({ items, isOpen, onClose, role 
 
         {/* Logo */}
         <div className="hidden lg:flex items-center justify-center h-16 border-b border-white/10">
-          <span className="text-white font-bold text-xl">AdaptLearn</span>
+          <Brand
+            to="/"
+            textClassName="text-white font-bold text-xl"
+            iconWrapperClassName="bg-white/10 ring-1 ring-white/20"
+            iconClassName="h-5 w-5 text-white"
+          />
         </div>
 
         {/* Role badge */}

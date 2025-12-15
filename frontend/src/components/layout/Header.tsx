@@ -2,6 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import { FiMenu, FiBell } from 'react-icons/fi';
 import { useState } from 'react';
+import { Brand } from '../shared';
 
 interface HeaderProps {
   toggleSidebar: () => void;
@@ -28,8 +29,13 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
             <span className="sr-only">Open sidebar</span>
             <FiMenu className="h-6 w-6" />
           </button>
-          <div className="hidden lg:flex lg:items-center lg:ml-4">
-            <span className="text-xl font-bold text-primary-600">Adaptive Learning</span>
+          <div className="ml-3 flex items-center">
+            <Brand
+              to="/"
+              textClassName="text-xl font-bold text-primary-700"
+              iconWrapperClassName="bg-primary-50 ring-1 ring-primary-100"
+              iconClassName="h-5 w-5 text-primary-700"
+            />
           </div>
         </div>
 

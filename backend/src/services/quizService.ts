@@ -617,7 +617,7 @@ export const quizService = {
       { range: '0-50', count: scores.filter(s => s < 50).length, color: '#EF4444' },
       { range: '50-70', count: scores.filter(s => s >= 50 && s < 70).length, color: '#F59E0B' },
       { range: '70-85', count: scores.filter(s => s >= 70 && s < 85).length, color: '#10B981' },
-      { range: '85-100', count: scores.filter(s => s >= 85).length, color: '#6366F1' },
+      { range: '85-100', count: scores.filter(s => s >= 85).length, color: '#4ca1af' },
     ];
 
     // Weekly data for chart (last 4 weeks)

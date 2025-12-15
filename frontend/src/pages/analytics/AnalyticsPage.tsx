@@ -56,7 +56,7 @@ const AnalyticsPage: React.FC = () => {
     { name: 'MongoDB', value: 60 },
   ];
 
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+  const COLORS = ['#4ca1af', '#00C49F', '#FFBB28', '#FF8042'];
 
   return (
     <div className="space-y-6">
@@ -74,7 +74,7 @@ const AnalyticsPage: React.FC = () => {
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Line type="monotone" dataKey="score" stroke="#4f46e5" activeDot={{ r: 8 }} />
+                <Line type="monotone" dataKey="score" stroke="#4ca1af" activeDot={{ r: 8 }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -91,7 +91,7 @@ const AnalyticsPage: React.FC = () => {
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="quizzes" fill="#3b82f6" />
+                <Bar dataKey="quizzes" fill="#4ca1af" />
               </BarChart>
             </ResponsiveContainer>
           </div>

@@ -24,7 +24,8 @@ connectDatabase();
 // Allow strictly defined origins
 const allowedOrigins = [
   config.frontendUrl,
-  'https://Waqar-743.github.io',
+  'https://waqar-743.github.io',
+  'https://quiz-shield.vercel.app',
   'http://localhost:3000',
   'http://localhost:5173'
 ];
@@ -35,9 +36,19 @@ app.use(cors({
   origin: (origin, callback) => {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.some(o => origin.startsWith(o))) {
+
+    // Check against allowed origins (case-insensitive)
+    const isAllowed = allowedOrigins.some(o => {
+      // Handle potential undefined/null in allowedOrigins
+      if (!o) return false;
+      return origin.toLowerCase() === o.toLowerCase() ||
+        origin.toLowerCase().startsWith(o.toLowerCase());
+    });
+
+    if (isAllowed) {
       return callback(null, true);
     }
+
     console.warn(`Blocked CORS request from: ${origin}`);
     return callback(new Error('Not allowed by CORS'), false);
   },

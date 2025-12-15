@@ -139,7 +139,7 @@ const StudentRecommendations = () => {
     const styles = {
       high: 'bg-red-100 text-red-800',
       medium: 'bg-yellow-100 text-yellow-800',
-      low: 'bg-blue-100 text-blue-800',
+      low: 'bg-primary-100 text-primary-800',
     };
     return (
       <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${styles[priority]}`}>
@@ -170,7 +170,7 @@ const StudentRecommendations = () => {
       case 'weakness':
         return <div className="p-2 bg-red-100 rounded-lg"><ArrowTrendingUpIcon className="h-5 w-5 text-red-600 transform rotate-180" /></div>;
       case 'suggestion':
-        return <div className="p-2 bg-purple-100 rounded-lg"><LightBulbIcon className="h-5 w-5 text-purple-600" /></div>;
+        return <div className="p-2 bg-primary-100 rounded-lg"><LightBulbIcon className="h-5 w-5 text-primary-700" /></div>;
       default:
         return <div className="p-2 bg-gray-100 rounded-lg"><SparklesIcon className="h-5 w-5 text-gray-600" /></div>;
     }
@@ -179,7 +179,7 @@ const StudentRecommendations = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
       </div>
     );
   }
@@ -187,12 +187,12 @@ const StudentRecommendations = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <header className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl p-6 text-white">
+      <header className="bg-gradient-to-r from-primary-600 to-primary-700 rounded-xl p-6 text-white">
         <div className="flex items-center gap-3 mb-2">
           <SparklesIcon className="h-8 w-8" />
           <h1 className="text-2xl font-bold">AI-Powered Recommendations</h1>
         </div>
-        <p className="text-purple-100">
+        <p className="text-white/90">
           Personalized suggestions to optimize your learning journey based on your performance and goals.
         </p>
       </header>
@@ -213,7 +213,7 @@ const StudentRecommendations = () => {
                     rec.type === 'topic' ? 'bg-blue-100 text-blue-600' :
                     rec.type === 'quiz' ? 'bg-yellow-100 text-yellow-600' :
                     rec.type === 'course' ? 'bg-green-100 text-green-600' :
-                    'bg-purple-100 text-purple-600'
+                    'bg-primary-100 text-primary-700'
                   }`}>
                     {getTypeIcon(rec.type)}
                   </div>
@@ -240,7 +240,7 @@ const StudentRecommendations = () => {
                       {rec.actionUrl && (
                         <Link
                           to={rec.actionUrl}
-                          className="flex-shrink-0 inline-flex items-center gap-1 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors"
+                          className="flex-shrink-0 inline-flex items-center gap-1 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-700"
                         >
                           {rec.actionLabel || 'Start'}
                           <ArrowRightIcon className="h-4 w-4" />
@@ -303,14 +303,14 @@ const StudentRecommendations = () => {
           )}
 
           {/* Quick Actions */}
-          <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl border border-indigo-100 p-4">
+          <div className="bg-gradient-to-br from-primary-50 to-primary-100 rounded-xl border border-primary-100 p-4">
             <h4 className="font-medium text-gray-900 mb-3">Quick Actions</h4>
             <div className="space-y-2">
               <Link
                 to="/courses"
                 className="flex items-center gap-2 p-2 bg-white rounded-lg hover:bg-gray-50 transition-colors"
               >
-                <BookOpenIcon className="h-5 w-5 text-indigo-600" />
+                <BookOpenIcon className="h-5 w-5 text-primary-700" />
                 <span className="text-sm font-medium text-gray-700">Browse Courses</span>
               </Link>
               <Link

@@ -65,7 +65,7 @@ const TeacherAnalytics = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
       </div>
     );
   }
@@ -98,7 +98,7 @@ const TeacherAnalytics = () => {
           icon={<ChartBarIcon className="h-6 w-6" />}
           label="Average Score"
           value={`${analytics?.avgScore || 0}%`}
-          color="purple"
+          color="primary"
           trend={analytics?.avgScore && analytics.avgScore >= 60 ? 'up' : 'down'}
         />
         <StatCard
@@ -141,9 +141,9 @@ const TeacherAnalytics = () => {
                     <Line
                       type="monotone"
                       dataKey="avgScore"
-                      stroke="#6366f1"
+                      stroke="#4ca1af"
                       strokeWidth={2}
-                      dot={{ fill: '#6366f1' }}
+                      dot={{ fill: '#4ca1af' }}
                       name="Avg Score %"
                     />
                     <Legend />
@@ -197,7 +197,7 @@ const TeacherAnalytics = () => {
                       borderRadius: '8px',
                     }}
                   />
-                  <Bar dataKey="attempts" fill="#6366f1" name="Attempts" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="attempts" fill="#4ca1af" name="Attempts" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -214,10 +214,10 @@ const TeacherAnalytics = () => {
                   : 'Consider reviewing difficult topics.'}
               </p>
             </div>
-            <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl p-6 text-white">
+            <div className="bg-gradient-to-br from-primary-600 to-primary-700 rounded-xl p-6 text-white">
               <h4 className="text-lg font-semibold mb-2">Total Quizzes</h4>
               <p className="text-4xl font-bold">{analytics?.totalQuizzes || 0}</p>
-              <p className="text-indigo-100 mt-2">Quizzes created and available</p>
+              <p className="text-white/90 mt-2">Quizzes created and available</p>
             </div>
             <div className="bg-gradient-to-br from-orange-500 to-red-500 rounded-xl p-6 text-white">
               <h4 className="text-lg font-semibold mb-2">Engagement</h4>

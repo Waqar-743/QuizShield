@@ -96,8 +96,8 @@ const TeacherCourses = () => {
       header: 'Course',
       render: (course: TeacherCourse) => (
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-lg flex items-center justify-center">
-            <span className="text-lg font-bold text-indigo-600">
+          <div className="w-12 h-12 bg-gradient-to-br from-primary-100 to-primary-200 rounded-lg flex items-center justify-center">
+            <span className="text-lg font-bold text-primary-700">
               {course.title.charAt(0)}
             </span>
           </div>
@@ -161,14 +161,14 @@ const TeacherCourses = () => {
         <div className="flex items-center gap-2">
           <button
             onClick={() => navigate(`/courses/${course._id}`)}
-            className="p-1.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+            className="p-1.5 text-gray-500 hover:text-primary-700 hover:bg-primary-50 rounded-lg transition-colors"
             title="View"
           >
             <EyeIcon className="h-5 w-5" />
           </button>
           <button
             onClick={() => navigate(`/dashboard/teacher/courses/${course._id}/edit`)}
-            className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+            className="p-1.5 text-gray-500 hover:text-primary-700 hover:bg-primary-50 rounded-lg transition-colors"
             title="Edit"
           >
             <PencilIcon className="h-5 w-5" />
@@ -197,7 +197,7 @@ const TeacherCourses = () => {
         </div>
         <Link
           to="/dashboard/teacher/courses/new"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition-colors"
         >
           <PlusIcon className="h-5 w-5" />
           Create Course
@@ -214,7 +214,7 @@ const TeacherCourses = () => {
               placeholder="Search courses..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
             />
           </div>
         </div>

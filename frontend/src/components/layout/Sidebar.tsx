@@ -3,6 +3,7 @@ import { FiHome, FiBook, FiBarChart2, FiUser, FiX, FiRefreshCw } from 'react-ico
 import clsx from 'clsx';
 import { useAuthStore } from '../../store/authStore';
 import toast from 'react-hot-toast';
+import { Brand } from '../shared';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -50,13 +51,27 @@ const Sidebar = ({ isOpen, closeSidebar }: SidebarProps) => {
         )}
       >
         <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200 lg:hidden">
-          <span className="text-xl font-bold text-primary-600">Adaptive Learning</span>
+          <Brand
+            to="/"
+            textClassName="text-xl font-bold text-primary-700"
+            iconWrapperClassName="bg-primary-50 ring-1 ring-primary-100"
+            iconClassName="h-5 w-5 text-primary-700"
+          />
           <button
             onClick={closeSidebar}
             className="text-gray-500 hover:text-gray-600 focus:outline-none"
           >
             <FiX className="h-6 w-6" />
           </button>
+        </div>
+
+        <div className="hidden lg:flex items-center h-16 px-6 border-b border-gray-200">
+          <Brand
+            to="/"
+            textClassName="text-xl font-bold text-primary-700"
+            iconWrapperClassName="bg-primary-50 ring-1 ring-primary-100"
+            iconClassName="h-5 w-5 text-primary-700"
+          />
         </div>
 
         <nav className="mt-5 px-4 space-y-1">

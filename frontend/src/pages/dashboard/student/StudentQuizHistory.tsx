@@ -196,7 +196,7 @@ const StudentQuizHistory = () => {
         <div className="flex gap-2">
           <Link
             to={`/quiz/teacher-results/${attempt._id}`}
-            className="text-indigo-600 hover:text-indigo-900 text-sm font-medium"
+            className="text-primary-700 hover:text-primary-900 text-sm font-medium"
           >
             View Details
           </Link>
@@ -224,8 +224,8 @@ const StudentQuizHistory = () => {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-indigo-100 rounded-lg">
-              <AcademicCapIcon className="h-6 w-6 text-indigo-600" />
+            <div className="p-2 bg-primary-100 rounded-lg">
+              <AcademicCapIcon className="h-6 w-6 text-primary-700" />
             </div>
             <div>
               <p className="text-sm text-gray-500">Total Attempts</p>
@@ -248,8 +248,8 @@ const StudentQuizHistory = () => {
         </div>
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <ClockIcon className="h-6 w-6 text-purple-600" />
+            <div className="p-2 bg-primary-100 rounded-lg">
+              <ClockIcon className="h-6 w-6 text-primary-700" />
             </div>
             <div>
               <p className="text-sm text-gray-500">Average Score</p>
@@ -269,7 +269,7 @@ const StudentQuizHistory = () => {
                 onClick={() => setFilter(tab)}
                 className={`px-6 py-3 text-sm font-medium border-b-2 ${
                   filter === tab
-                    ? 'border-indigo-500 text-indigo-600'
+                    ? 'border-primary-500 text-primary-700'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >

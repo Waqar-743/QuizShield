@@ -6,7 +6,6 @@
   "type": "module",
   "scripts": {
     "dev": "node node_modules/vite/bin/vite.js",
-    "start": "node scripts/railway-start.mjs",
     "build": "node node_modules/typescript/bin/tsc && node node_modules/vite/bin/vite.js build",
     "lint": "node node_modules/eslint/bin/eslint.js . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "node node_modules/vite/bin/vite.js preview"

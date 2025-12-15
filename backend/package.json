@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Backend for AI-Powered Adaptive Learning Platform",
   "main": "src/index.ts",
-  "start": "echo '--- STARTING ---' && node dist/index.js",
+  "start": "echo '--- STARTING ---' && node dist/src/index.js",
   "dev": "nodemon src/index.ts",
   "build": "tsc",
   "test:debug": "echo 'Debug script running'",

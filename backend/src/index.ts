@@ -88,18 +88,24 @@ try {
   console.log('Directory check failed:', err);
 }
 
-const server = app.listen(Number(PORT), '0.0.0.0', () => {
-  console.log(`Server running in ${config.nodeEnv} mode on port ${PORT}`);
-  console.log(`Health check available at http://0.0.0.0:${PORT}/health`);
-});
 
-server.on('error', (error) => {
-  console.error('FATAL: Server failed to start:', error);
-});
+if (require.main === module) {
+  const server = app.listen(Number(PORT), '0.0.0.0', () => {
+    console.log(`Server running in ${config.nodeEnv} mode on port ${PORT}`);
+    console.log(`Health check available at http://0.0.0.0:${PORT}/health`);
+  });
+
+  server.on('error', (error) => {
+    console.error('FATAL: Server failed to start:', error);
+  });
+}
+
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err: Error) => {
   console.log('UNHANDLED REJECTION! 💥 Shutting down...');
   console.log(err.name, err.message);
-  process.exit(1);
+  // process.exit(1); // Don't exit in serverless environment
 });
+
+export default app;

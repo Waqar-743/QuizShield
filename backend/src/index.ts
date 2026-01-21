@@ -85,29 +85,28 @@ app.get('/', (req, res) => {
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-// Start server
-const PORT = config.port;
+// Only start server if not in serverless environment (Vercel)
+if (process.env.VERCEL !== '1') {
+  const PORT = config.port;
 
-console.log('--- SERVER INITIALIZATION ---');
-console.log('Process CWD:', process.cwd());
-console.log('Attempting to bind port:', PORT);
+  console.log('--- SERVER INITIALIZATION ---');
+  console.log('Process CWD:', process.cwd());
+  console.log('Attempting to bind port:', PORT);
 
-// Start the server
-const server = app.listen(Number(PORT), '0.0.0.0', () => {
-  console.log(`Server running in ${config.nodeEnv} mode on port ${PORT}`);
-  console.log(`Health check available at http://0.0.0.0:${PORT}/health`);
-});
+  const server = app.listen(Number(PORT), '0.0.0.0', () => {
+    console.log(`Server running in ${config.nodeEnv} mode on port ${PORT}`);
+    console.log(`Health check available at http://0.0.0.0:${PORT}/health`);
+  });
 
-server.on('error', (error) => {
-  console.error('FATAL: Server failed to start:', error);
-});
-
+  server.on('error', (error) => {
+    console.error('FATAL: Server failed to start:', error);
+  });
+}
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err: Error) => {
   console.log('UNHANDLED REJECTION! 💥 Shutting down...');
   console.log(err.name, err.message);
-  // process.exit(1); // Don't exit in serverless environment
 });
 
 export default app;

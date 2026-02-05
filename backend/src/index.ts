@@ -27,7 +27,9 @@ const allowedOrigins = [
   'https://waqar-743.github.io',
   'https://quiz-shield.vercel.app',
   'http://localhost:3000',
-  'http://localhost:5173'
+  'http://localhost:5173',
+  'http://127.0.0.1:3000',
+  'http://127.0.0.1:5173'
 ];
 
 console.log('CORS Configured for origins:', allowedOrigins);

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuiz } from '../../hooks/useQuiz';
+import { useQuizSecurity } from '../../hooks/useQuizSecurity';
 import { LightBulbIcon } from '@heroicons/react/24/outline';
 
 const QuizPage: React.FC = () => {
@@ -13,6 +14,12 @@ const QuizPage: React.FC = () => {
     submitAnswer, 
     getHint 
   } = useQuiz();
+
+  // Security hook
+  useQuizSecurity({
+    quizAttemptId: attemptId || '',
+    quizId: quizId || '',
+  });
 
   const [selectedAnswer, setSelectedAnswer] = useState<string>('');
   const [hint, setHint] = useState<string | null>(null);

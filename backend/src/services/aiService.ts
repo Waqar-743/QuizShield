@@ -27,10 +27,12 @@ export const aiService = {
         {
           "content": "Question text here",
           "options": ["Option A", "Option B", "Option C", "Option D"],
-          "correct_answer": "Option A",
+          "correct_answer_index": 0,
+          "explanation": "Brief explanation",
           "hint": "A helpful hint"
         }
       ]
+      The correct_answer_index should be a 0-based integer matching the index in the options array.
       Do not include any markdown formatting or code blocks, just the raw JSON string.`;
 
       console.log('[AI Service] Calling Gemini API...');

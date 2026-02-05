@@ -1,12 +1,15 @@
 import { Request, Response, NextFunction } from 'express';
 
 export const notFoundHandler = (req: Request, res: Response, next: NextFunction) => {
+  console.warn(`[404] Route not found: ${req.method} ${req.originalUrl}`);
   const error = new Error(`Not Found - ${req.originalUrl}`);
   res.status(404);
   next(error);
 };
 
 export const errorHandler = (err: any, req: Request, res: Response, next: NextFunction) => {
+  console.error(`[Error] ${req.method} ${req.originalUrl}:`, err);
+  
   // Determine status code from error message or default to 500
   let statusCode = res.statusCode === 200 ? 500 : res.statusCode;
   
@@ -21,7 +24,10 @@ export const errorHandler = (err: any, req: Request, res: Response, next: NextFu
   res.status(statusCode);
   res.json({
     success: false,
-    message,
+    message, // Keep top level for some clients
+    error: {
+      message,
+    },
     stack: process.env.NODE_ENV === 'production' ? null : err.stack,
   });
 };

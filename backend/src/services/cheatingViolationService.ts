@@ -45,15 +45,30 @@ export const cheatingViolationService = {
       .select('*', { count: 'exact', head: true })
       .eq('quiz_attempt_id', input.quizAttemptId);
 
+    const currentCount = count || 1;
+
     // Update the quiz_attempts table with violation count
+    // Auto-submit if violations exceed 100
+    const updateData: any = { 
+      violation_count: currentCount 
+    };
+
+    if (currentCount > 100) {
+      updateData.status = 'completed';
+      updateData.completed_at = new Date().toISOString();
+      updateData.auto_submitted = true;
+      updateData.submission_reason = 'excessive_violations';
+    }
+
     await supabase
       .from('quiz_attempts')
-      .update({ violation_count: count || 1 })
+      .update(updateData)
       .eq('id', input.quizAttemptId);
 
     return {
       violationId: violation.id,
-      violationCount: count || 1
+      violationCount: currentCount,
+      autoSubmitted: currentCount > 100
     };
   },
 
@@ -85,33 +100,11 @@ export const cheatingViolationService = {
 
     if (error) throw new Error(error.message);
 
-    // Get student name
-    const { data: student } = await supabase
-      .from('users')
-      .select('name')
-      .eq('id', attempt.user_id)
-      .single();
-
-    // Get quiz name
-    const { data: topic } = await supabase
-      .from('topics')
-      .select('title')
-      .eq('id', attempt.topic_id)
-      .single();
-
-    return {
-      attemptId,
-      studentName: student?.name || 'Unknown',
-      quizName: topic?.title || 'Unknown Quiz',
-      totalViolations: violations?.length || 0,
-      violations: violations?.map(v => ({
-        id: v.id,
-        type: v.violation_type,
-        timestamp: v.timestamp,
-        severity: v.severity,
-        detectionMethod: v.detection_method
-      })) || []
-    };
+    return violations.map(v => ({
+      type: v.violation_type,
+      timestamp: v.timestamp,
+      details: typeof v.details === 'string' ? v.details : JSON.stringify(v.details)
+    }));
   },
 
   // Get violation summary for teacher dashboard

@@ -29,6 +29,12 @@ router.get('/teacher/analytics', getTeacherAnalytics);
 // Student analytics
 router.get('/student/analytics', getStudentAnalytics);
 router.put('/submissions/:submissionId/grade', gradeSubmission);
+
+// Adaptive quiz routes for students
+router.post('/generate', getQuizForTopic);
+router.post('/:quizId/attempt', (req, res) => res.status(200).json({ success: true, message: 'Attempt already started by generate' })); // Mocked because getQuizForTopic does both
+router.get('/:quizId/next-question', (req, res) => res.status(200).json({ success: true, data: null })); // Mocked
+
 router.post('/', createQuiz);
 router.put('/:quizId', updateQuiz);
 router.delete('/:quizId', deleteQuiz);

@@ -92,7 +92,7 @@ export const quizService = {
         teacher_id: teacherId,
         title: data.title,
         description: data.description || '',
-        time_limit: data.timeLimit || 30,
+        time_limit: data.timeLimit,
         questions: data.questions,
         access_code: accessCode,
         scheduled_start: data.scheduledStart || null,
@@ -146,7 +146,7 @@ export const quizService = {
       .update({
         title: data.title,
         description: data.description || '',
-        time_limit: data.timeLimit || 30,
+        time_limit: data.timeLimit,
         questions: data.questions,
         updated_at: new Date(),
       })
@@ -271,6 +271,8 @@ export const quizService = {
       violations: attempt.violations || [],
       teacherGrade: attempt.teacher_grade,
       teacherFeedback: attempt.teacher_feedback,
+      autoSubmitted: attempt.auto_submitted,
+      submissionReason: attempt.submission_reason,
       quiz: quiz ? {
         title: quiz.title,
         description: quiz.description,
@@ -330,6 +332,8 @@ export const quizService = {
         teacherFeedback: attempt.teacher_feedback,
         answers: attempt.answers || [],
         violations: attempt.violations || [],
+        autoSubmitted: attempt.auto_submitted,
+        submissionReason: attempt.submission_reason,
       };
     });
   },
@@ -498,7 +502,14 @@ export const quizService = {
          if (generated && generated.length > 0) {
             const { data: savedQuestions } = await supabase
               .from('questions')
-              .insert(generated.map((q: any) => ({ ...q, topic_id: topicId, difficulty: targetDifficulty })))
+              .insert(generated.map((q: any) => ({ 
+                content: q.content,
+                options: q.options,
+                correct_answer: q.correct_answer_index,
+                explanation: q.explanation,
+                topic_id: topicId, 
+                difficulty: targetDifficulty 
+              })))
               .select();
             
             if (savedQuestions) {

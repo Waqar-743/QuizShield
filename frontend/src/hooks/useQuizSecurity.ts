@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import api from '../services/api';
+import toast from 'react-hot-toast';
 
 type ViolationType = 'tab_change' | 'copy_attempt' | 'right_click' | 'screenshot_attempt' | 'keyboard_shortcut';
 
@@ -42,6 +43,16 @@ export const useQuizSecurity = (options: UseQuizSecurityOptions) => {
       });
       
       const count = response.data?.data?.violationCount || violations.length + 1;
+      const isAutoSubmitted = response.data?.data?.autoSubmitted || false;
+
+      if (isAutoSubmitted) {
+        toast.error('Quiz auto-submitted due to excessive violations (Over 100).', {
+          duration: 5000,
+          position: 'top-center',
+        });
+        window.location.href = `/quiz/results/${quizAttemptId}`;
+      }
+
       onViolation?.(type, count);
     } catch (error) {
       console.error('Failed to report violation:', error);

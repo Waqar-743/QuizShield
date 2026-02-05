@@ -86,10 +86,16 @@ CREATE TABLE IF NOT EXISTS quizzes (
 CREATE TABLE IF NOT EXISTS quiz_attempts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-  quiz_id UUID REFERENCES quizzes(id) ON DELETE CASCADE,
+  quiz_id UUID, -- Remove reference to quizzes to support teacher_quizzes
+  topic_id UUID REFERENCES topics(id) ON DELETE CASCADE,
   score INTEGER DEFAULT 0,
+  max_score INTEGER DEFAULT 0,
   total_questions INTEGER DEFAULT 0,
   answers JSONB DEFAULT '[]'::jsonb,
+  status VARCHAR(20) DEFAULT 'in-progress',
+  difficulty VARCHAR(20),
+  teacher_grade INTEGER,
+  teacher_feedback TEXT,
   started_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   completed_at TIMESTAMP WITH TIME ZONE,
   violation_count INTEGER DEFAULT 0,
@@ -134,6 +140,34 @@ CREATE TABLE IF NOT EXISTS quiz_questions (
   UNIQUE(quiz_id, question_id)
 );
 
+-- 11. Teacher Quizzes Table
+CREATE TABLE IF NOT EXISTS teacher_quizzes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  teacher_id VARCHAR(255) NOT NULL,
+  title VARCHAR(255) NOT NULL,
+  description TEXT,
+  time_limit INTEGER DEFAULT 30,
+  questions JSONB DEFAULT '[]'::jsonb,
+  access_code VARCHAR(10) UNIQUE,
+  scheduled_start TIMESTAMP WITH TIME ZONE,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 12. Notifications Table
+CREATE TABLE IF NOT EXISTS notifications (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  title VARCHAR(255) NOT NULL,
+  message TEXT NOT NULL,
+  type VARCHAR(50) DEFAULT 'general',
+  quiz_id UUID,
+  quiz_code VARCHAR(10),
+  is_read BOOLEAN DEFAULT false,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_courses_created_by ON courses(created_by);
 CREATE INDEX IF NOT EXISTS idx_topics_course_id ON topics(course_id);
@@ -167,3 +201,5 @@ GRANT ALL ON quiz_attempts TO anon, authenticated;
 GRANT ALL ON quiz_codes TO anon, authenticated;
 GRANT ALL ON cheating_violations TO anon, authenticated;
 GRANT ALL ON quiz_questions TO anon, authenticated;
+GRANT ALL ON teacher_quizzes TO anon, authenticated;
+GRANT ALL ON notifications TO anon, authenticated;

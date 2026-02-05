@@ -34,6 +34,8 @@ interface Submission {
   teacherFeedback?: string;
   answers: any[];
   violations?: Violation[];
+  autoSubmitted?: boolean;
+  submissionReason?: string;
 }
 
 interface QuizDetails {
@@ -75,12 +77,20 @@ const TeacherSubmissions = () => {
     setGradeInput(submission.teacherGrade?.toString() || submission.percentage.toString());
     setFeedbackInput(submission.teacherFeedback || '');
     
-    // Fetch quiz details for questions
+    // Fetch quiz details and violations
     try {
-      const response = await api.get(`/quizzes/teacher/quiz/${submission.quizId}`);
-      setQuizDetails(response.data.data);
+      const [quizResponse, violationsResponse] = await Promise.all([
+        api.get(`/quizzes/teacher/quiz/${submission.quizId}`),
+        api.get(`/quizzes/attempts/${submission.id}/violations`)
+      ]);
+      
+      setQuizDetails(quizResponse.data.data);
+      setSelectedSubmission(prev => prev ? { 
+        ...prev, 
+        violations: violationsResponse.data.data 
+      } : null);
     } catch (error) {
-      console.error('Error fetching quiz details:', error);
+      console.error('Error fetching details:', error);
     }
   };
 
@@ -354,41 +364,77 @@ const TeacherSubmissions = () => {
               )}
 
               {/* Violations Section */}
-              {selectedSubmission.violations && selectedSubmission.violations.length > 0 && (
-                <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
-                  <h4 className="font-medium text-red-800 mb-3 flex items-center gap-2">
-                    <ExclamationTriangleIcon className="h-5 w-5" />
-                    Rule Violations ({selectedSubmission.violations.length})
-                  </h4>
-                  <div className="space-y-2 max-h-48 overflow-y-auto">
-                    {selectedSubmission.violations.map((v, i) => (
-                      <div key={i} className="flex items-center justify-between bg-white p-2 rounded border border-red-100">
-                        <div className="flex items-center gap-2">
-                          <span className={`px-2 py-1 text-xs font-medium rounded ${
-                            v.type === 'tab_switch' ? 'bg-orange-100 text-orange-700' :
-                            v.type === 'copy_attempt' ? 'bg-red-100 text-red-700' :
-                            v.type === 'paste_attempt' ? 'bg-primary-100 text-primary-800' :
-                            'bg-gray-100 text-gray-700'
-                          }`}>
-                            {v.type === 'tab_switch' ? 'Tab Switch' :
-                             v.type === 'copy_attempt' ? 'Copy Attempt' :
-                             v.type === 'paste_attempt' ? 'Paste Attempt' :
-                             v.type === 'right_click' ? 'Right Click' : v.type}
-                          </span>
-                          {v.details && <span className="text-sm text-gray-600">{v.details}</span>}
-                        </div>
-                        <span className="text-xs text-gray-500">
-                          {new Date(v.timestamp).toLocaleTimeString()}
-                        </span>
-                      </div>
-                    ))}
+              <div className="mb-6 border-t pt-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="font-medium text-gray-900">Security & Rule Violations</h4>
+                  <div className={`px-3 py-1 rounded-full text-sm font-bold ${
+                    (selectedSubmission.violations?.length || 0) >= 100 ? 'bg-red-100 text-red-700' :
+                    (selectedSubmission.violations?.length || 0) > 10 ? 'bg-orange-100 text-orange-700' :
+                    'bg-green-100 text-green-700'
+                  }`}>
+                    {selectedSubmission.violations?.length || 0} Total Violations
                   </div>
                 </div>
-              )}
+
+                {selectedSubmission.autoSubmitted && (
+                  <div className="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                    <div className="flex items-center gap-2">
+                      <ExclamationTriangleIcon className="h-5 w-5" />
+                      <strong className="font-bold">Auto-Submitted! </strong>
+                    </div>
+                    <span className="block sm:inline ml-7">This quiz was automatically submitted by the system due to excessive violations (Over 100).</span>
+                  </div>
+                )}
+
+                {selectedSubmission.violations && selectedSubmission.violations.length > 0 ? (
+                  <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <p className="text-sm font-medium text-gray-500 mb-3">Violation Timeline</p>
+                    <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
+                      {selectedSubmission.violations.map((v, i) => (
+                        <div key={i} className="flex gap-4 relative">
+                          {/* Timeline Line */}
+                          {i !== (selectedSubmission.violations?.length || 0) - 1 && (
+                            <div className="absolute left-[11px] top-6 bottom-[-12px] w-[2px] bg-gray-200"></div>
+                          )}
+                          
+                          <div className={`h-6 w-6 rounded-full flex-shrink-0 z-10 flex items-center justify-center ${
+                            v.type.includes('tab') ? 'bg-orange-500' :
+                            v.type.includes('copy') ? 'bg-red-500' :
+                            'bg-primary-500'
+                          }`}>
+                            <ExclamationTriangleIcon className="h-4 w-4 text-white" />
+                          </div>
+                          
+                          <div className="flex-1 pb-4">
+                            <div className="flex items-center justify-between">
+                              <p className="text-sm font-bold text-gray-900 capitalize">
+                                {v.type.replace(/_/g, ' ')}
+                              </p>
+                              <span className="text-xs text-gray-500">
+                                {new Date(v.timestamp).toLocaleTimeString()}
+                              </span>
+                            </div>
+                            {v.details && (
+                              <p className="text-xs text-gray-600 mt-1">
+                                {v.details}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-green-50 text-green-700 p-4 rounded-lg text-sm flex items-center gap-2">
+                    <CheckCircleIcon className="h-5 w-5" />
+                    No violations detected during this attempt.
+                  </div>
+                )}
+              </div>
 
               {/* Grading Section */}
               <div className="border-t pt-6">
-                <h4 className="font-medium text-gray-900 mb-4">Grade & Feedback</h4>
+                <h4 className="font-medium text-gray-900 mb-4">Grade & Feedback Corner</h4>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">

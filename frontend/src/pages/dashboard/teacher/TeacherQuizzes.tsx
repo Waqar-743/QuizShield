@@ -28,6 +28,7 @@ interface QuestionItem {
   correctAnswer: number;
   difficulty: string;
   explanation?: string;
+  timeLimit: number; // in seconds
 }
 
 const TeacherQuizzes = () => {
@@ -39,10 +40,10 @@ const TeacherQuizzes = () => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    timeLimit: 30,
+    timeLimit: 0,
     scheduledStart: '',
     questions: [
-      { text: '', options: ['', '', '', ''], correctAnswer: 0, difficulty: 'Medium', explanation: '' }
+      { text: '', options: ['', '', '', ''], correctAnswer: 0, difficulty: 'Medium', explanation: '', timeLimit: 60 }
     ] as QuestionItem[],
   });
 
@@ -50,13 +51,24 @@ const TeacherQuizzes = () => {
     fetchQuizzes();
   }, []);
 
+  // Calculate total time whenever questions change
+  useEffect(() => {
+    const totalSeconds = formData.questions.reduce((sum, q) => sum + (q.timeLimit || 0), 0);
+    const totalMinutes = Math.ceil(totalSeconds / 60);
+    if (formData.timeLimit !== totalMinutes) {
+      setFormData(prev => ({ ...prev, timeLimit: totalMinutes }));
+    }
+  }, [formData.questions]);
+
   const fetchQuizzes = async () => {
     setLoading(true);
     try {
       const response = await api.get('/quizzes/teacher/my-quizzes');
       setQuizzes(response.data.data || []);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching quizzes:', error);
+      const message = error.response?.data?.message || 'Failed to load quizzes';
+      toast.error(message);
       setQuizzes([]);
     } finally {
       setLoading(false);
@@ -77,10 +89,13 @@ const TeacherQuizzes = () => {
       setFormData({
         title: quiz.title,
         description: quiz.description,
-        timeLimit: quiz.timeLimit || 30,
+        timeLimit: quiz.timeLimit || 0,
         scheduledStart: quiz.scheduledStart ? utcToLocal(quiz.scheduledStart) : '',
-        questions: quiz.questions.length > 0 ? quiz.questions : [
-          { text: '', options: ['', '', '', ''], correctAnswer: 0, difficulty: 'Medium', explanation: '' }
+        questions: quiz.questions.length > 0 ? quiz.questions.map(q => ({
+          ...q,
+          timeLimit: q.timeLimit || 60 // fallback to 60s
+        })) : [
+          { text: '', options: ['', '', '', ''], correctAnswer: 0, difficulty: 'Medium', explanation: '', timeLimit: 60 }
         ],
       });
     } else {
@@ -88,10 +103,10 @@ const TeacherQuizzes = () => {
       setFormData({
         title: '',
         description: '',
-        timeLimit: 30,
+        timeLimit: 0,
         scheduledStart: '',
         questions: [
-          { text: '', options: ['', '', '', ''], correctAnswer: 0, difficulty: 'Medium', explanation: '' }
+          { text: '', options: ['', '', '', ''], correctAnswer: 0, difficulty: 'Medium', explanation: '', timeLimit: 60 }
         ],
       });
     }
@@ -103,7 +118,7 @@ const TeacherQuizzes = () => {
       ...formData,
       questions: [
         ...formData.questions,
-        { text: '', options: ['', '', '', ''], correctAnswer: 0, difficulty: 'Medium', explanation: '' }
+        { text: '', options: ['', '', '', ''], correctAnswer: 0, difficulty: 'Medium', explanation: '', timeLimit: 60 }
       ],
     });
   };
@@ -147,7 +162,7 @@ const TeacherQuizzes = () => {
     // Convert local datetime to ISO string for proper timezone handling
     const submitData = {
       ...formData,
-      scheduledStart: formData.scheduledStart 
+      scheduledStart: formData.scheduledStart && formData.scheduledStart.trim() !== ''
         ? new Date(formData.scheduledStart).toISOString() 
         : null,
     };
@@ -162,8 +177,10 @@ const TeacherQuizzes = () => {
       }
       setModalOpen(false);
       fetchQuizzes();
-    } catch (error) {
-      toast.error('Failed to save quiz');
+    } catch (error: any) {
+      console.error('Save Quiz Error:', error);
+      const message = error.response?.data?.message || error.message || 'Failed to save quiz';
+      toast.error(message);
     }
   };
 
@@ -327,15 +344,10 @@ const TeacherQuizzes = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Time Limit (minutes)</label>
-                  <input
-                    type="number"
-                    min="5"
-                    max="180"
-                    value={formData.timeLimit}
-                    onChange={(e) => setFormData({ ...formData, timeLimit: parseInt(e.target.value) })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  />
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Total Time (minutes)</label>
+                  <div className="w-full px-3 py-2 border border-gray-200 bg-gray-50 text-gray-500 rounded-lg">
+                    {formData.timeLimit} minutes (calculated from questions)
+                  </div>
                 </div>
               </div>
 
@@ -384,6 +396,19 @@ const TeacherQuizzes = () => {
                       <div className="flex items-center justify-between mb-3">
                         <span className="font-medium text-gray-700">Question {qIndex + 1}</span>
                         <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1 mr-2">
+                            <label className="text-xs text-gray-500">Time (sec):</label>
+                            <input
+                              type="number"
+                              min="30"
+                              max="2700"
+                              step="5"
+                              value={question.timeLimit}
+                              onChange={(e) => updateQuestion(qIndex, 'timeLimit', parseInt(e.target.value))}
+                              className="w-16 text-sm px-2 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                              title="Time for this question (30s to 45m)"
+                            />
+                          </div>
                           <select
                             value={question.difficulty}
                             onChange={(e) => updateQuestion(qIndex, 'difficulty', e.target.value)}

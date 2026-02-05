@@ -42,6 +42,13 @@ const QuizResultsPage: React.FC = () => {
         <div className="bg-white shadow overflow-hidden sm:rounded-lg">
           <div className="px-4 py-5 sm:px-6 text-center">
             <h2 className="text-3xl font-bold text-gray-900">Quiz Completed!</h2>
+            {currentAttempt.autoSubmitted && (
+              <div className="mt-4 bg-red-50 border border-red-200 p-4 rounded-lg">
+                <p className="text-red-800 font-medium">
+                  This quiz was auto-submitted due to detected violations.
+                </p>
+              </div>
+            )}
             <p className="mt-1 max-w-2xl text-sm text-gray-500 mx-auto">
               Here is how you performed.
             </p>

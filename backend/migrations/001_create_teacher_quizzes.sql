@@ -6,6 +6,9 @@ CREATE TABLE IF NOT EXISTS teacher_quizzes (
   description TEXT,
   time_limit INTEGER DEFAULT 30,
   questions JSONB DEFAULT '[]'::jsonb,
+  access_code VARCHAR(10) UNIQUE,
+  scheduled_start TIMESTAMP WITH TIME ZONE,
+  is_active BOOLEAN DEFAULT true,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

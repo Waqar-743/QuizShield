@@ -9,6 +9,7 @@ interface Question {
   text: string;
   options: string[];
   difficulty: string;
+  timeLimit: number; // Added per-question time limit
 }
 
 interface QuizData {
@@ -45,7 +46,7 @@ const QuizTakePage = () => {
   const [warningMessage, setWarningMessage] = useState('');
 
   // Add a violation
-  const addViolation = useCallback((type: Violation['type'], details?: string) => {
+  const addViolation = useCallback(async (type: Violation['type'], details?: string) => {
     const violation: Violation = {
       type,
       timestamp: new Date().toISOString(),
@@ -63,7 +64,26 @@ const QuizTakePage = () => {
     setWarningMessage(messages[type] || 'Warning: Action recorded!');
     setShowWarning(true);
     setTimeout(() => setShowWarning(false), 2000);
-  }, []);
+
+    // Report to backend in real-time
+    try {
+      const response = await api.post(`/quizzes/attempts/${attemptId}/report-violation`, {
+        violationType: type === 'tab_switch' ? 'tab_change' : type,
+        detectionMethod: 'browser_event',
+        details: details || 'Manual action detection',
+        quizId: quizData?.quiz._id
+      });
+
+      if (response.data.data.autoSubmitted) {
+        toast.error('Quiz auto-submitted due to excessive violations (Over 100).', {
+          duration: 5000,
+        });
+        navigate(`/quiz/results/${attemptId}`);
+      }
+    } catch (error) {
+      console.error('Failed to report violation:', error);
+    }
+  }, [attemptId, quizData, navigate]);
 
   // Prevent copy
   useEffect(() => {
@@ -147,12 +167,23 @@ const QuizTakePage = () => {
     if (storedData) {
       const data = JSON.parse(storedData) as QuizData;
       setQuizData(data);
-      setTimeLeft(data.quiz.timeLimit * 60);
+      // Initialize with the first question's time limit
+      if (data.quiz.questions.length > 0) {
+        setTimeLeft(data.quiz.questions[0].timeLimit || 60);
+      }
     } else {
       toast.error('Quiz data not found. Please try again.');
       navigate('/dashboard/student/join-quiz');
     }
   }, [navigate]);
+
+  // Set timer whenever question changes
+  useEffect(() => {
+    if (quizData && quizData.quiz.questions[currentQuestionIndex]) {
+      const qTime = (quizData.quiz.questions[currentQuestionIndex] as any).timeLimit || 60;
+      setTimeLeft(qTime);
+    }
+  }, [currentQuestionIndex, quizData]);
 
   // Timer countdown
   useEffect(() => {
@@ -162,7 +193,7 @@ const QuizTakePage = () => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
-          handleSubmitQuiz();
+          handleAutoNext();
           return 0;
         }
         return prev - 1;
@@ -171,6 +202,23 @@ const QuizTakePage = () => {
 
     return () => clearInterval(timer);
   }, [timeLeft, quizData]);
+
+  const handleAutoNext = () => {
+    if (!quizData) return;
+    
+    // If it's the last question, submit the quiz
+    if (currentQuestionIndex === quizData.quiz.questions.length - 1) {
+      toast.error('Time is up for the last question! Submitting quiz...', { duration: 3000 });
+      handleSubmitQuiz();
+    } else {
+      toast.error('Time is up for this question! Moving to the next one.', { duration: 2000 });
+      // Mark current question as -1 (no answer) if not already answered
+      if (selectedAnswers[currentQuestionIndex] === undefined) {
+        setSelectedAnswers(prev => ({ ...prev, [currentQuestionIndex]: -1 }));
+      }
+      setCurrentQuestionIndex(prev => prev + 1);
+    }
+  };
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -287,7 +335,7 @@ const QuizTakePage = () => {
               </p>
             </div>
             <div className={`flex items-center gap-2 px-4 py-2 rounded-lg ${
-              timeLeft < 60 ? 'bg-red-100 text-red-700' : 'bg-indigo-100 text-indigo-700'
+              timeLeft < 10 ? 'bg-red-100 text-red-700 animate-pulse' : 'bg-indigo-100 text-indigo-700'
             }`}>
               <ClockIcon className="h-5 w-5" />
               <span className="font-mono font-bold text-lg">{formatTime(timeLeft)}</span>

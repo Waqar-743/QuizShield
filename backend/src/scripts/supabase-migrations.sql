@@ -39,9 +39,23 @@ CREATE INDEX IF NOT EXISTS idx_violations_student_id ON cheating_violations(stud
 CREATE INDEX IF NOT EXISTS idx_violations_teacher_id ON cheating_violations(teacher_id);
 
 -- Add new columns to quiz_attempts table if they don't exist
+ALTER TABLE quiz_attempts ADD COLUMN IF NOT EXISTS topic_id UUID REFERENCES topics(id);
+ALTER TABLE quiz_attempts ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'in-progress';
+ALTER TABLE quiz_attempts ADD COLUMN IF NOT EXISTS max_score INTEGER DEFAULT 0;
+ALTER TABLE quiz_attempts ADD COLUMN IF NOT EXISTS difficulty VARCHAR(20);
+ALTER TABLE quiz_attempts ADD COLUMN IF NOT EXISTS teacher_grade INTEGER;
+ALTER TABLE quiz_attempts ADD COLUMN IF NOT EXISTS teacher_feedback TEXT;
 ALTER TABLE quiz_attempts ADD COLUMN IF NOT EXISTS violation_count INTEGER DEFAULT 0;
 ALTER TABLE quiz_attempts ADD COLUMN IF NOT EXISTS is_flagged BOOLEAN DEFAULT false;
 ALTER TABLE quiz_attempts ADD COLUMN IF NOT EXISTS accessed_via VARCHAR(20) DEFAULT 'enrolled';
+
+-- Remove foreign key constraint on quiz_id if it exists to support teacher_quizzes
+DO $$ 
+BEGIN 
+    IF EXISTS (SELECT 1 FROM information_schema.table_constraints WHERE constraint_name = 'quiz_attempts_quiz_id_fkey') THEN
+        ALTER TABLE quiz_attempts DROP CONSTRAINT quiz_attempts_quiz_id_fkey;
+    END IF;
+END $$;
 
 -- Enhanced Questions Table (for MCQ and Short Answer support)
 -- Update existing questions table

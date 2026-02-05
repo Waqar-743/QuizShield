@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuiz } from '../../hooks/useQuiz';
 import { useQuizSecurity } from '../../hooks/useQuizSecurity';
-import { LightBulbIcon } from '@heroicons/react/24/outline';
+import { LightBulbIcon, ClockIcon } from '@heroicons/react/24/outline';
 
 const QuizPage: React.FC = () => {
   const { quizId, attemptId } = useParams<{ quizId: string; attemptId: string }>();
@@ -24,6 +24,44 @@ const QuizPage: React.FC = () => {
   const [selectedAnswer, setSelectedAnswer] = useState<string>('');
   const [hint, setHint] = useState<string | null>(null);
   const [showHint, setShowHint] = useState(false);
+  const [timeLeft, setTimeLeft] = useState<number>(60); // Default 60s if not specified
+
+  // Handle Question Timer
+  useEffect(() => {
+    if (currentQuestion) {
+      // Set time to question's limit or default 60s
+      setTimeLeft(currentQuestion.timeLimit || 60);
+    }
+  }, [currentQuestion]);
+
+  const handleSubmit = useCallback(async () => {
+    if (!quizId || !attemptId || !currentQuestion) return;
+    
+    // Use currently selected answer, or empty string if time is up
+    await submitAnswer(quizId, attemptId, currentQuestion._id, selectedAnswer);
+    setSelectedAnswer('');
+    setHint(null);
+    setShowHint(false);
+  }, [quizId, attemptId, currentQuestion, selectedAnswer, submitAnswer]);
+
+  useEffect(() => {
+    if (timeLeft <= 0) {
+      handleSubmit();
+      return;
+    }
+
+    const timer = setInterval(() => {
+      setTimeLeft(prev => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [timeLeft, handleSubmit]);
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
 
   // If we don't have a current question but have IDs, we might need to re-fetch or handle state
   // Ideally, the hook or a parent component manages the flow. 
@@ -101,9 +139,17 @@ const QuizPage: React.FC = () => {
         {/* Progress / Header */}
         <div className="mb-8 flex justify-between items-center">
           <h2 className="text-2xl font-bold text-gray-900">Quiz Session</h2>
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800">
-            {currentQuestion.difficulty}
-          </span>
+          <div className="flex items-center gap-4">
+            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg font-mono font-bold ${
+              timeLeft < 10 ? 'bg-red-100 text-red-600 animate-pulse' : 'bg-indigo-100 text-indigo-700'
+            }`}>
+              <ClockIcon className="h-4 w-4" />
+              {formatTime(timeLeft)}
+            </div>
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800">
+              {currentQuestion.difficulty}
+            </span>
+          </div>
         </div>
 
         {/* Question Card */}

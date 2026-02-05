@@ -9,6 +9,7 @@ import {
   TrashIcon,
   ClipboardDocumentIcon,
   CheckCircleIcon,
+  ClockIcon,
 } from '@heroicons/react/24/outline';
 
 interface Quiz {
@@ -395,9 +396,10 @@ const TeacherQuizzes = () => {
                     <div key={qIndex} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
                       <div className="flex items-center justify-between mb-3">
                         <span className="font-medium text-gray-700">Question {qIndex + 1}</span>
-                        <div className="flex items-center gap-2">
-                          <div className="flex items-center gap-1 mr-2">
-                            <label className="text-xs text-gray-500">Time (sec):</label>
+                        <div className="flex items-center gap-3">
+                          {/* Time Section */}
+                          <div className="flex items-center gap-2 bg-white px-2 py-1 border border-gray-300 rounded-lg">
+                            <ClockIcon className="h-4 w-4 text-gray-400" />
                             <input
                               type="number"
                               min="30"
@@ -405,10 +407,13 @@ const TeacherQuizzes = () => {
                               step="5"
                               value={question.timeLimit}
                               onChange={(e) => updateQuestion(qIndex, 'timeLimit', parseInt(e.target.value))}
-                              className="w-16 text-sm px-2 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
-                              title="Time for this question (30s to 45m)"
+                              className="w-16 text-sm border-none focus:ring-0 p-0"
+                              placeholder="60"
                             />
+                            <span className="text-[10px] font-bold text-gray-400 uppercase">sec</span>
                           </div>
+
+                          {/* Difficulty Section */}
                           <select
                             value={question.difficulty}
                             onChange={(e) => updateQuestion(qIndex, 'difficulty', e.target.value)}
@@ -418,6 +423,7 @@ const TeacherQuizzes = () => {
                             <option value="Medium">Medium</option>
                             <option value="Hard">Hard</option>
                           </select>
+
                           {formData.questions.length > 1 && (
                             <button
                               type="button"

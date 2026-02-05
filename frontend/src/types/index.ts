@@ -51,6 +51,7 @@ export interface Question {
   correctAnswer?: string; // Hidden from student during quiz
   explanation?: string; // Hidden from student during quiz
   difficulty: 'Easy' | 'Medium' | 'Hard';
+  timeLimit?: number; // per-question limit in seconds
 }
 
 export interface Quiz {

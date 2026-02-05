@@ -461,6 +461,7 @@ export const quizService = {
     
     if (violations && violations.length > 0) {
       updateData.violations = violations;
+      updateData.violation_count = violations.length;
     }
 
     const { error: updateError } = await supabase

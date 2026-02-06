@@ -12,6 +12,7 @@ import {
 } from '@heroicons/react/24/outline';
 import RoleSidebar, { SidebarItem } from './RoleSidebar';
 import Brand from './Brand';
+import ChatbotWidget from './ChatbotWidget';
 import { useAuthStore } from '../../store/authStore';
 import api from '../../services/api';
 
@@ -256,6 +257,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ role }) => {
           <Outlet />
         </main>
       </div>
+
+      <ChatbotWidget />
     </div>
   );
 };

@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Header from './Header';
 import Sidebar from './Sidebar';
-import { ChatbotWidget } from '../shared';
 
 const MainLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -19,7 +18,6 @@ const MainLayout = () => {
         </main>
       </div>
 
-      <ChatbotWidget />
     </div>
   );
 };

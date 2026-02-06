@@ -120,3 +120,41 @@ export const getInsights = asyncHandler(async (req: Request, res: Response) => {
     },
   });
 });
+
+export const chatAssistant = asyncHandler(async (req: Request, res: Response) => {
+  const { messages } = req.body as { messages?: { role: string; content: string }[] };
+
+  if (!Array.isArray(messages) || messages.length === 0) {
+    res.status(400).json({
+      success: false,
+      error: { message: 'messages array is required' }
+    });
+    return;
+  }
+
+  const lastUserMessage = [...messages].reverse().find(m => m.role === 'user');
+  const lastContent = lastUserMessage?.content ?? '';
+
+  const riskyPattern = /(bypass|avoid detection|disable monitoring|circumvent|cheat|hack|exploit|get answers|leak|steal)/i;
+  if (riskyPattern.test(lastContent)) {
+    res.status(200).json({
+      success: true,
+      data: {
+        reply:
+          'I cannot help with cheating or bypassing quiz rules. I can explain the rules, how violations work, and how to use the app features.'
+      }
+    });
+    return;
+  }
+
+  const normalizedMessages = messages
+    .filter(m => (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string')
+    .slice(-10);
+
+  const reply = await aiService.chatAssistant(normalizedMessages as any);
+
+  res.status(200).json({
+    success: true,
+    data: { reply }
+  });
+});

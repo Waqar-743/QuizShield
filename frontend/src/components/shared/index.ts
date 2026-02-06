@@ -4,4 +4,5 @@ export { default as RoleSidebar } from './RoleSidebar';
 export { default as DashboardLayout } from './DashboardLayout';
 export { default as CourseCard } from './CourseCard';
 export { default as Brand } from './Brand';
+export { default as ChatbotWidget } from './ChatbotWidget';
 export type { SidebarItem } from './RoleSidebar';

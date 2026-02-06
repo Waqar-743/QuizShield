@@ -1,8 +1,14 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { config } from '../config/environment';
 
 // Initialize Gemini API
 const apiKey = process.env.GEMINI_API_KEY || '';
 const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
+
+type ChatMessage = {
+  role: 'system' | 'user' | 'assistant';
+  content: string;
+};
 
 export const aiService = {
   async generateQuestions(topicId: string, difficulty: string, count: number) {
@@ -89,5 +95,55 @@ export const aiService = {
       console.error('[AI Service] Error generating explanation:', error);
       return "Unable to generate explanation at this time.";
     }
+  },
+  async chatAssistant(messages: ChatMessage[]) {
+    const openRouterKey = config.openRouterApiKey;
+    if (!openRouterKey) {
+      throw new Error('AI assistant is not configured. Please set OPENROUTER_API_KEY.');
+    }
+
+    const systemPrompt =
+      'You are the QuizShield assistant. Your job is to explain quiz rules, '
+      + 'anti-cheating policies, and help users navigate features like joining quizzes, '
+      + 'viewing reports/analytics, and moving through student and teacher pages. '
+      + 'Never provide help to cheat, bypass monitoring, or break rules. If asked, '
+      + 'refuse briefly and offer allowed guidance. Keep responses concise and helpful.';
+
+    const payload = {
+      model: config.openRouterModel,
+      messages: [{ role: 'system', content: systemPrompt }, ...messages],
+      temperature: 0.2,
+      max_tokens: 400,
+    };
+
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${openRouterKey}`,
+      'Content-Type': 'application/json',
+      'X-Title': config.openRouterAppName,
+    };
+
+    if (config.openRouterAppUrl) {
+      headers['HTTP-Referer'] = config.openRouterAppUrl;
+    }
+
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`OpenRouter error: ${response.status} ${errorText}`);
+    }
+
+    const data = await response.json();
+    const content = data?.choices?.[0]?.message?.content;
+
+    if (!content || typeof content !== 'string') {
+      throw new Error('OpenRouter returned an empty response.');
+    }
+
+    return content.trim();
   }
 };

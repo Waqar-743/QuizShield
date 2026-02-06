@@ -4,9 +4,9 @@ import axios from 'axios';
 const api = axios.create({
   // In dev we proxy /api -> http://localhost:5000 via vite.config.ts.
   // In prod, we strictly use the Vercel backend.
-  baseURL: import.meta.env.PROD
-    ? 'https://quiz-shield.vercel.app/api'
-    : (import.meta.env.VITE_API_URL ?? '/api'),
+  baseURL: import.meta.env.VITE_API_URL
+    ? import.meta.env.VITE_API_URL
+    : (import.meta.env.PROD ? 'https://quiz-shield.vercel.app/api' : '/api'),
   headers: {
     'Content-Type': 'application/json',
   },

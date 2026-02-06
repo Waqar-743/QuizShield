@@ -73,7 +73,7 @@ const ChatbotWidget = () => {
   };
 
   return (
-    <div className="fixed bottom-5 right-5 z-40">
+    <div className="fixed bottom-5 left-5 z-40">
       {isOpen && (
         <div className="mb-3 w-[22rem] max-w-[90vw] rounded-2xl border border-gray-200 bg-white shadow-xl">
           <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">

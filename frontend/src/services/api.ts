@@ -1,12 +1,17 @@
 import axios from 'axios';
 
+const normalizeApiBaseUrl = (value?: string) => {
+  if (!value) return value;
+  const trimmed = value.replace(/\/$/, '');
+  return trimmed.endsWith('/api') ? trimmed : `${trimmed}/api`;
+};
+
 // Create axios instance
 const api = axios.create({
   // In dev we proxy /api -> http://localhost:5000 via vite.config.ts.
   // In prod, we strictly use the Vercel backend.
-  baseURL: import.meta.env.VITE_API_URL
-    ? import.meta.env.VITE_API_URL
-    : (import.meta.env.PROD ? 'https://quiz-shield.vercel.app/api' : '/api'),
+  baseURL: normalizeApiBaseUrl(import.meta.env.VITE_API_URL)
+    ?? (import.meta.env.PROD ? 'https://quiz-shield.vercel.app/api' : '/api'),
   headers: {
     'Content-Type': 'application/json',
   },

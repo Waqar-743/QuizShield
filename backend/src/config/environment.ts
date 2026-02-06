@@ -17,7 +17,7 @@ export const config = {
   supabaseKey: process.env.SUPABASE_KEY || '',
   jwtSecret: process.env.JWT_SECRET || 'your_jwt_secret_key',
   resendApiKey: process.env.RESEND_API_KEY || '',
-  openRouterApiKey: process.env.OPENROUTER_API_KEY || '',
+  openRouterApiKey: process.env.OPENROUTER_API_KEY || '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',
   openRouterModel: process.env.OPENROUTER_MODEL || 'meta-llama/llama-3.1-8b-instruct:free',
   openRouterAppUrl: process.env.OPENROUTER_APP_URL || '',
   openRouterAppName: process.env.OPENROUTER_APP_NAME || 'QuizShield',

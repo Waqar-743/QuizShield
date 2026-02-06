@@ -34,11 +34,12 @@ const QuizPage: React.FC = () => {
     }
   }, [currentQuestion]);
 
-  const handleSubmit = useCallback(async () => {
+  const handleSubmit = useCallback(async (force = false) => {
     if (!quizId || !attemptId || !currentQuestion) return;
-    
+    if (!force && !selectedAnswer) return;
+
     // Use currently selected answer, or empty string if time is up
-    await submitAnswer(quizId, attemptId, currentQuestion._id, selectedAnswer);
+    await submitAnswer(quizId, attemptId, currentQuestion._id, selectedAnswer || '');
     setSelectedAnswer('');
     setHint(null);
     setShowHint(false);
@@ -46,7 +47,7 @@ const QuizPage: React.FC = () => {
 
   useEffect(() => {
     if (timeLeft <= 0) {
-      handleSubmit();
+      handleSubmit(true);
       return;
     }
 
@@ -80,15 +81,6 @@ const QuizPage: React.FC = () => {
 
   const handleOptionSelect = (option: string) => {
     setSelectedAnswer(option);
-  };
-
-  const handleSubmit = async () => {
-    if (!selectedAnswer || !quizId || !attemptId || !currentQuestion) return;
-    
-    await submitAnswer(quizId, attemptId, currentQuestion._id, selectedAnswer);
-    setSelectedAnswer('');
-    setHint(null);
-    setShowHint(false);
   };
 
   const handleRequestHint = async () => {

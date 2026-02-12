@@ -326,25 +326,28 @@ export const courseService = {
   },
 
   async createQuestion(teacherId: string, questionData: any) {
-    // Get topic and verify course ownership
-    const { data: topic } = await supabase
-      .from('topics')
-      .select('course_id')
-      .eq('id', questionData.topicId)
-      .single();
+    let topicId: string | null = questionData.topicId || null;
 
-    if (!topic) {
-      throw new Error('Topic not found');
-    }
+    if (topicId) {
+      const { data: topic } = await supabase
+        .from('topics')
+        .select('course_id')
+        .eq('id', topicId)
+        .single();
 
-    const { data: course } = await supabase
-      .from('courses')
-      .select('instructor_id')
-      .eq('id', topic.course_id)
-      .single();
+      if (!topic) {
+        throw new Error('Topic not found');
+      }
 
-    if (!course || course.instructor_id !== teacherId) {
-      throw new Error('Not authorized to add questions to this topic');
+      const { data: course } = await supabase
+        .from('courses')
+        .select('instructor_id')
+        .eq('id', topic.course_id)
+        .single();
+
+      if (!course || course.instructor_id !== teacherId) {
+        throw new Error('Not authorized to add questions to this topic');
+      }
     }
 
     const { data: question, error } = await supabase
@@ -352,11 +355,14 @@ export const courseService = {
       .insert([{
         content: questionData.text,
         question_text: questionData.text,
-        options: questionData.options,
-        correct_answer: questionData.correctAnswer,
+        options: questionData.options || [],
+        correct_answer: questionData.correctAnswer ?? null,
+        correct_answers: questionData.answerText ? [questionData.answerText] : (questionData.correctAnswers || []),
+        question_type: questionData.questionType || (questionData.answerText ? 'shortAnswer' : 'multipleChoice'),
         difficulty: questionData.difficulty,
-        topic_id: questionData.topicId,
+        topic_id: topicId,
         explanation: questionData.explanation,
+        created_by: teacherId,
         created_at: new Date().toISOString(),
       }])
       .select()
@@ -371,6 +377,7 @@ export const courseService = {
       text: question.content || question.question_text,
       options: question.options,
       correctAnswer: question.correct_answer,
+      answerText: question.correct_answers?.[0] || '',
       difficulty: question.difficulty,
       topicId: question.topic_id,
       explanation: question.explanation,
@@ -378,10 +385,10 @@ export const courseService = {
   },
 
   async updateQuestion(teacherId: string, questionId: string, questionData: any) {
-    // Get question, topic, and verify course ownership
+    // Get question and verify ownership
     const { data: question } = await supabase
       .from('questions')
-      .select('topic_id')
+      .select('topic_id, created_by')
       .eq('id', questionId)
       .single();
 
@@ -389,23 +396,27 @@ export const courseService = {
       throw new Error('Question not found');
     }
 
-    const { data: topic } = await supabase
-      .from('topics')
-      .select('course_id')
-      .eq('id', question.topic_id)
-      .single();
+    if (question.topic_id) {
+      const { data: topic } = await supabase
+        .from('topics')
+        .select('course_id')
+        .eq('id', question.topic_id)
+        .single();
 
-    if (!topic) {
-      throw new Error('Topic not found');
-    }
+      if (!topic) {
+        throw new Error('Topic not found');
+      }
 
-    const { data: course } = await supabase
-      .from('courses')
-      .select('instructor_id')
-      .eq('id', topic.course_id)
-      .single();
+      const { data: course } = await supabase
+        .from('courses')
+        .select('instructor_id')
+        .eq('id', topic.course_id)
+        .single();
 
-    if (!course || course.instructor_id !== teacherId) {
+      if (!course || course.instructor_id !== teacherId) {
+        throw new Error('Not authorized to update this question');
+      }
+    } else if (question.created_by !== teacherId) {
       throw new Error('Not authorized to update this question');
     }
 
@@ -414,8 +425,10 @@ export const courseService = {
       .update({
         content: questionData.text,
         question_text: questionData.text,
-        options: questionData.options,
-        correct_answer: questionData.correctAnswer,
+        options: questionData.options || [],
+        correct_answer: questionData.correctAnswer ?? null,
+        correct_answers: questionData.answerText ? [questionData.answerText] : (questionData.correctAnswers || []),
+        question_type: questionData.questionType || (questionData.answerText ? 'shortAnswer' : 'multipleChoice'),
         difficulty: questionData.difficulty,
         explanation: questionData.explanation,
         updated_at: new Date().toISOString(),
@@ -433,6 +446,7 @@ export const courseService = {
       text: updated.content || updated.question_text,
       options: updated.options,
       correctAnswer: updated.correct_answer,
+      answerText: updated.correct_answers?.[0] || '',
       difficulty: updated.difficulty,
       topicId: updated.topic_id,
       explanation: updated.explanation,
@@ -440,10 +454,10 @@ export const courseService = {
   },
 
   async deleteQuestion(teacherId: string, questionId: string) {
-    // Get question, topic, and verify course ownership
+    // Get question and verify ownership
     const { data: question } = await supabase
       .from('questions')
-      .select('topic_id')
+      .select('topic_id, created_by')
       .eq('id', questionId)
       .single();
 
@@ -451,23 +465,27 @@ export const courseService = {
       throw new Error('Question not found');
     }
 
-    const { data: topic } = await supabase
-      .from('topics')
-      .select('course_id')
-      .eq('id', question.topic_id)
-      .single();
+    if (question.topic_id) {
+      const { data: topic } = await supabase
+        .from('topics')
+        .select('course_id')
+        .eq('id', question.topic_id)
+        .single();
 
-    if (!topic) {
-      throw new Error('Topic not found');
-    }
+      if (!topic) {
+        throw new Error('Topic not found');
+      }
 
-    const { data: course } = await supabase
-      .from('courses')
-      .select('instructor_id')
-      .eq('id', topic.course_id)
-      .single();
+      const { data: course } = await supabase
+        .from('courses')
+        .select('instructor_id')
+        .eq('id', topic.course_id)
+        .single();
 
-    if (!course || course.instructor_id !== teacherId) {
+      if (!course || course.instructor_id !== teacherId) {
+        throw new Error('Not authorized to delete this question');
+      }
+    } else if (question.created_by !== teacherId) {
       throw new Error('Not authorized to delete this question');
     }
 
@@ -585,27 +603,41 @@ export const courseService = {
       const topicIds = topics.map((t: any) => t._id);
       const topicMap = new Map(topics.map((t: any) => [t._id, { name: t.title, course: t.courseName }]));
 
-      if (topicIds.length === 0) return [];
+      let topicQuestions: any[] = [];
+      if (topicIds.length > 0) {
+        const { data: questions, error } = await supabase
+          .from('questions')
+          .select('*')
+          .in('topic_id', topicIds)
+          .order('created_at', { ascending: false });
 
-      // Get questions for these topics
-      const { data: questions, error } = await supabase
+        if (error) throw error;
+        topicQuestions = questions || [];
+      }
+
+      const { data: standaloneQuestions, error: standaloneError } = await supabase
         .from('questions')
         .select('*')
-        .in('topic_id', topicIds)
+        .eq('created_by', teacherId)
+        .is('topic_id', null)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (standaloneError) throw standaloneError;
 
-      return (questions || []).map((q: any) => ({
+      const combinedQuestions = [...topicQuestions, ...(standaloneQuestions || [])]
+        .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+      return combinedQuestions.map((q: any) => ({
         _id: q.id,
         text: q.content || q.question_text,
         options: q.options || [],
         correctAnswer: q.correct_answer,
+        answerText: q.correct_answers?.[0] || '',
         difficulty: q.difficulty,
         topicId: q.topic_id,
         explanation: q.explanation,
-        topicName: topicMap.get(q.topic_id)?.name || 'Unknown',
-        courseName: topicMap.get(q.topic_id)?.course || 'Unknown',
+        topicName: q.topic_id ? (topicMap.get(q.topic_id)?.name || 'Unknown') : 'Standalone',
+        courseName: q.topic_id ? (topicMap.get(q.topic_id)?.course || 'Unknown') : 'Direct Question',
       }));
     } catch (e) {
       console.error('Error fetching teacher questions:', e);

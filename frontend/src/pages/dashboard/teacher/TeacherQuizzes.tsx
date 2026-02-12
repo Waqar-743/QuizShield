@@ -30,17 +30,11 @@ interface QuestionItem {
   difficulty: string;
   explanation?: string;
   timeLimit: number; // in seconds
-}
-
-interface TopicOption {
-  _id: string;
-  title: string;
-  courseName?: string;
+  answerText?: string;
 }
 
 const TeacherQuizzes = () => {
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
-  const [topics, setTopics] = useState<TopicOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
@@ -51,15 +45,13 @@ const TeacherQuizzes = () => {
     description: '',
     timeLimit: 0,
     scheduledStart: '',
-    topicId: '',
     questions: [
-      { text: '', options: ['', '', '', ''], correctAnswer: 0, difficulty: 'Medium', explanation: '', timeLimit: 60 }
+      { text: '', options: ['', '', '', ''], correctAnswer: 0, difficulty: 'Medium', explanation: '', timeLimit: 60, answerText: '' }
     ] as QuestionItem[],
   });
 
   useEffect(() => {
     fetchQuizzes();
-    fetchTopics();
   }, []);
 
   // Calculate total time whenever questions change
@@ -86,16 +78,6 @@ const TeacherQuizzes = () => {
     }
   };
 
-  const fetchTopics = async () => {
-    try {
-      const response = await api.get('/courses/teacher/topics');
-      setTopics(response.data.data || []);
-    } catch (error) {
-      console.error('Error fetching topics:', error);
-      setTopics([]);
-    }
-  };
-
   // Convert UTC date to local datetime-local format
   const utcToLocal = (utcDate: string) => {
     const date = new Date(utcDate);
@@ -113,12 +95,12 @@ const TeacherQuizzes = () => {
         description: quiz.description,
         timeLimit: quiz.timeLimit || 0,
         scheduledStart: quiz.scheduledStart ? utcToLocal(quiz.scheduledStart) : '',
-        topicId: '',
         questions: quiz.questions.length > 0 ? quiz.questions.map(q => ({
           ...q,
-          timeLimit: q.timeLimit || 60 // fallback to 60s
+          timeLimit: q.timeLimit || 60,
+          answerText: q.answerText || ''
         })) : [
-          { text: '', options: ['', '', '', ''], correctAnswer: 0, difficulty: 'Medium', explanation: '', timeLimit: 60 }
+          { text: '', options: ['', '', '', ''], correctAnswer: 0, difficulty: 'Medium', explanation: '', timeLimit: 60, answerText: '' }
         ],
       });
     } else {
@@ -129,9 +111,8 @@ const TeacherQuizzes = () => {
         description: '',
         timeLimit: 0,
         scheduledStart: '',
-        topicId: topics[0]?._id || '',
         questions: [
-          { text: '', options: ['', '', '', ''], correctAnswer: 0, difficulty: 'Medium', explanation: '', timeLimit: 60 }
+          { text: '', options: ['', '', '', ''], correctAnswer: 0, difficulty: 'Medium', explanation: '', timeLimit: 60, answerText: '' }
         ],
       });
     }
@@ -143,7 +124,7 @@ const TeacherQuizzes = () => {
       ...formData,
       questions: [
         ...formData.questions,
-        { text: '', options: ['', '', '', ''], correctAnswer: 0, difficulty: 'Medium', explanation: '', timeLimit: 60 }
+        { text: '', options: ['', '', '', ''], correctAnswer: 0, difficulty: 'Medium', explanation: '', timeLimit: 60, answerText: '' }
       ],
     });
   };
@@ -175,28 +156,24 @@ const TeacherQuizzes = () => {
 
     if (formMode === 'question') {
       const question = formData.questions[0];
-      if (!formData.topicId) {
-        toast.error('Please select a topic for this question');
-        return;
-      }
       if (!question.text.trim()) {
         toast.error('Question text is required');
         return;
       }
-      if (question.options.some((opt) => !opt.trim())) {
-        toast.error('All options must be filled');
+      if (!question.answerText?.trim()) {
+        toast.error('Please provide the expected answer');
         return;
       }
 
       try {
         await api.post('/courses/questions', {
           text: question.text,
-          options: question.options,
-          correctAnswer: question.correctAnswer,
+          options: [],
+          correctAnswer: null,
+          answerText: question.answerText,
+          questionType: 'shortAnswer',
           difficulty: question.difficulty,
           explanation: question.explanation,
-          topicId: formData.topicId,
-          timeLimit: question.timeLimit,
         });
         toast.success('Question created successfully');
         setModalOpen(false);
@@ -411,8 +388,7 @@ const TeacherQuizzes = () => {
                       title: '',
                       description: '',
                       scheduledStart: '',
-                      topicId: prev.topicId || topics[0]?._id || '',
-                      questions: [prev.questions[0] || { text: '', options: ['', '', '', ''], correctAnswer: 0, difficulty: 'Medium', explanation: '', timeLimit: 60 }],
+                      questions: [prev.questions[0] || { text: '', options: ['', '', '', ''], correctAnswer: 0, difficulty: 'Medium', explanation: '', timeLimit: 60, answerText: '' }],
                     }));
                   }}
                   className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
@@ -473,28 +449,6 @@ const TeacherQuizzes = () => {
                     />
                   </div>
                 </>
-              )}
-
-              {formMode === 'question' && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Topic</label>
-                  <select
-                    value={formData.topicId}
-                    onChange={(e) => setFormData({ ...formData, topicId: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                    required
-                  >
-                    {topics.length === 0 ? (
-                      <option value="">No topics found</option>
-                    ) : (
-                      topics.map((topic) => (
-                        <option key={topic._id} value={topic._id}>
-                          {topic.title}{topic.courseName ? ` (${topic.courseName})` : ''}
-                        </option>
-                      ))
-                    )}
-                  </select>
-                </div>
               )}
 
               <div className="border-t pt-4">
@@ -568,30 +522,44 @@ const TeacherQuizzes = () => {
                         required
                       />
 
-                      <div className="space-y-2 mb-3">
-                        {question.options.map((option, oIndex) => (
-                          <div key={oIndex} className="flex items-center gap-2">
-                            <input
-                              type="radio"
-                              name={`correct-${qIndex}`}
-                              checked={question.correctAnswer === oIndex}
-                              onChange={() => updateQuestion(qIndex, 'correctAnswer', oIndex)}
-                              className="h-4 w-4 text-indigo-600 focus:ring-indigo-500"
-                            />
-                            <input
-                              type="text"
-                              value={option}
-                              onChange={(e) => updateOption(qIndex, oIndex, e.target.value)}
-                              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                              placeholder={`Option ${oIndex + 1}`}
-                              required
-                            />
-                            {question.correctAnswer === oIndex && (
-                              <CheckCircleIcon className="h-5 w-5 text-green-500" />
-                            )}
-                          </div>
-                        ))}
-                      </div>
+                      {formMode === 'quiz' ? (
+                        <div className="space-y-2 mb-3">
+                          {question.options.map((option, oIndex) => (
+                            <div key={oIndex} className="flex items-center gap-2">
+                              <input
+                                type="radio"
+                                name={`correct-${qIndex}`}
+                                checked={question.correctAnswer === oIndex}
+                                onChange={() => updateQuestion(qIndex, 'correctAnswer', oIndex)}
+                                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500"
+                              />
+                              <input
+                                type="text"
+                                value={option}
+                                onChange={(e) => updateOption(qIndex, oIndex, e.target.value)}
+                                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                placeholder={`Option ${oIndex + 1}`}
+                                required
+                              />
+                              {question.correctAnswer === oIndex && (
+                                <CheckCircleIcon className="h-5 w-5 text-green-500" />
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="mb-3">
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Answer</label>
+                          <textarea
+                            value={question.answerText || ''}
+                            onChange={(e) => updateQuestion(qIndex, 'answerText', e.target.value)}
+                            rows={3}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                            placeholder="Enter expected answer"
+                            required
+                          />
+                        </div>
+                      )}
 
                       <input
                         type="text"

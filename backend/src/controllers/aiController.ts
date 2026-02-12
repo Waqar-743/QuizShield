@@ -151,10 +151,22 @@ export const chatAssistant = asyncHandler(async (req: Request, res: Response) =>
     .filter(m => (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string')
     .slice(-10);
 
-  const reply = await aiService.chatAssistant(normalizedMessages as any);
+  try {
+    const reply = await aiService.chatAssistant(normalizedMessages as any);
 
-  res.status(200).json({
-    success: true,
-    data: { reply }
-  });
+    res.status(200).json({
+      success: true,
+      data: { reply }
+    });
+  } catch (error: any) {
+    console.error('[AI Controller] chatAssistant error:', error.message);
+
+    res.status(500).json({
+      success: false,
+      error: {
+        message: error.message || 'Failed to get AI response',
+        code: 'AI_ASSISTANT_ERROR'
+      }
+    });
+  }
 });

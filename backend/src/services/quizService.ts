@@ -7,6 +7,9 @@ interface QuizQuestion {
   correctAnswer: number;
   difficulty: string;
   explanation?: string;
+  timeLimit?: number;
+  questionType?: 'multipleChoice' | 'shortAnswer';
+  answerText?: string;
 }
 
 interface QuizData {
@@ -439,7 +442,7 @@ export const quizService = {
   async submitAllAnswers(
     attemptId: string, 
     userId: string, 
-    answers: { questionId: string; selectedAnswer: number }[],
+    answers: { questionId: string; selectedAnswer: number | string }[],
     violations?: { type: string; timestamp: string; details?: string }[]
   ) {
     // Get the attempt
@@ -476,7 +479,16 @@ export const quizService = {
     answers.forEach((answer) => {
       const questionIndex = parseInt(answer.questionId.split('-q')[1]);
       const question = questions[questionIndex];
-      if (question && answer.selectedAnswer === question.correctAnswer) {
+      if (!question) return;
+
+      const isShortAnswer = question.questionType === 'shortAnswer' || !question.options || question.options.length === 0;
+      if (isShortAnswer) {
+        const submitted = String(answer.selectedAnswer ?? '').trim().toLowerCase();
+        const expected = String(question.answerText ?? '').trim().toLowerCase();
+        if (submitted && expected && submitted === expected) {
+          score++;
+        }
+      } else if (answer.selectedAnswer === question.correctAnswer) {
         score++;
       }
     });

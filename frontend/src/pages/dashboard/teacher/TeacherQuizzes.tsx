@@ -45,6 +45,8 @@ const TeacherQuizzes = () => {
     description: '',
     timeLimit: 0,
     scheduledStart: '',
+    questionTitle: '',
+    questionScheduledStart: '',
     questions: [
       { text: '', options: ['', '', '', ''], correctAnswer: 0, difficulty: 'Medium', explanation: '', timeLimit: 60, answerText: '' }
     ] as QuestionItem[],
@@ -95,6 +97,8 @@ const TeacherQuizzes = () => {
         description: quiz.description,
         timeLimit: quiz.timeLimit || 0,
         scheduledStart: quiz.scheduledStart ? utcToLocal(quiz.scheduledStart) : '',
+        questionTitle: '',
+        questionScheduledStart: '',
         questions: quiz.questions.length > 0 ? quiz.questions.map(q => ({
           ...q,
           timeLimit: q.timeLimit || 60,
@@ -111,6 +115,8 @@ const TeacherQuizzes = () => {
         description: '',
         timeLimit: 0,
         scheduledStart: '',
+        questionTitle: '',
+        questionScheduledStart: '',
         questions: [
           { text: '', options: ['', '', '', ''], correctAnswer: 0, difficulty: 'Medium', explanation: '', timeLimit: 60, answerText: '' }
         ],
@@ -156,6 +162,10 @@ const TeacherQuizzes = () => {
 
     if (formMode === 'question') {
       const question = formData.questions[0];
+      if (!formData.questionTitle.trim()) {
+        toast.error('Question title is required');
+        return;
+      }
       if (!question.text.trim()) {
         toast.error('Question text is required');
         return;
@@ -166,17 +176,30 @@ const TeacherQuizzes = () => {
       }
 
       try {
-        await api.post('/courses/questions', {
-          text: question.text,
-          options: [],
-          correctAnswer: null,
-          answerText: question.answerText,
-          questionType: 'shortAnswer',
-          difficulty: question.difficulty,
-          explanation: question.explanation,
+        const questionScheduledStart = formData.questionScheduledStart && formData.questionScheduledStart.trim() !== ''
+          ? new Date(formData.questionScheduledStart).toISOString()
+          : null;
+
+        await api.post('/quizzes', {
+          title: formData.questionTitle,
+          description: formData.description || 'Single-question assessment',
+          scheduledStart: questionScheduledStart,
+          timeLimit: Math.ceil((question.timeLimit || 60) / 60),
+          questions: [{
+            text: question.text,
+            options: [],
+            correctAnswer: -1,
+            answerText: question.answerText,
+            questionType: 'shortAnswer',
+            difficulty: question.difficulty,
+            explanation: question.explanation,
+            timeLimit: question.timeLimit || 60,
+          }],
         });
-        toast.success('Question created successfully');
+
+        toast.success('Question created with quiz features successfully');
         setModalOpen(false);
+        fetchQuizzes();
       } catch (error: any) {
         console.error('Save Question Error:', error);
         const message = error.response?.data?.message || error.message || 'Failed to save question';
@@ -388,6 +411,8 @@ const TeacherQuizzes = () => {
                       title: '',
                       description: '',
                       scheduledStart: '',
+                      questionTitle: '',
+                      questionScheduledStart: '',
                       questions: [prev.questions[0] || { text: '', options: ['', '', '', ''], correctAnswer: 0, difficulty: 'Medium', explanation: '', timeLimit: 60, answerText: '' }],
                     }));
                   }}
@@ -449,6 +474,34 @@ const TeacherQuizzes = () => {
                     />
                   </div>
                 </>
+              )}
+
+              {formMode === 'question' && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Question Title</label>
+                    <input
+                      type="text"
+                      value={formData.questionTitle}
+                      onChange={(e) => setFormData({ ...formData, questionTitle: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                      placeholder="Enter question title"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Scheduled Start Time (Optional)</label>
+                    <input
+                      type="datetime-local"
+                      value={formData.questionScheduledStart}
+                      onChange={(e) => setFormData({ ...formData, questionScheduledStart: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    />
+                    <p className="mt-1 text-xs text-gray-500">
+                      If set, students cannot start the question before this time
+                    </p>
+                  </div>
+                </div>
               )}
 
               <div className="border-t pt-4">

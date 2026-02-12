@@ -12,9 +12,9 @@ import {
 interface QuizHistoryItem {
   _id: string;
   quizId: string;
-  score: number;
+  score: number | null;
   totalQuestions: number;
-  correctAnswers: number;
+  correctAnswers: number | null;
   timeTaken: number;
   isCompleted: boolean;
   attemptedAt: string;
@@ -23,6 +23,7 @@ interface QuizHistoryItem {
   courseTitle?: string;
   teacherGrade?: number;
   teacherFeedback?: string;
+  reviewStatus?: 'pending' | 'reviewed';
 }
 
 const StudentQuizHistory = () => {
@@ -88,8 +89,9 @@ const StudentQuizHistory = () => {
   };
 
   const filteredAttempts = attempts.filter((attempt) => {
-    if (filter === 'passed') return (attempt.score || 0) >= 70;
-    if (filter === 'failed') return (attempt.score || 0) < 70;
+    const finalGrade = attempt.teacherGrade;
+    if (filter === 'passed') return finalGrade !== undefined && finalGrade >= 70;
+    if (filter === 'failed') return finalGrade !== undefined && finalGrade < 70;
     return true;
   });
 
@@ -135,13 +137,17 @@ const StudentQuizHistory = () => {
       header: 'Auto Score',
       render: (attempt: QuizHistoryItem) => (
         <div className="flex items-center gap-2">
-          <span
-            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium ${getScoreColor(
-              attempt.score || 0
-            )}`}
-          >
-            {attempt.score}%
-          </span>
+          {attempt.reviewStatus === 'reviewed' && attempt.score !== null ? (
+            <span
+              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium ${getScoreColor(
+                attempt.score
+              )}`}
+            >
+              {attempt.score}%
+            </span>
+          ) : (
+            <span className="text-sm text-gray-400">Hidden until review</span>
+          )}
         </div>
       ),
     },
@@ -172,7 +178,9 @@ const StudentQuizHistory = () => {
       header: 'Correct',
       render: (attempt: QuizHistoryItem) => (
         <span className="text-gray-600">
-          {attempt.correctAnswers}/{attempt.totalQuestions}
+          {attempt.reviewStatus === 'reviewed' && attempt.correctAnswers !== null
+            ? `${attempt.correctAnswers}/${attempt.totalQuestions}`
+            : 'Pending review'}
         </span>
       ),
     },
@@ -207,9 +215,10 @@ const StudentQuizHistory = () => {
 
   // Calculate stats
   const totalAttempts = attempts.length;
-  const passedAttempts = attempts.filter((a) => (a.score || 0) >= 70).length;
-  const avgScore = totalAttempts > 0
-    ? Math.round(attempts.reduce((sum, a) => sum + (a.score || 0), 0) / totalAttempts)
+  const reviewedAttempts = attempts.filter((a) => a.teacherGrade !== undefined);
+  const passedAttempts = reviewedAttempts.filter((a) => (a.teacherGrade || 0) >= 70).length;
+  const avgScore = reviewedAttempts.length > 0
+    ? Math.round(reviewedAttempts.reduce((sum, a) => sum + (a.teacherGrade || 0), 0) / reviewedAttempts.length)
     : 0;
 
   return (

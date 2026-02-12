@@ -17,8 +17,5 @@ export const config = {
   supabaseKey: process.env.SUPABASE_KEY || '',
   jwtSecret: process.env.JWT_SECRET || 'your_jwt_secret_key',
   resendApiKey: process.env.RESEND_API_KEY || '',
-  openRouterApiKey: process.env.OPENROUTER_API_KEY || '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',
-  openRouterModel: process.env.OPENROUTER_MODEL || 'meta-llama/llama-3.1-8b-instruct:free',
-  openRouterAppUrl: process.env.OPENROUTER_APP_URL || process.env.FRONTEND_URL || '',
-  openRouterAppName: process.env.OPENROUTER_APP_NAME || 'QuizShield',
+  geminiApiKey: process.env.GEMINI_API_KEY || 'AIzaSyCx29qt_w-9aIofJbS3Wyc3uBhnWLJ3sQk',
 };

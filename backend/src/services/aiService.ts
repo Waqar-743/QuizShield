@@ -2,7 +2,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { config } from '../config/environment';
 
 // Initialize Gemini API
-const apiKey = process.env.GEMINI_API_KEY || '';
+const apiKey = config.geminiApiKey || process.env.GEMINI_API_KEY || '';
 const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
 
 type ChatMessage = {
@@ -97,10 +97,9 @@ export const aiService = {
     }
   },
   async chatAssistant(messages: ChatMessage[]) {
-    const openRouterKey = config.openRouterApiKey;
-    if (!openRouterKey) {
-      console.error('[AI Service] OPENROUTER_API_KEY is not set in environment variables');
-      throw new Error('AI assistant is not configured. Please set the OPENROUTER_API_KEY environment variable on your Vercel deployment.');
+    if (!apiKey || !genAI) {
+      console.error('[AI Service] GEMINI_API_KEY is not set or Gemini failed to initialize');
+      throw new Error('AI assistant is not configured. Please set the GEMINI_API_KEY environment variable.');
     }
 
     const systemPrompt =
@@ -110,60 +109,51 @@ export const aiService = {
       + 'Never provide help to cheat, bypass monitoring, or break rules. If asked, '
       + 'refuse briefly and offer allowed guidance. Keep responses concise and helpful.';
 
-    const payload = {
-      model: config.openRouterModel,
-      messages: [{ role: 'system', content: systemPrompt }, ...messages],
-      temperature: 0.2,
-      max_tokens: 400,
-    };
+    console.log('[AI Service] Calling Gemini API for chat assistant...');
 
-    const headers: Record<string, string> = {
-      Authorization: `Bearer ${openRouterKey}`,
-      'Content-Type': 'application/json',
-      'X-Title': config.openRouterAppName,
-    };
-
-    const referer = config.openRouterAppUrl || config.frontendUrl;
-    if (referer) {
-      headers['HTTP-Referer'] = referer;
-    }
-
-    console.log('[AI Service] Calling OpenRouter API with model:', config.openRouterModel);
-    console.log('[AI Service] API key present:', !!openRouterKey, 'length:', openRouterKey.length);
-
-    let response: Response;
     try {
-      response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(payload),
+      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+
+      // Convert chat messages to Gemini format
+      const geminiHistory = messages
+        .filter(m => m.role === 'user' || m.role === 'assistant')
+        .slice(0, -1) // all except the last message
+        .map(m => ({
+          role: m.role === 'assistant' ? 'model' : 'user',
+          parts: [{ text: m.content }],
+        }));
+
+      const lastMessage = messages[messages.length - 1];
+
+      const chat = model.startChat({
+        history: [
+          { role: 'user', parts: [{ text: 'System instruction: ' + systemPrompt }] },
+          { role: 'model', parts: [{ text: 'Understood. I will follow these guidelines.' }] },
+          ...geminiHistory,
+        ],
       });
-    } catch (fetchError: any) {
-      console.error('[AI Service] Network error calling OpenRouter:', fetchError.message);
-      throw new Error(`Failed to reach AI service: ${fetchError.message}`);
-    }
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`[AI Service] OpenRouter API error: ${response.status}`, errorText);
+      const result = await chat.sendMessage(lastMessage.content);
+      const response = await result.response;
+      const text = response.text();
 
-      if (response.status === 401 || response.status === 403) {
-        throw new Error('OpenRouter API key is invalid or expired. Please update OPENROUTER_API_KEY in your Vercel environment variables and redeploy.');
+      if (!text) {
+        throw new Error('Gemini returned an empty response.');
       }
-      if (response.status === 429) {
-        throw new Error('AI rate limit reached. Please try again in a moment.');
+
+      console.log('[AI Service] Gemini chat response received, length:', text.length);
+      return text.trim();
+    } catch (error: any) {
+      console.error('[AI Service] Gemini chat error:', error.message);
+
+      if (error.message?.includes('API key')) {
+        throw new Error('Gemini API key is invalid. Please check your GEMINI_API_KEY.');
       }
-      throw new Error(`AI service error (${response.status}). Please check server logs.`);
+      if (error.message?.includes('quota')) {
+        throw new Error('API quota exceeded. Please try again later.');
+      }
+
+      throw new Error(`AI assistant error: ${error.message || 'Unknown error'}`);
     }
-
-    const data = await response.json();
-    const content = data?.choices?.[0]?.message?.content;
-
-    if (!content || typeof content !== 'string') {
-      console.error('[AI Service] OpenRouter returned unexpected response:', JSON.stringify(data));
-      throw new Error('AI returned an empty response. The model may be temporarily unavailable.');
-    }
-
-    return content.trim();
   }
 };

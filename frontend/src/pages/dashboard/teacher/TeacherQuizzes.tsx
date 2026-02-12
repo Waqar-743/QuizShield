@@ -32,17 +32,26 @@ interface QuestionItem {
   timeLimit: number; // in seconds
 }
 
+interface TopicOption {
+  _id: string;
+  title: string;
+  courseName?: string;
+}
+
 const TeacherQuizzes = () => {
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
+  const [topics, setTopics] = useState<TopicOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [editingQuiz, setEditingQuiz] = useState<Quiz | null>(null);
+  const [formMode, setFormMode] = useState<'quiz' | 'question'>('quiz');
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     timeLimit: 0,
     scheduledStart: '',
+    topicId: '',
     questions: [
       { text: '', options: ['', '', '', ''], correctAnswer: 0, difficulty: 'Medium', explanation: '', timeLimit: 60 }
     ] as QuestionItem[],
@@ -50,6 +59,7 @@ const TeacherQuizzes = () => {
 
   useEffect(() => {
     fetchQuizzes();
+    fetchTopics();
   }, []);
 
   // Calculate total time whenever questions change
@@ -76,6 +86,16 @@ const TeacherQuizzes = () => {
     }
   };
 
+  const fetchTopics = async () => {
+    try {
+      const response = await api.get('/courses/teacher/topics');
+      setTopics(response.data.data || []);
+    } catch (error) {
+      console.error('Error fetching topics:', error);
+      setTopics([]);
+    }
+  };
+
   // Convert UTC date to local datetime-local format
   const utcToLocal = (utcDate: string) => {
     const date = new Date(utcDate);
@@ -86,12 +106,14 @@ const TeacherQuizzes = () => {
 
   const handleOpenModal = (quiz?: Quiz) => {
     if (quiz) {
+      setFormMode('quiz');
       setEditingQuiz(quiz);
       setFormData({
         title: quiz.title,
         description: quiz.description,
         timeLimit: quiz.timeLimit || 0,
         scheduledStart: quiz.scheduledStart ? utcToLocal(quiz.scheduledStart) : '',
+        topicId: '',
         questions: quiz.questions.length > 0 ? quiz.questions.map(q => ({
           ...q,
           timeLimit: q.timeLimit || 60 // fallback to 60s
@@ -101,11 +123,13 @@ const TeacherQuizzes = () => {
       });
     } else {
       setEditingQuiz(null);
+      setFormMode('quiz');
       setFormData({
         title: '',
         description: '',
         timeLimit: 0,
         scheduledStart: '',
+        topicId: topics[0]?._id || '',
         questions: [
           { text: '', options: ['', '', '', ''], correctAnswer: 0, difficulty: 'Medium', explanation: '', timeLimit: 60 }
         ],
@@ -148,6 +172,41 @@ const TeacherQuizzes = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (formMode === 'question') {
+      const question = formData.questions[0];
+      if (!formData.topicId) {
+        toast.error('Please select a topic for this question');
+        return;
+      }
+      if (!question.text.trim()) {
+        toast.error('Question text is required');
+        return;
+      }
+      if (question.options.some((opt) => !opt.trim())) {
+        toast.error('All options must be filled');
+        return;
+      }
+
+      try {
+        await api.post('/courses/questions', {
+          text: question.text,
+          options: question.options,
+          correctAnswer: question.correctAnswer,
+          difficulty: question.difficulty,
+          explanation: question.explanation,
+          topicId: formData.topicId,
+          timeLimit: question.timeLimit,
+        });
+        toast.success('Question created successfully');
+        setModalOpen(false);
+      } catch (error: any) {
+        console.error('Save Question Error:', error);
+        const message = error.response?.data?.message || error.message || 'Failed to save question';
+        toast.error(message);
+      }
+      return;
+    }
 
     for (const q of formData.questions) {
       if (!q.text.trim()) {
@@ -329,70 +388,134 @@ const TeacherQuizzes = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto">
           <div className="bg-white rounded-xl p-6 max-w-3xl w-full mx-4 my-8 max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              {editingQuiz ? 'Edit Quiz' : 'Create Quiz'}
+              {editingQuiz ? 'Edit Quiz' : 'Create'}
             </h3>
+
+            {!editingQuiz && (
+              <div className="mb-4 inline-flex rounded-lg border border-gray-300 p-1">
+                <button
+                  type="button"
+                  onClick={() => setFormMode('quiz')}
+                  className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+                    formMode === 'quiz' ? 'bg-indigo-600 text-white' : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  Quiz
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFormMode('question');
+                    setFormData((prev) => ({
+                      ...prev,
+                      title: '',
+                      description: '',
+                      scheduledStart: '',
+                      topicId: prev.topicId || topics[0]?._id || '',
+                      questions: [prev.questions[0] || { text: '', options: ['', '', '', ''], correctAnswer: 0, difficulty: 'Medium', explanation: '', timeLimit: 60 }],
+                    }));
+                  }}
+                  className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+                    formMode === 'question' ? 'bg-indigo-600 text-white' : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  Question
+                </button>
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Quiz Title</label>
-                  <input
-                    type="text"
-                    value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                    placeholder="Enter quiz title"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Total Time (minutes)</label>
-                  <div className="w-full px-3 py-2 border border-gray-200 bg-gray-50 text-gray-500 rounded-lg">
-                    {formData.timeLimit} minutes (calculated from questions)
+              {formMode === 'quiz' && (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Quiz Title</label>
+                      <input
+                        type="text"
+                        value={formData.title}
+                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        placeholder="Enter quiz title"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Total Time (minutes)</label>
+                      <div className="w-full px-3 py-2 border border-gray-200 bg-gray-50 text-gray-500 rounded-lg">
+                        {formData.timeLimit} minutes (calculated from questions)
+                      </div>
+                    </div>
                   </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Scheduled Start Time (Optional)
+                    </label>
+                    <input
+                      type="datetime-local"
+                      value={formData.scheduledStart}
+                      onChange={(e) => setFormData({ ...formData, scheduledStart: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    />
+                    <p className="mt-1 text-xs text-gray-500">
+                      If set, students cannot start the quiz before this time
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <textarea
+                      value={formData.description}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      rows={2}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                      placeholder="Brief description of the quiz"
+                    />
+                  </div>
+                </>
+              )}
+
+              {formMode === 'question' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Topic</label>
+                  <select
+                    value={formData.topicId}
+                    onChange={(e) => setFormData({ ...formData, topicId: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    required
+                  >
+                    {topics.length === 0 ? (
+                      <option value="">No topics found</option>
+                    ) : (
+                      topics.map((topic) => (
+                        <option key={topic._id} value={topic._id}>
+                          {topic.title}{topic.courseName ? ` (${topic.courseName})` : ''}
+                        </option>
+                      ))
+                    )}
+                  </select>
                 </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Scheduled Start Time (Optional)
-                </label>
-                <input
-                  type="datetime-local"
-                  value={formData.scheduledStart}
-                  onChange={(e) => setFormData({ ...formData, scheduledStart: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                />
-                <p className="mt-1 text-xs text-gray-500">
-                  If set, students cannot start the quiz before this time
-                </p>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  rows={2}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="Brief description of the quiz"
-                />
-              </div>
+              )}
 
               <div className="border-t pt-4">
                 <div className="flex items-center justify-between mb-4">
-                  <h4 className="text-md font-semibold text-gray-900">Questions</h4>
-                  <button
-                    type="button"
-                    onClick={addQuestion}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 text-sm bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors"
-                  >
-                    <PlusIcon className="h-4 w-4" />
-                    Add Question
-                  </button>
+                  <h4 className="text-md font-semibold text-gray-900">
+                    {formMode === 'quiz' ? 'Questions' : 'Question'}
+                  </h4>
+                  {formMode === 'quiz' && (
+                    <button
+                      type="button"
+                      onClick={addQuestion}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 text-sm bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors"
+                    >
+                      <PlusIcon className="h-4 w-4" />
+                      Add Question
+                    </button>
+                  )}
                 </div>
 
                 <div className="space-y-6">
-                  {formData.questions.map((question, qIndex) => (
+                  {(formMode === 'quiz' ? formData.questions : [formData.questions[0]]).map((question, qIndex) => (
                     <div key={qIndex} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
                       <div className="flex items-center justify-between mb-3">
                         <span className="font-medium text-gray-700">Question {qIndex + 1}</span>
@@ -424,7 +547,7 @@ const TeacherQuizzes = () => {
                             <option value="Hard">Hard</option>
                           </select>
 
-                          {formData.questions.length > 1 && (
+                          {formMode === 'quiz' && formData.questions.length > 1 && (
                             <button
                               type="button"
                               onClick={() => removeQuestion(qIndex)}
@@ -494,7 +617,7 @@ const TeacherQuizzes = () => {
                   type="submit"
                   className="px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700"
                 >
-                  {editingQuiz ? 'Update Quiz' : 'Create Quiz'}
+                  {editingQuiz ? 'Update Quiz' : formMode === 'quiz' ? 'Create Quiz' : 'Create Question'}
                 </button>
               </div>
             </form>

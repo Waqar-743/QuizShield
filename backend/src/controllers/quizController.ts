@@ -89,8 +89,9 @@ export const submitAllAnswers = asyncHandler(async (req: Request, res: Response)
 export const getAttemptResults = asyncHandler(async (req: Request, res: Response) => {
   const { attemptId } = req.params;
   const userId = req.user!._id.toString();
+  const userRole = req.user!.role;
 
-  const result = await quizService.getAttemptResults(attemptId, userId);
+  const result = await quizService.getAttemptResults(attemptId, userId, userRole);
 
   res.status(200).json({
     success: true,

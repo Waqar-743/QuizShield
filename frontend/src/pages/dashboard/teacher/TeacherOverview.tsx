@@ -6,6 +6,7 @@ import api from '../../../services/api';
 import {
   BookOpenIcon,
   UserGroupIcon,
+  AcademicCapIcon,
   QuestionMarkCircleIcon,
   ChartBarIcon,
   PlusIcon,

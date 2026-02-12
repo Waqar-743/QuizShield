@@ -12,14 +12,16 @@ interface Violation {
 
 interface AttemptResult {
   id: string;
-  score: number;
-  maxScore: number;
-  percentage: number;
+  score?: number;
+  maxScore?: number;
+  percentage?: number;
   status: string;
   startedAt: string;
   completedAt: string;
   answers: { questionId: string; selectedAnswer: number }[];
   violations: Violation[];
+  reviewPending?: boolean;
+  reviewStatus?: 'pending' | 'reviewed';
   quiz: {
     title: string;
     description: string;
@@ -79,7 +81,52 @@ const TeacherQuizResultsPage = () => {
     );
   }
 
-  const isPassing = result.percentage >= 60;
+  const isPendingReview = result.reviewStatus === 'pending' || !!result.reviewPending;
+  const percentage = result.percentage ?? 0;
+  const isPassing = percentage >= 60;
+
+  if (isPendingReview) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 py-8 px-4">
+        <div className="max-w-3xl mx-auto">
+          <div className="bg-white rounded-xl shadow-sm border p-8 text-center">
+            <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-amber-100 mb-4">
+              <ClockIcon className="h-8 w-8 text-amber-600" />
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Submission Received</h1>
+            <p className="text-gray-600 mb-6">
+              Your quiz has been submitted and sent to your teacher for review.
+              Your grade will appear once the teacher publishes feedback.
+            </p>
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-left mb-6">
+              <p className="text-sm text-amber-800">
+                <span className="font-medium">Quiz:</span> {result.quiz?.title || 'Quiz'}
+              </p>
+              <p className="text-sm text-amber-800 mt-1">
+                <span className="font-medium">Submitted at:</span>{' '}
+                {result.completedAt ? new Date(result.completedAt).toLocaleString() : 'N/A'}
+              </p>
+            </div>
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={() => navigate('/dashboard/student')}
+                className="inline-flex items-center gap-2 px-6 py-3 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50"
+              >
+                <ArrowLeftIcon className="h-5 w-5" />
+                Back to Dashboard
+              </button>
+              <Link
+                to="/dashboard/student/quiz-history"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+              >
+                View Quiz History
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 py-8 px-4">
@@ -105,11 +152,11 @@ const TeacherQuizResultsPage = () => {
           
           <div className="grid grid-cols-4 gap-4 mb-6">
             <div className="text-center p-4 bg-indigo-50 rounded-lg">
-              <p className="text-4xl font-bold text-indigo-600">{result.percentage}%</p>
+              <p className="text-4xl font-bold text-indigo-600">{percentage}%</p>
               <p className="text-sm text-gray-500">Score</p>
             </div>
             <div className="text-center p-4 bg-green-50 rounded-lg">
-              <p className="text-4xl font-bold text-green-600">{result.score}/{result.maxScore}</p>
+              <p className="text-4xl font-bold text-green-600">{result.score ?? 0}/{result.maxScore ?? 0}</p>
               <p className="text-sm text-gray-500">Correct</p>
             </div>
             <div className={`text-center p-4 rounded-lg ${

@@ -241,7 +241,7 @@ export const quizService = {
   },
 
   // Get attempt results for student
-  async getAttemptResults(attemptId: string, userId: string) {
+  async getAttemptResults(attemptId: string, userId: string, userRole: string) {
     const { data: attempt, error } = await supabase
       .from('quiz_attempts')
       .select('*')
@@ -259,6 +259,34 @@ export const quizService = {
       .eq('id', attempt.quiz_id)
       .single();
 
+    const isStudentOwner = attempt.user_id === userId;
+    const isTeacherOwner = !!quiz && quiz.teacher_id === userId;
+
+    if (!isStudentOwner && !(userRole === 'teacher' && isTeacherOwner) && userRole !== 'admin') {
+      throw new Error('Unauthorized to view this attempt');
+    }
+
+    const isReviewed = attempt.teacher_grade !== null && attempt.teacher_grade !== undefined;
+
+    if (isStudentOwner && !isReviewed) {
+      return {
+        id: attempt.id,
+        status: attempt.status,
+        startedAt: attempt.started_at,
+        completedAt: attempt.completed_at,
+        reviewPending: true,
+        reviewStatus: 'pending',
+        autoSubmitted: attempt.auto_submitted,
+        submissionReason: attempt.submission_reason,
+        violations: attempt.violations || [],
+        quiz: quiz ? {
+          title: quiz.title,
+          description: quiz.description,
+          questions: [],
+        } : null,
+      };
+    }
+
     return {
       id: attempt.id,
       score: attempt.score,
@@ -271,6 +299,8 @@ export const quizService = {
       violations: attempt.violations || [],
       teacherGrade: attempt.teacher_grade,
       teacherFeedback: attempt.teacher_feedback,
+      reviewPending: false,
+      reviewStatus: 'reviewed',
       autoSubmitted: attempt.auto_submitted,
       submissionReason: attempt.submission_reason,
       quiz: quiz ? {
@@ -431,7 +461,7 @@ export const quizService = {
     // Get quiz to calculate score
     const { data: quiz, error: quizError } = await supabase
       .from('teacher_quizzes')
-      .select('questions')
+      .select('id, title, teacher_id, questions')
       .eq('id', attempt.quiz_id)
       .single();
 
@@ -470,6 +500,21 @@ export const quizService = {
       .eq('id', attemptId);
 
     if (updateError) throw new Error(updateError.message);
+
+    if (quiz.teacher_id) {
+      const { error: notifyError } = await supabase.from('notifications').insert([{
+        user_id: quiz.teacher_id,
+        title: 'Submission Pending Review',
+        message: 'A student submitted quiz "' + quiz.title + '" and is waiting for your review.',
+        type: 'submission',
+        quiz_id: quiz.id,
+        is_read: false,
+      }]);
+
+      if (notifyError) {
+        console.error('Failed to notify teacher about submission:', notifyError.message);
+      }
+    }
 
     return {
       score,
@@ -756,19 +801,23 @@ export const quizService = {
 
       const quizMap = new Map(quizzes?.map(q => [q.id, q.title]) || []);
 
-      return attempts.map(attempt => ({
+      return attempts.map(attempt => {
+        const reviewed = attempt.teacher_grade !== null && attempt.teacher_grade !== undefined;
+        return {
         _id: attempt.id,
         quizId: attempt.quiz_id,
         quizTitle: quizMap.get(attempt.quiz_id) || 'Quiz',
-        score: attempt.max_score > 0 ? Math.round((attempt.score / attempt.max_score) * 100) : 0,
+        score: reviewed && attempt.max_score > 0 ? Math.round((attempt.score / attempt.max_score) * 100) : null,
         totalQuestions: attempt.max_score,
-        correctAnswers: attempt.score,
+        correctAnswers: reviewed ? attempt.score : null,
         timeTaken: 0,
         isCompleted: attempt.status === 'completed',
         attemptedAt: attempt.completed_at || attempt.started_at,
-        teacherGrade: attempt.teacher_grade,
-        teacherFeedback: attempt.teacher_feedback,
-      }));
+        teacherGrade: reviewed ? attempt.teacher_grade : undefined,
+        teacherFeedback: reviewed ? attempt.teacher_feedback : undefined,
+        reviewStatus: reviewed ? 'reviewed' : 'pending',
+      };
+      });
     } catch (err) {
       console.error('Error fetching quiz history:', err);
       return [];

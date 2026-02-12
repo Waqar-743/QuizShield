@@ -51,13 +51,15 @@ const ChatbotWidget = () => {
 
       const reply = response?.data?.data?.reply || 'Sorry, I could not generate a reply.';
       setMessages((prev) => [...prev, { role: 'assistant', content: reply }]);
-    } catch (error) {
+    } catch (error: any) {
+      const serverMsg = error?.response?.data?.error?.message;
       setMessages((prev) => [
         ...prev,
         {
           role: 'assistant',
-          content:
-            'I am having trouble right now. Please try again in a moment or contact your instructor.'
+          content: serverMsg
+            ? `Error: ${serverMsg}`
+            : 'I am having trouble right now. Please try again in a moment or contact your instructor.'
         }
       ]);
     } finally {

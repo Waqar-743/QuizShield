@@ -99,7 +99,8 @@ export const aiService = {
   async chatAssistant(messages: ChatMessage[]) {
     const openRouterKey = config.openRouterApiKey;
     if (!openRouterKey) {
-      throw new Error('AI assistant is not configured. Please set OPENROUTER_API_KEY.');
+      console.error('[AI Service] OPENROUTER_API_KEY is not set in environment variables');
+      throw new Error('AI assistant is not configured. Please set the OPENROUTER_API_KEY environment variable on your Vercel deployment.');
     }
 
     const systemPrompt =
@@ -122,26 +123,45 @@ export const aiService = {
       'X-Title': config.openRouterAppName,
     };
 
-    if (config.openRouterAppUrl) {
-      headers['HTTP-Referer'] = config.openRouterAppUrl;
+    const referer = config.openRouterAppUrl || config.frontendUrl;
+    if (referer) {
+      headers['HTTP-Referer'] = referer;
     }
 
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(payload),
-    });
+    console.log('[AI Service] Calling OpenRouter API with model:', config.openRouterModel);
+    console.log('[AI Service] API key present:', !!openRouterKey, 'length:', openRouterKey.length);
+
+    let response: Response;
+    try {
+      response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(payload),
+      });
+    } catch (fetchError: any) {
+      console.error('[AI Service] Network error calling OpenRouter:', fetchError.message);
+      throw new Error(`Failed to reach AI service: ${fetchError.message}`);
+    }
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`OpenRouter error: ${response.status} ${errorText}`);
+      console.error(`[AI Service] OpenRouter API error: ${response.status}`, errorText);
+
+      if (response.status === 401 || response.status === 403) {
+        throw new Error('OpenRouter API key is invalid or expired. Please update OPENROUTER_API_KEY in your Vercel environment variables and redeploy.');
+      }
+      if (response.status === 429) {
+        throw new Error('AI rate limit reached. Please try again in a moment.');
+      }
+      throw new Error(`AI service error (${response.status}). Please check server logs.`);
     }
 
     const data = await response.json();
     const content = data?.choices?.[0]?.message?.content;
 
     if (!content || typeof content !== 'string') {
-      throw new Error('OpenRouter returned an empty response.');
+      console.error('[AI Service] OpenRouter returned unexpected response:', JSON.stringify(data));
+      throw new Error('AI returned an empty response. The model may be temporarily unavailable.');
     }
 
     return content.trim();

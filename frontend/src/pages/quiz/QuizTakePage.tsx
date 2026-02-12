@@ -10,6 +10,8 @@ interface Question {
   options: string[];
   difficulty: string;
   timeLimit: number; // Added per-question time limit
+  questionType?: 'multipleChoice' | 'shortAnswer';
+  answerText?: string;
 }
 
 interface QuizData {
@@ -36,7 +38,7 @@ const QuizTakePage = () => {
   
   const [quizData, setQuizData] = useState<QuizData | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [selectedAnswers, setSelectedAnswers] = useState<Record<number, number>>({});
+  const [selectedAnswers, setSelectedAnswers] = useState<Record<number, number | string>>({});
   const [timeLeft, setTimeLeft] = useState<number>(0);
   const [submitting, setSubmitting] = useState(false);
   
@@ -205,6 +207,8 @@ const QuizTakePage = () => {
 
   const handleAutoNext = () => {
     if (!quizData) return;
+    const activeQuestion = quizData.quiz.questions[currentQuestionIndex];
+    const isShortAnswer = activeQuestion?.questionType === 'shortAnswer' || !activeQuestion?.options?.length;
     
     // If it's the last question, submit the quiz
     if (currentQuestionIndex === quizData.quiz.questions.length - 1) {
@@ -214,7 +218,7 @@ const QuizTakePage = () => {
       toast.error('Time is up for this question! Moving to the next one.', { duration: 2000 });
       // Mark current question as -1 (no answer) if not already answered
       if (selectedAnswers[currentQuestionIndex] === undefined) {
-        setSelectedAnswers(prev => ({ ...prev, [currentQuestionIndex]: -1 }));
+        setSelectedAnswers(prev => ({ ...prev, [currentQuestionIndex]: isShortAnswer ? '' : -1 }));
       }
       setCurrentQuestionIndex(prev => prev + 1);
     }
@@ -233,6 +237,13 @@ const QuizTakePage = () => {
     }));
   };
 
+  const handleTextAnswer = (questionIndex: number, value: string) => {
+    setSelectedAnswers((prev) => ({
+      ...prev,
+      [questionIndex]: value,
+    }));
+  };
+
   const handleSubmitQuiz = async () => {
     if (!quizData) return;
     
@@ -240,7 +251,7 @@ const QuizTakePage = () => {
     try {
       const answers = quizData.quiz.questions.map((q, index) => ({
         questionId: q._id,
-        selectedAnswer: selectedAnswers[index] ?? -1,
+        selectedAnswer: selectedAnswers[index] ?? (q.questionType === 'shortAnswer' || !q.options?.length ? '' : -1),
       }));
 
       await api.post(`/quizzes/${attemptId}/submit-all`, { 
@@ -369,30 +380,43 @@ const QuizTakePage = () => {
             {currentQuestion.text}
           </h2>
 
-          <div className="space-y-3">
-            {currentQuestion.options.map((option, index) => (
-              <button
-                key={index}
-                onClick={() => handleSelectAnswer(currentQuestionIndex, index)}
-                className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
-                  selectedAnswers[currentQuestionIndex] === index
-                    ? 'border-indigo-500 bg-indigo-50'
-                    : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <span className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+          {currentQuestion.questionType === 'shortAnswer' || !currentQuestion.options?.length ? (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Your Answer</label>
+              <textarea
+                value={String(selectedAnswers[currentQuestionIndex] ?? '')}
+                onChange={(e) => handleTextAnswer(currentQuestionIndex, e.target.value)}
+                rows={4}
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                placeholder="Type your answer here"
+              />
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {currentQuestion.options.map((option, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleSelectAnswer(currentQuestionIndex, index)}
+                  className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
                     selectedAnswers[currentQuestionIndex] === index
-                      ? 'bg-indigo-500 text-white'
-                      : 'bg-gray-100 text-gray-600'
-                  }`}>
-                    {String.fromCharCode(65 + index)}
-                  </span>
-                  <span className="text-gray-900">{option}</span>
-                </div>
-              </button>
-            ))}
-          </div>
+                      ? 'border-indigo-500 bg-indigo-50'
+                      : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                      selectedAnswers[currentQuestionIndex] === index
+                        ? 'bg-indigo-500 text-white'
+                        : 'bg-gray-100 text-gray-600'
+                    }`}>
+                      {String.fromCharCode(65 + index)}
+                    </span>
+                    <span className="text-gray-900">{option}</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Anti-cheating notice */}

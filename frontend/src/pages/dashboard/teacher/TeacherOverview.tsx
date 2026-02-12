@@ -104,15 +104,24 @@ const TeacherOverview = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold">Welcome, {user?.name}!</h1>
-            <p className="mt-1 text-white/90">Create quizzes and share them with your students using access codes.</p>
+            <p className="mt-1 text-white/90">Create and manage both quizzes and questions for your students.</p>
           </div>
-          <Link
-            to="/dashboard/teacher/quizzes"
-            className="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 font-medium text-primary-700 transition-colors hover:bg-primary-50"
-          >
-            <PlusIcon className="h-5 w-5" />
-            Create Quiz
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              to="/dashboard/teacher/quizzes"
+              className="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 font-medium text-primary-700 transition-colors hover:bg-primary-50"
+            >
+              <PlusIcon className="h-5 w-5" />
+              Quiz
+            </Link>
+            <Link
+              to="/dashboard/teacher/questions"
+              className="inline-flex items-center gap-2 rounded-lg bg-white/10 px-4 py-2 font-medium text-white ring-1 ring-white/30 transition-colors hover:bg-white/20"
+            >
+              <QuestionMarkCircleIcon className="h-5 w-5" />
+              Question
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -243,13 +252,20 @@ const TeacherOverview = () => {
         {/* Quick Actions */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <Link
               to="/dashboard/teacher/quizzes"
               className="flex flex-col items-center p-4 bg-gradient-to-br from-primary-50 to-primary-100 rounded-xl hover:from-primary-100 hover:to-primary-200 transition-colors"
             >
               <QuestionMarkCircleIcon className="h-8 w-8 text-primary-700 mb-2" />
               <span className="text-sm font-medium text-gray-900">Create Quiz</span>
+            </Link>
+            <Link
+              to="/dashboard/teacher/questions"
+              className="flex flex-col items-center p-4 bg-gradient-to-br from-primary-50 to-primary-100 rounded-xl hover:from-primary-100 hover:to-primary-200 transition-colors"
+            >
+              <AcademicCapIcon className="h-8 w-8 text-primary-700 mb-2" />
+              <span className="text-sm font-medium text-gray-900">Manage Questions</span>
             </Link>
             <Link
               to="/dashboard/teacher/analytics"

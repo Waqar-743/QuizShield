@@ -37,7 +37,8 @@ const getStudentSidebarItems = (): SidebarItem[] => [
 
 const getTeacherSidebarItems = (): SidebarItem[] => [
   { label: 'Overview', href: '/dashboard/teacher', icon: <HomeIcon className="h-5 w-5" /> },
-  { label: 'Create Quiz', href: '/dashboard/teacher/quizzes', icon: <QuestionMarkCircleIcon className="h-5 w-5" /> },
+  { label: 'Quizzes', href: '/dashboard/teacher/quizzes', icon: <QuestionMarkCircleIcon className="h-5 w-5" /> },
+  { label: 'Questions', href: '/dashboard/teacher/questions', icon: <AcademicCapIcon className="h-5 w-5" /> },
   { label: 'Submissions', href: '/dashboard/teacher/submissions', icon: <ClipboardDocumentListIcon className="h-5 w-5" /> },
   { label: 'Analytics', href: '/dashboard/teacher/analytics', icon: <ChartBarIcon className="h-5 w-5" /> },
 ];

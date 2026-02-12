@@ -25,7 +25,7 @@ export const aiService = {
     console.log(`[AI Service] Generating ${count} questions for topic: ${topicId}, difficulty: ${difficulty}`);
 
     try {
-      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
       const prompt = `Generate ${count} multiple-choice questions about "${topicId}" at a "${difficulty}" difficulty level. 
       Format the output as a JSON array of objects with the following structure:
@@ -85,7 +85,7 @@ export const aiService = {
     }
     
     try {
-      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
       const prompt = `Explain why "${answer}" is the correct answer for the question: "${question}". Keep the explanation brief and educational.`;
       
       const result = await model.generateContent(prompt);
@@ -112,7 +112,7 @@ export const aiService = {
     console.log('[AI Service] Calling Gemini API for chat assistant...');
 
     try {
-      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
       // Convert chat messages to Gemini format
       const geminiHistory = messages

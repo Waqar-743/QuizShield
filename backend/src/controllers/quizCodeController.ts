@@ -45,6 +45,8 @@ export const generateQuizCode = asyncHandler(async (req: Request, res: Response)
 // Access quiz by code (student)
 export const accessQuizByCode = asyncHandler(async (req: Request, res: Response) => {
   const { code } = req.params;
+  const userId = req.user!._id.toString();
+  const userRole = req.user!.role;
 
   if (!code) {
     res.status(400).json({
@@ -55,7 +57,7 @@ export const accessQuizByCode = asyncHandler(async (req: Request, res: Response)
   }
 
   try {
-    const result = await quizCodeService.accessByCode(code);
+    const result = await quizCodeService.accessByCode(code, userId, userRole);
 
     res.status(200).json({
       success: true,

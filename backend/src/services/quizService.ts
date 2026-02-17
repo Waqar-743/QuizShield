@@ -17,6 +17,7 @@ interface QuizData {
   description?: string;
   timeLimit?: number;
   scheduledStart?: string;
+  courseId?: string;
   questions: QuizQuestion[];
 }
 
@@ -45,13 +46,19 @@ export const quizService = {
     return code;
   },
 
-  // Send notification to all students
-  async notifyAllStudents(quizTitle: string, quizId: string, accessCode: string, teacherId: string, scheduledStart?: string) {
+  // Send notification only to students enrolled in the quiz course
+  async notifyCourseStudents(quizTitle: string, quizId: string, accessCode: string, teacherId: string, courseId: string, scheduledStart?: string) {
     // Get teacher name
     const { data: teacher } = await supabase
       .from('users')
       .select('name')
       .eq('id', teacherId)
+      .single();
+
+    const { data: course } = await supabase
+      .from('courses')
+      .select('title')
+      .eq('id', courseId)
       .single();
 
     const teacherName = teacher?.name || 'Your teacher';
@@ -63,17 +70,19 @@ export const quizService = {
       timeMessage = ` Starts at: ${startDate.toLocaleString()}.`;
     }
 
-    // Get all students
-    const { data: students } = await supabase
-      .from('users')
-      .select('id')
-      .eq('role', 'student');
+    // Get only students enrolled in this course
+    const { data: enrollments } = await supabase
+      .from('enrollments')
+      .select('user_id')
+      .eq('course_id', courseId);
 
-    if (students && students.length > 0) {
-      const notifications = students.map((student: any) => ({
-        user_id: student.id,
+    const studentIds = [...new Set((enrollments || []).map((e: any) => e.user_id))];
+
+    if (studentIds.length > 0) {
+      const notifications = studentIds.map((studentId: string) => ({
+        user_id: studentId,
         title: 'New Quiz Available!',
-        message: `${teacherName} has created a new quiz: "${quizTitle}". Code: ${accessCode}.${timeMessage}`,
+        message: `${teacherName} has created a new quiz for ${course?.title || 'your course'}: "${quizTitle}". Code: ${accessCode}.${timeMessage}`,
         type: 'quiz',
         quiz_id: quizId,
         quiz_code: accessCode,
@@ -86,6 +95,20 @@ export const quizService = {
 
   // Teacher quiz management
   async createQuiz(teacherId: string, data: QuizData) {
+    if (!data.courseId) {
+      throw new Error('Course is required to create a quiz');
+    }
+
+    const { data: courseOwner } = await supabase
+      .from('courses')
+      .select('id, created_by')
+      .eq('id', data.courseId)
+      .single();
+
+    if (!courseOwner || courseOwner.created_by !== teacherId) {
+      throw new Error('You can only create quizzes for your own courses');
+    }
+
     // Generate unique 4-digit access code
     const accessCode = await this.generateUniqueCode();
 
@@ -95,6 +118,7 @@ export const quizService = {
         teacher_id: teacherId,
         title: data.title,
         description: data.description || '',
+        course_id: data.courseId,
         time_limit: data.timeLimit,
         questions: data.questions,
         access_code: accessCode,
@@ -107,13 +131,21 @@ export const quizService = {
 
     if (error) throw new Error(error.message);
 
-    // Send notification to all students
-    await this.notifyAllStudents(data.title, quiz.id, accessCode, teacherId, data.scheduledStart);
+    // Send notification only to enrolled students in selected course
+    await this.notifyCourseStudents(data.title, quiz.id, accessCode, teacherId, data.courseId, data.scheduledStart);
+
+    const { data: course } = await supabase
+      .from('courses')
+      .select('title')
+      .eq('id', data.courseId)
+      .single();
 
     return {
       _id: quiz.id,
       title: quiz.title,
       description: quiz.description,
+      courseId: quiz.course_id,
+      courseTitle: course?.title || 'Unknown Course',
       timeLimit: quiz.time_limit,
       questions: quiz.questions,
       accessCode: quiz.access_code,
@@ -130,11 +162,25 @@ export const quizService = {
       .order('created_at', { ascending: false });
 
     if (error) throw new Error(error.message);
+
+    const courseIds = [...new Set((quizzes || []).map((q: any) => q.course_id).filter(Boolean))];
+    let courseMap = new Map<string, string>();
+
+    if (courseIds.length > 0) {
+      const { data: courses } = await supabase
+        .from('courses')
+        .select('id, title')
+        .in('id', courseIds);
+
+      courseMap = new Map((courses || []).map((c: any) => [c.id, c.title]));
+    }
     
     return (quizzes || []).map((q: any) => ({
       _id: q.id,
       title: q.title,
       description: q.description,
+      courseId: q.course_id,
+      courseTitle: q.course_id ? (courseMap.get(q.course_id) || 'Unknown Course') : 'General',
       timeLimit: q.time_limit,
       questions: q.questions || [],
       accessCode: q.access_code,
@@ -193,6 +239,20 @@ export const quizService = {
       throw new Error('Invalid quiz code');
     }
 
+    // Ensure student is enrolled if this quiz is course-specific
+    if (quiz.course_id) {
+      const { data: enrollment } = await supabase
+        .from('enrollments')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('course_id', quiz.course_id)
+        .maybeSingle();
+
+      if (!enrollment) {
+        throw new Error('You are not enrolled in this course. Please join the course first.');
+      }
+    }
+
     // Check if quiz has a scheduled start time
     if (quiz.scheduled_start) {
       const scheduledTime = new Date(quiz.scheduled_start);
@@ -232,6 +292,7 @@ export const quizService = {
         _id: quiz.id,
         title: quiz.title,
         description: quiz.description,
+        courseId: quiz.course_id,
         timeLimit: quiz.time_limit,
         questions: quiz.questions?.map((q: any, index: number) => ({
           _id: `${quiz.id}-q${index}`,
@@ -648,6 +709,7 @@ export const quizService = {
         recentAttempts: [],
         scoreDistribution: [],
         weeklyData: [],
+        courseParticipation: [],
       };
     }
 
@@ -661,22 +723,11 @@ export const quizService = {
       .eq('status', 'completed')
       .order('completed_at', { ascending: false });
 
-    if (!attempts || attempts.length === 0) {
-      return {
-        totalStudents: 0,
-        totalQuizzes: quizzes.length,
-        totalAttempts: 0,
-        avgScore: 0,
-        passRate: 0,
-        recentAttempts: [],
-        scoreDistribution: [],
-        weeklyData: [],
-      };
-    }
+    const completedAttempts = attempts || [];
 
     // Calculate stats
-    const uniqueStudents = new Set(attempts.map(a => a.user_id));
-    const scores = attempts.map(a => a.max_score > 0 ? (a.score / a.max_score) * 100 : 0);
+    const uniqueStudents = new Set(completedAttempts.map(a => a.user_id));
+    const scores = completedAttempts.map(a => a.max_score > 0 ? (a.score / a.max_score) * 100 : 0);
     const avgScore = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
     const passCount = scores.filter(s => s >= 60).length;
     const passRate = scores.length > 0 ? (passCount / scores.length) * 100 : 0;
@@ -698,7 +749,7 @@ export const quizService = {
       const weekEnd = new Date(now);
       weekEnd.setDate(weekEnd.getDate() - (i * 7));
       
-      const weekAttempts = attempts.filter(a => {
+      const weekAttempts = completedAttempts.filter(a => {
         const date = new Date(a.completed_at);
         return date >= weekStart && date < weekEnd;
       });
@@ -712,14 +763,70 @@ export const quizService = {
       });
     }
 
+    // Course-wise participation data (enrolled count, participating count, percentage)
+    const { data: teacherCourses } = await supabase
+      .from('courses')
+      .select('id, title, created_by')
+      .eq('created_by', teacherId);
+
+    const courseParticipation: Array<{
+      courseId: string;
+      courseName: string;
+      enrolledStudents: number;
+      attemptedStudents: number;
+      participationPercentage: number;
+    }> = [];
+
+    for (const course of teacherCourses || []) {
+      const { data: enrollments } = await supabase
+        .from('enrollments')
+        .select('user_id')
+        .eq('course_id', course.id);
+
+      const enrolledIds = [...new Set((enrollments || []).map((e: any) => e.user_id))];
+
+      const { data: courseQuizzes } = await supabase
+        .from('teacher_quizzes')
+        .select('id')
+        .eq('teacher_id', teacherId)
+        .eq('course_id', course.id);
+
+      const courseQuizIds = (courseQuizzes || []).map((q: any) => q.id);
+
+      let attemptedStudents = 0;
+      if (courseQuizIds.length > 0) {
+        const { data: courseAttempts } = await supabase
+          .from('quiz_attempts')
+          .select('user_id')
+          .in('quiz_id', courseQuizIds)
+          .eq('status', 'completed');
+
+        attemptedStudents = new Set((courseAttempts || []).map((a: any) => a.user_id)).size;
+      }
+
+      const enrolledStudents = enrolledIds.length;
+      const participationPercentage = enrolledStudents > 0
+        ? Math.round((attemptedStudents / enrolledStudents) * 100)
+        : 0;
+
+      courseParticipation.push({
+        courseId: course.id,
+        courseName: course.title,
+        enrolledStudents,
+        attemptedStudents,
+        participationPercentage,
+      });
+    }
+
     return {
       totalStudents: uniqueStudents.size,
       totalQuizzes: quizzes.length,
-      totalAttempts: attempts.length,
+      totalAttempts: completedAttempts.length,
       avgScore: Math.round(avgScore * 10) / 10,
       passRate: Math.round(passRate * 10) / 10,
       scoreDistribution,
       weeklyData,
+      courseParticipation,
     };
   },
 

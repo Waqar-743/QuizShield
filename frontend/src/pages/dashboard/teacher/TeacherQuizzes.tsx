@@ -16,11 +16,18 @@ interface Quiz {
   _id: string;
   title: string;
   description: string;
+  courseId?: string;
+  courseTitle?: string;
   questions: QuestionItem[];
   timeLimit?: number;
   scheduledStart?: string;
   createdAt: string;
   accessCode: string;
+}
+
+interface TeacherCourse {
+  _id: string;
+  title: string;
 }
 
 interface QuestionItem {
@@ -35,6 +42,7 @@ interface QuestionItem {
 
 const TeacherQuizzes = () => {
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
+  const [teacherCourses, setTeacherCourses] = useState<TeacherCourse[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
@@ -43,6 +51,7 @@ const TeacherQuizzes = () => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
+    courseId: '',
     timeLimit: 0,
     scheduledStart: '',
     questionTitle: '',
@@ -54,6 +63,7 @@ const TeacherQuizzes = () => {
 
   useEffect(() => {
     fetchQuizzes();
+    fetchTeacherCourses();
   }, []);
 
   // Calculate total time whenever questions change
@@ -80,6 +90,16 @@ const TeacherQuizzes = () => {
     }
   };
 
+  const fetchTeacherCourses = async () => {
+    try {
+      const response = await api.get('/courses/teacher/my-courses');
+      setTeacherCourses(response.data.data || []);
+    } catch (error) {
+      console.error('Error fetching teacher courses:', error);
+      setTeacherCourses([]);
+    }
+  };
+
   // Convert UTC date to local datetime-local format
   const utcToLocal = (utcDate: string) => {
     const date = new Date(utcDate);
@@ -95,6 +115,7 @@ const TeacherQuizzes = () => {
       setFormData({
         title: quiz.title,
         description: quiz.description,
+        courseId: quiz.courseId || '',
         timeLimit: quiz.timeLimit || 0,
         scheduledStart: quiz.scheduledStart ? utcToLocal(quiz.scheduledStart) : '',
         questionTitle: '',
@@ -113,6 +134,7 @@ const TeacherQuizzes = () => {
       setFormData({
         title: '',
         description: '',
+        courseId: '',
         timeLimit: 0,
         scheduledStart: '',
         questionTitle: '',
@@ -162,16 +184,16 @@ const TeacherQuizzes = () => {
 
     if (formMode === 'question') {
       const question = formData.questions[0];
+      if (!formData.courseId) {
+        toast.error('Please select a course');
+        return;
+      }
       if (!formData.questionTitle.trim()) {
         toast.error('Question title is required');
         return;
       }
       if (!question.text.trim()) {
         toast.error('Question text is required');
-        return;
-      }
-      if (!question.answerText?.trim()) {
-        toast.error('Please provide the expected answer');
         return;
       }
 
@@ -183,6 +205,7 @@ const TeacherQuizzes = () => {
         await api.post('/quizzes', {
           title: formData.questionTitle,
           description: formData.description || 'Single-question assessment',
+          courseId: formData.courseId,
           scheduledStart: questionScheduledStart,
           timeLimit: Math.ceil((question.timeLimit || 60) / 60),
           questions: [{
@@ -217,6 +240,11 @@ const TeacherQuizzes = () => {
         toast.error('All options must be filled');
         return;
       }
+    }
+
+    if (!formData.courseId) {
+      toast.error('Please select a course');
+      return;
     }
 
     // Convert local datetime to ISO string for proper timezone handling
@@ -292,6 +320,13 @@ const TeacherQuizzes = () => {
             <ClipboardDocumentIcon className="h-4 w-4" />
           </button>
         </div>
+      ),
+    },
+    {
+      key: 'courseTitle' as keyof Quiz,
+      header: 'Course',
+      render: (quiz: Quiz) => (
+        <span className="text-gray-700">{quiz.courseTitle || 'General'}</span>
       ),
     },
     {
@@ -441,6 +476,22 @@ const TeacherQuizzes = () => {
                       />
                     </div>
                     <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Course</label>
+                      <select
+                        value={formData.courseId}
+                        onChange={(e) => setFormData({ ...formData, courseId: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        required
+                      >
+                        <option value="">Select a course</option>
+                        {teacherCourses.map((course) => (
+                          <option key={course._id} value={course._id}>
+                            {course.title}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Total Time (minutes)</label>
                       <div className="w-full px-3 py-2 border border-gray-200 bg-gray-50 text-gray-500 rounded-lg">
                         {formData.timeLimit} minutes (calculated from questions)
@@ -477,7 +528,23 @@ const TeacherQuizzes = () => {
               )}
 
               {formMode === 'question' && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Course</label>
+                    <select
+                      value={formData.courseId}
+                      onChange={(e) => setFormData({ ...formData, courseId: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                      required
+                    >
+                      <option value="">Select a course</option>
+                      {teacherCourses.map((course) => (
+                        <option key={course._id} value={course._id}>
+                          {course.title}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Question Title</label>
                     <input
@@ -608,8 +675,7 @@ const TeacherQuizzes = () => {
                             onChange={(e) => updateQuestion(qIndex, 'answerText', e.target.value)}
                             rows={3}
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                            placeholder="Enter expected answer"
-                            required
+                            placeholder="Expected answer (optional)"
                           />
                         </div>
                       )}

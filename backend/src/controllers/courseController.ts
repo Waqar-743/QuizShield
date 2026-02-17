@@ -31,6 +31,19 @@ export const enrollInCourse = asyncHandler(async (req: Request, res: Response) =
   });
 });
 
+export const enrollByCourseCode = asyncHandler(async (req: Request, res: Response) => {
+  const { courseCode } = req.body;
+  if (!courseCode) {
+    res.status(400).json({ success: false, message: 'Course code is required' });
+    return;
+  }
+  const result = await courseService.enrollByCourseCode(req.user!._id.toString(), courseCode);
+  res.status(200).json({
+    success: true,
+    data: result,
+  });
+});
+
 export const getEnrolledCourses = asyncHandler(async (req: Request, res: Response) => {
   const courses = await courseService.getEnrolledCourses(req.user!._id.toString());
   

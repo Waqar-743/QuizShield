@@ -31,6 +31,13 @@ interface AnalyticsData {
   passRate: number;
   scoreDistribution: { range: string; count: number; color: string }[];
   weeklyData: { date: string; attempts: number; avgScore: number }[];
+  courseParticipation: {
+    courseId: string;
+    courseName: string;
+    enrolledStudents: number;
+    attemptedStudents: number;
+    participationPercentage: number;
+  }[];
 }
 
 const TeacherAnalytics = () => {
@@ -56,6 +63,7 @@ const TeacherAnalytics = () => {
         passRate: 0,
         scoreDistribution: [],
         weeklyData: [],
+        courseParticipation: [],
       });
     } finally {
       setLoading(false);
@@ -70,7 +78,10 @@ const TeacherAnalytics = () => {
     );
   }
 
-  const hasData = analytics && analytics.totalAttempts > 0;
+  const hasData = !!analytics && (
+    analytics.totalAttempts > 0 ||
+    (analytics.courseParticipation && analytics.courseParticipation.length > 0)
+  );
 
   return (
     <div className="space-y-6">
@@ -198,6 +209,35 @@ const TeacherAnalytics = () => {
                     }}
                   />
                   <Bar dataKey="attempts" fill="#4ca1af" name="Attempts" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Course Participation (Straight Chart) */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Course Participation (%)</h3>
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={analytics?.courseParticipation || []} layout="vertical" margin={{ left: 20, right: 20 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis type="number" stroke="#6b7280" fontSize={12} domain={[0, 100]} />
+                  <YAxis type="category" dataKey="courseName" stroke="#6b7280" fontSize={12} width={140} />
+                  <Tooltip
+                    formatter={(value: any, _name: any, payload: any) => {
+                      const course = payload?.payload;
+                      return [
+                        `${value}% ( ${course?.attemptedStudents || 0} / ${course?.enrolledStudents || 0} students )`,
+                        'Participation'
+                      ];
+                    }}
+                    contentStyle={{
+                      backgroundColor: '#fff',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '8px',
+                    }}
+                  />
+                  <Bar dataKey="participationPercentage" fill="#4ca1af" radius={[0, 6, 6, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>

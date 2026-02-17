@@ -50,7 +50,7 @@ export const quizCodeService = {
   },
 
   // Get quiz by code (for students) - now uses 4-digit code from teacher_quizzes
-  async accessByCode(code: string) {
+  async accessByCode(code: string, userId?: string, userRole?: string) {
     // First try to find quiz by access_code in teacher_quizzes
     const { data: quiz, error } = await supabase
       .from('teacher_quizzes')
@@ -60,6 +60,30 @@ export const quizCodeService = {
 
     if (error || !quiz) {
       throw new Error('Invalid quiz code');
+    }
+
+    // If quiz is tied to a course, only enrolled students can access it
+    if (quiz.course_id && userId && userRole === 'student') {
+      const { data: enrollment } = await supabase
+        .from('enrollments')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('course_id', quiz.course_id)
+        .maybeSingle();
+
+      if (!enrollment) {
+        throw new Error('You are not enrolled in this course. Please join the course first.');
+      }
+    }
+
+    let courseTitle = 'General';
+    if (quiz.course_id) {
+      const { data: course } = await supabase
+        .from('courses')
+        .select('title')
+        .eq('id', quiz.course_id)
+        .maybeSingle();
+      courseTitle = course?.title || courseTitle;
     }
 
     // Calculate expiry time if scheduled
@@ -78,6 +102,8 @@ export const quizCodeService = {
         _id: quiz.id,
         title: quiz.title,
         description: quiz.description,
+        courseId: quiz.course_id || null,
+        courseTitle,
         timeLimit: quiz.time_limit,
         questionCount: quiz.questions?.length || 0,
         scheduledStart: quiz.scheduled_start,

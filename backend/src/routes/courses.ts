@@ -4,7 +4,8 @@ import {
   createCourse, updateCourse, deleteCourse,
   getTopicsByCourse, createTopic, updateTopic, deleteTopic,
   getQuestionsByTopic, createQuestion, updateQuestion, deleteQuestion,
-  getTeacherCourses, getTeacherTopics, getTeacherQuestions
+  getTeacherCourses, getTeacherTopics, getTeacherQuestions,
+  enrollByCourseCode
 } from '../controllers/courseController';
 import { protect, authorize } from '../middleware/auth';
 
@@ -18,6 +19,7 @@ router.use(protect);
 
 // Student enrollment routes
 router.get('/my/enrolled', getEnrolledCourses);
+router.post('/join-by-code', enrollByCourseCode);
 
 // ============ Teacher routes (must come before /:id to avoid conflicts) ============
 router.get('/teacher/my-courses', authorize('teacher', 'admin'), getTeacherCourses);

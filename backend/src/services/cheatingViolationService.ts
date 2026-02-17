@@ -1,6 +1,14 @@
 import { supabase } from '../config/supabase';
 
-export type ViolationType = 'tab_change' | 'copy_attempt' | 'right_click' | 'screenshot_attempt' | 'keyboard_shortcut';
+export type ViolationType =
+  | 'tab_change'
+  | 'copy_attempt'
+  | 'right_click'
+  | 'screenshot_attempt'
+  | 'keyboard_shortcut'
+  | 'TAB_SWITCH'
+  | 'SYSTEM_FOCUS_LOST'
+  | 'RESTRICTED_KEY';
 export type Severity = 'low' | 'medium' | 'high';
 
 interface ViolationInput {
@@ -15,6 +23,15 @@ interface ViolationInput {
     windowFocused?: boolean;
     userAgent?: string;
     ipAddress?: string;
+    eventTimestamp?: string;
+    alertMessage?: string;
+    durationSeconds?: number;
+    payloadMetaData?: {
+      ip?: string;
+      user_agent?: string;
+      key_name?: string;
+      focus_state?: string;
+    };
   };
 }
 
@@ -149,6 +166,9 @@ export const cheatingViolationService = {
       suspiciousAttempts: Object.keys(attemptViolations).length,
       byType: {
         tab_change: data?.filter(v => v.violation_type === 'tab_change').length || 0,
+        TAB_SWITCH: data?.filter(v => v.violation_type === 'TAB_SWITCH').length || 0,
+        SYSTEM_FOCUS_LOST: data?.filter(v => v.violation_type === 'SYSTEM_FOCUS_LOST').length || 0,
+        RESTRICTED_KEY: data?.filter(v => v.violation_type === 'RESTRICTED_KEY').length || 0,
         copy_attempt: data?.filter(v => v.violation_type === 'copy_attempt').length || 0,
         screenshot_attempt: data?.filter(v => v.violation_type === 'screenshot_attempt').length || 0,
         keyboard_shortcut: data?.filter(v => v.violation_type === 'keyboard_shortcut').length || 0,

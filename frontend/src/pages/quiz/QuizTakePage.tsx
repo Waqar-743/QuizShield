@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
@@ -26,10 +26,19 @@ interface QuizData {
   code: string;
 }
 
-interface Violation {
-  type: 'tab_switch' | 'copy_attempt' | 'paste_attempt' | 'right_click';
-  timestamp: string;
-  details?: string;
+type ViolationType = 'TAB_SWITCH' | 'SYSTEM_FOCUS_LOST' | 'RESTRICTED_KEY';
+
+interface ViolationPayload {
+  violation_type: ViolationType;
+  alert_message: string;
+  event_timestamp: string;
+  duration_seconds?: number;
+  meta_data: {
+    ip: string;
+    user_agent: string;
+    key_name?: string;
+    focus_state?: string;
+  };
 }
 
 const QuizTakePage = () => {
@@ -43,37 +52,51 @@ const QuizTakePage = () => {
   const [submitting, setSubmitting] = useState(false);
   
   // Anti-cheating state
-  const [violations, setViolations] = useState<Violation[]>([]);
+  const [violations, setViolations] = useState<ViolationPayload[]>([]);
   const [showWarning, setShowWarning] = useState(false);
   const [warningMessage, setWarningMessage] = useState('');
+  const tabHiddenStartRef = useRef<number | null>(null);
 
-  // Add a violation
-  const addViolation = useCallback(async (type: Violation['type'], details?: string) => {
-    const violation: Violation = {
-      type,
-      timestamp: new Date().toISOString(),
-      details,
+  const createViolationPayload = useCallback((
+    violationType: ViolationType,
+    alertMessage: string,
+    options?: { durationSeconds?: number; keyName?: string; focusState?: string }
+  ): ViolationPayload => {
+    return {
+      violation_type: violationType,
+      alert_message: alertMessage,
+      event_timestamp: new Date().toISOString(),
+      ...(typeof options?.durationSeconds === 'number' ? { duration_seconds: options.durationSeconds } : {}),
+      meta_data: {
+        ip: 'N/A',
+        user_agent: navigator.userAgent,
+        ...(options?.keyName ? { key_name: options.keyName } : {}),
+        ...(options?.focusState ? { focus_state: options.focusState } : {}),
+      },
     };
-    setViolations(prev => [...prev, violation]);
-    
-    // Show warning to user
-    const messages: Record<string, string> = {
-      'tab_switch': 'Warning: Tab switch recorded!',
-      'copy_attempt': 'Warning: Copy attempt recorded!',
-      'paste_attempt': 'Warning: Paste attempt recorded!',
-      'right_click': 'Warning: Right-click recorded!',
-    };
-    setWarningMessage(messages[type] || 'Warning: Action recorded!');
+  }, []);
+
+  const reportViolation = useCallback(async (payload: ViolationPayload) => {
+    setViolations(prev => [...prev, payload]);
+    setWarningMessage(payload.alert_message);
     setShowWarning(true);
     setTimeout(() => setShowWarning(false), 2000);
 
-    // Report to backend in real-time
     try {
       const response = await api.post(`/quizzes/attempts/${attemptId}/report-violation`, {
-        violationType: type === 'tab_switch' ? 'tab_change' : type,
+        violation_type: payload.violation_type,
+        alert_message: payload.alert_message,
+        event_timestamp: payload.event_timestamp,
+        duration_seconds: payload.duration_seconds,
+        meta_data: payload.meta_data,
+        violationType:
+          payload.violation_type === 'TAB_SWITCH'
+            ? 'tab_change'
+            : payload.violation_type === 'SYSTEM_FOCUS_LOST'
+            ? 'right_click'
+            : 'keyboard_shortcut',
         detectionMethod: 'browser_event',
-        details: details || 'Manual action detection',
-        quizId: quizData?.quiz._id
+        quizId: quizData?.quiz._id,
       });
 
       if (response.data.data.autoSubmitted) {
@@ -85,73 +108,74 @@ const QuizTakePage = () => {
     } catch (error) {
       console.error('Failed to report violation:', error);
     }
-  }, [attemptId, quizData, navigate]);
+  }, [attemptId, navigate, quizData]);
 
-  // Prevent copy
-  useEffect(() => {
-    const handleCopy = (e: ClipboardEvent) => {
-      e.preventDefault();
-      addViolation('copy_attempt');
-    };
-
-    const handlePaste = (e: ClipboardEvent) => {
-      e.preventDefault();
-      addViolation('paste_attempt');
-    };
-
-    const handleContextMenu = (e: MouseEvent) => {
-      e.preventDefault();
-      addViolation('right_click');
-    };
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (
-        (e.ctrlKey && ['c', 'v', 'a', 'p', 'u'].includes(e.key.toLowerCase())) ||
-        e.key === 'F12' ||
-        (e.ctrlKey && e.shiftKey && ['i', 'j', 'c'].includes(e.key.toLowerCase()))
-      ) {
-        e.preventDefault();
-        if (e.key.toLowerCase() === 'c') {
-          addViolation('copy_attempt');
-        } else if (e.key.toLowerCase() === 'v') {
-          addViolation('paste_attempt');
-        }
-      }
-    };
-
-    document.addEventListener('copy', handleCopy);
-    document.addEventListener('paste', handlePaste);
-    document.addEventListener('contextmenu', handleContextMenu);
-    document.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      document.removeEventListener('copy', handleCopy);
-      document.removeEventListener('paste', handlePaste);
-      document.removeEventListener('contextmenu', handleContextMenu);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [addViolation]);
-
-  // Detect tab/window change
+  // Detect three violation scenarios
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.hidden) {
-        addViolation('tab_switch', 'User switched away from quiz tab');
+      if (document.visibilityState === 'hidden') {
+        tabHiddenStartRef.current = Date.now();
+        return;
+      }
+
+      if (document.visibilityState === 'visible' && tabHiddenStartRef.current) {
+        const durationSeconds = Math.max(1, Math.round((Date.now() - tabHiddenStartRef.current) / 1000));
+        tabHiddenStartRef.current = null;
+        reportViolation(
+          createViolationPayload(
+            'TAB_SWITCH',
+            `User switched tabs for ${durationSeconds} seconds`,
+            { durationSeconds }
+          )
+        );
       }
     };
 
     const handleBlur = () => {
-      addViolation('tab_switch', 'Quiz window lost focus');
+      if (document.visibilityState === 'visible') {
+        reportViolation(
+          createViolationPayload(
+            'SYSTEM_FOCUS_LOST',
+            'External System/File Access Violation',
+            { focusState: 'Active Focus Lost' }
+          )
+        );
+      }
+    };
+
+    const handleRestrictedKeys = (e: KeyboardEvent) => {
+      let keyName = '';
+
+      if (e.key === 'Meta' || e.key === 'OS') {
+        keyName = 'Windows Button Clicked';
+      } else if (e.altKey && e.key === 'Tab') {
+        keyName = 'Alt+Tab Pressed';
+      } else if (e.key === 'PrintScreen') {
+        keyName = 'PrintScreen Pressed';
+      }
+
+      if (!keyName) return;
+
+      e.preventDefault();
+      reportViolation(
+        createViolationPayload(
+          'RESTRICTED_KEY',
+          'Restricted Key Violation',
+          { keyName }
+        )
+      );
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('blur', handleBlur);
+    document.addEventListener('keydown', handleRestrictedKeys);
 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('blur', handleBlur);
+      document.removeEventListener('keydown', handleRestrictedKeys);
     };
-  }, [addViolation]);
+  }, [createViolationPayload, reportViolation]);
 
   // Disable text selection
   useEffect(() => {
@@ -244,8 +268,46 @@ const QuizTakePage = () => {
     }));
   };
 
+  const isShortAnswerQuestion = (question: Question) => {
+    return question.questionType === 'shortAnswer' || !question.options?.length;
+  };
+
+  const isShortAnswerFilled = (questionIndex: number) => {
+    return String(selectedAnswers[questionIndex] ?? '').trim().length > 0;
+  };
+
+  const validateCurrentShortAnswer = () => {
+    if (!quizData) return true;
+    const activeQuestion = quizData.quiz.questions[currentQuestionIndex];
+    if (isShortAnswerQuestion(activeQuestion) && !isShortAnswerFilled(currentQuestionIndex)) {
+      toast.error('Answer is required for this question');
+      return false;
+    }
+    return true;
+  };
+
+  const handleNextQuestion = () => {
+    if (!validateCurrentShortAnswer()) return;
+    setCurrentQuestionIndex((prev) => Math.min(totalQuestions - 1, prev + 1));
+  };
+
+  const handleJumpToQuestion = (targetIndex: number) => {
+    if (targetIndex > currentQuestionIndex && !validateCurrentShortAnswer()) return;
+    setCurrentQuestionIndex(targetIndex);
+  };
+
   const handleSubmitQuiz = async () => {
     if (!quizData) return;
+
+    const missingShortAnswer = quizData.quiz.questions.some((question, index) => {
+      if (!isShortAnswerQuestion(question)) return false;
+      return String(selectedAnswers[index] ?? '').trim().length === 0;
+    });
+
+    if (missingShortAnswer) {
+      toast.error('Please answer all short-answer questions before submitting');
+      return;
+    }
     
     setSubmitting(true);
     try {
@@ -314,20 +376,18 @@ const QuizTakePage = () => {
               <div 
                 key={i} 
                 className={`px-2 py-1 rounded text-xs flex items-center gap-1.5 ${
-                  v.type === 'tab_switch' ? 'bg-orange-100 text-orange-700' :
-                  v.type === 'copy_attempt' ? 'bg-red-100 text-red-700' :
-                  v.type === 'paste_attempt' ? 'bg-purple-100 text-purple-700' :
-                  'bg-gray-100 text-gray-700'
+                  v.violation_type === 'TAB_SWITCH' ? 'bg-orange-100 text-orange-700' :
+                  v.violation_type === 'SYSTEM_FOCUS_LOST' ? 'bg-red-100 text-red-700' :
+                  'bg-purple-100 text-purple-700'
                 }`}
               >
                 <span className="font-medium">
-                  {v.type === 'tab_switch' ? 'Tab' :
-                   v.type === 'copy_attempt' ? 'Copy' :
-                   v.type === 'paste_attempt' ? 'Paste' :
-                   v.type === 'right_click' ? 'R-Click' : v.type}
+                  {v.violation_type === 'TAB_SWITCH' ? 'Tab Change' :
+                   v.violation_type === 'SYSTEM_FOCUS_LOST' ? 'External Focus' :
+                   'Restricted Key'}
                 </span>
                 <span className="text-[10px] opacity-70">
-                  {new Date(v.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'})}
+                  {new Date(v.event_timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'})}
                 </span>
               </div>
             ))}
@@ -389,6 +449,7 @@ const QuizTakePage = () => {
                 rows={4}
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 placeholder="Type your answer here"
+                required
               />
             </div>
           ) : (
@@ -439,7 +500,7 @@ const QuizTakePage = () => {
             {quizData.quiz.questions.map((_, index) => (
               <button
                 key={index}
-                onClick={() => setCurrentQuestionIndex(index)}
+                onClick={() => handleJumpToQuestion(index)}
                 className={`w-8 h-8 rounded-full text-sm font-medium transition-all ${
                   index === currentQuestionIndex
                     ? 'bg-indigo-600 text-white'
@@ -473,7 +534,7 @@ const QuizTakePage = () => {
             </button>
           ) : (
             <button
-              onClick={() => setCurrentQuestionIndex((prev) => Math.min(totalQuestions - 1, prev + 1))}
+              onClick={handleNextQuestion}
               className="px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700"
             >
               Next

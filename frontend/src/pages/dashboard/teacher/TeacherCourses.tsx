@@ -10,6 +10,7 @@ import {
   TrashIcon,
   EyeIcon,
   UserGroupIcon,
+  ClipboardDocumentIcon,
 } from '@heroicons/react/24/outline';
 
 interface TeacherCourse {
@@ -18,6 +19,7 @@ interface TeacherCourse {
   description: string;
   category: string;
   difficulty: string;
+  courseCode?: string;
   thumbnail?: string;
   topics: string[];
   createdBy: string;
@@ -112,6 +114,25 @@ const TeacherCourses = () => {
       key: 'difficulty' as keyof TeacherCourse,
       header: 'Difficulty',
       render: (course: TeacherCourse) => getDifficultyBadge(course.difficulty),
+    },
+    {
+      key: 'courseCode' as keyof TeacherCourse,
+      header: 'Course Code',
+      render: (course: TeacherCourse) => (
+        <button
+          onClick={() => {
+            if (course.courseCode) {
+              navigator.clipboard.writeText(course.courseCode);
+              toast.success(`Code "${course.courseCode}" copied!`);
+            }
+          }}
+          className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-md font-mono text-sm font-semibold hover:bg-indigo-100 transition-colors"
+          title="Click to copy"
+        >
+          {course.courseCode || '—'}
+          <ClipboardDocumentIcon className="h-3.5 w-3.5" />
+        </button>
+      ),
     },
     {
       key: 'topics' as keyof TeacherCourse,

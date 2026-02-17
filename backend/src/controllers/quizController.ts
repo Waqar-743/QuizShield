@@ -4,7 +4,7 @@ import { asyncHandler } from '../middleware/errorHandler';
 
 // Teacher endpoints
 export const createQuiz = asyncHandler(async (req: Request, res: Response) => {
-  const { title, description, timeLimit, scheduledStart, questions } = req.body;
+  const { title, description, timeLimit, scheduledStart, questions, courseId } = req.body;
   const teacherId = req.user!._id.toString();
 
   const quiz = await quizService.createQuiz(teacherId, {
@@ -12,6 +12,7 @@ export const createQuiz = asyncHandler(async (req: Request, res: Response) => {
     description,
     timeLimit,
     scheduledStart,
+    courseId,
     questions,
   });
 

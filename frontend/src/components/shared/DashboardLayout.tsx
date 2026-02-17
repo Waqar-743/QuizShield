@@ -9,6 +9,7 @@ import {
   ChartBarIcon,
   QuestionMarkCircleIcon,
   ClipboardDocumentListIcon,
+  BookOpenIcon,
 } from '@heroicons/react/24/outline';
 import RoleSidebar, { SidebarItem } from './RoleSidebar';
 import Brand from './Brand';
@@ -31,12 +32,14 @@ interface DashboardLayoutProps {
 
 const getStudentSidebarItems = (): SidebarItem[] => [
   { label: 'Overview', href: '/dashboard/student', icon: <HomeIcon className="h-5 w-5" /> },
+  { label: 'Courses', href: '/dashboard/student/courses', icon: <BookOpenIcon className="h-5 w-5" /> },
   { label: 'Enter Quiz Code', href: '/dashboard/student/join-quiz', icon: <AcademicCapIcon className="h-5 w-5" /> },
   { label: 'Quiz History', href: '/dashboard/student/quiz-history', icon: <ChartBarIcon className="h-5 w-5" /> },
 ];
 
 const getTeacherSidebarItems = (): SidebarItem[] => [
   { label: 'Overview', href: '/dashboard/teacher', icon: <HomeIcon className="h-5 w-5" /> },
+  { label: 'Courses', href: '/dashboard/teacher/courses', icon: <BookOpenIcon className="h-5 w-5" /> },
   { label: 'Quizzes', href: '/dashboard/teacher/quizzes', icon: <QuestionMarkCircleIcon className="h-5 w-5" /> },
   { label: 'Questions', href: '/dashboard/teacher/questions', icon: <AcademicCapIcon className="h-5 w-5" /> },
   { label: 'Submissions', href: '/dashboard/teacher/submissions', icon: <ClipboardDocumentListIcon className="h-5 w-5" /> },

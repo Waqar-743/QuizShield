@@ -86,15 +86,79 @@ export const courseService = {
 
   // ============ Teacher Course Management ============
 
+  async generateUniqueCourseCode(): Promise<string> {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let code = '';
+    let attempts = 0;
+    while (attempts < 20) {
+      code = '';
+      for (let i = 0; i < 6; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      const { data: existing } = await supabase
+        .from('courses')
+        .select('id')
+        .eq('course_code', code)
+        .single();
+      if (!existing) return code;
+      attempts++;
+    }
+    return code;
+  },
+
+  async enrollByCourseCode(userId: string, courseCode: string) {
+    // Find the course by code
+    const { data: course, error: courseError } = await supabase
+      .from('courses')
+      .select('id, title')
+      .eq('course_code', courseCode.toUpperCase())
+      .single();
+
+    if (courseError || !course) {
+      throw new Error('Invalid course code. Please check and try again.');
+    }
+
+    // Check if already enrolled
+    const { data: existing } = await supabase
+      .from('enrollments')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('course_id', course.id)
+      .single();
+
+    if (existing) {
+      return { message: 'Already enrolled in this course', course: { _id: course.id, title: course.title } };
+    }
+
+    const { error } = await supabase
+      .from('enrollments')
+      .insert([{ user_id: userId, course_id: course.id, enrolled_at: new Date() }]);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    // Send enrollment email
+    const { data: user } = await supabase.from('users').select('email, name').eq('id', userId).single();
+    if (user) {
+      await emailService.sendCourseEnrollmentEmail(user.email, user.name, course.title);
+    }
+
+    return { message: 'Enrolled successfully', course: { _id: course.id, title: course.title } };
+  },
+
   async createCourse(teacherId: string, courseData: any) {
     console.log('Creating course with data:', { teacherId, courseData });
     
+    const courseCode = await this.generateUniqueCourseCode();
+
     const insertData = {
       title: courseData.title,
       description: courseData.description || '',
       category: courseData.category || 'Other',
       difficulty: courseData.difficulty || 'Beginner',
-      instructor_id: teacherId,
+      created_by: teacherId,
+      course_code: courseCode,
     };
     
     console.log('Insert data:', insertData);
@@ -111,18 +175,18 @@ export const courseService = {
     }
 
     console.log('Course created successfully:', course);
-    return { ...course, _id: course.id, createdBy: course.instructor_id };
+    return { ...course, _id: course.id, createdBy: course.created_by, courseCode: course.course_code };
   },
 
   async updateCourse(teacherId: string, courseId: string, courseData: any) {
     // Verify ownership
     const { data: existing } = await supabase
       .from('courses')
-      .select('instructor_id')
+      .select('created_by')
       .eq('id', courseId)
       .single();
 
-    if (!existing || existing.instructor_id !== teacherId) {
+    if (!existing || existing.created_by !== teacherId) {
       throw new Error('Not authorized to update this course');
     }
 
@@ -142,18 +206,18 @@ export const courseService = {
       throw new Error(error.message);
     }
 
-    return { ...course, _id: course.id, createdBy: course.instructor_id };
+    return { ...course, _id: course.id, createdBy: course.created_by };
   },
 
   async deleteCourse(teacherId: string, courseId: string) {
     // Verify ownership
     const { data: existing } = await supabase
       .from('courses')
-      .select('instructor_id')
+      .select('created_by')
       .eq('id', courseId)
       .single();
 
-    if (!existing || existing.instructor_id !== teacherId) {
+    if (!existing || existing.created_by !== teacherId) {
       throw new Error('Not authorized to delete this course');
     }
 
@@ -189,11 +253,11 @@ export const courseService = {
     // Verify course ownership
     const { data: course } = await supabase
       .from('courses')
-      .select('instructor_id')
+      .select('created_by')
       .eq('id', topicData.courseId)
       .single();
 
-    if (!course || course.instructor_id !== teacherId) {
+    if (!course || course.created_by !== teacherId) {
       throw new Error('Not authorized to add topics to this course');
     }
 
@@ -240,11 +304,11 @@ export const courseService = {
 
     const { data: course } = await supabase
       .from('courses')
-      .select('instructor_id')
+      .select('created_by')
       .eq('id', topic.course_id)
       .single();
 
-    if (!course || course.instructor_id !== teacherId) {
+    if (!course || course.created_by !== teacherId) {
       throw new Error('Not authorized to update this topic');
     }
 
@@ -281,11 +345,11 @@ export const courseService = {
 
     const { data: course } = await supabase
       .from('courses')
-      .select('instructor_id')
+      .select('created_by')
       .eq('id', topic.course_id)
       .single();
 
-    if (!course || course.instructor_id !== teacherId) {
+    if (!course || course.created_by !== teacherId) {
       throw new Error('Not authorized to delete this topic');
     }
 
@@ -341,11 +405,11 @@ export const courseService = {
 
       const { data: course } = await supabase
         .from('courses')
-        .select('instructor_id')
+        .select('created_by')
         .eq('id', topic.course_id)
         .single();
 
-      if (!course || course.instructor_id !== teacherId) {
+      if (!course || course.created_by !== teacherId) {
         throw new Error('Not authorized to add questions to this topic');
       }
     }
@@ -409,11 +473,11 @@ export const courseService = {
 
       const { data: course } = await supabase
         .from('courses')
-        .select('instructor_id')
+        .select('created_by')
         .eq('id', topic.course_id)
         .single();
 
-      if (!course || course.instructor_id !== teacherId) {
+      if (!course || course.created_by !== teacherId) {
         throw new Error('Not authorized to update this question');
       }
     } else if (question.created_by !== teacherId) {
@@ -478,11 +542,11 @@ export const courseService = {
 
       const { data: course } = await supabase
         .from('courses')
-        .select('instructor_id')
+        .select('created_by')
         .eq('id', topic.course_id)
         .single();
 
-      if (!course || course.instructor_id !== teacherId) {
+      if (!course || course.created_by !== teacherId) {
         throw new Error('Not authorized to delete this question');
       }
     } else if (question.created_by !== teacherId) {
@@ -508,7 +572,7 @@ export const courseService = {
       const { data: courses, error } = await supabase
         .from('courses')
         .select('*')
-        .eq('instructor_id', teacherId)
+        .eq('created_by', teacherId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -532,8 +596,9 @@ export const courseService = {
             description: course.description,
             category: course.category,
             difficulty: course.difficulty,
+            courseCode: course.course_code,
             topics: topics?.map((t: any) => t.id) || [],
-            createdBy: course.instructor_id,
+            createdBy: course.created_by,
             enrollmentCount: enrollmentCount || 0,
             avgScore: 0,
           };
@@ -553,7 +618,7 @@ export const courseService = {
       const { data: courses } = await supabase
         .from('courses')
         .select('id, title')
-        .eq('instructor_id', teacherId);
+        .eq('created_by', teacherId);
 
       const courseIds = courses?.map((c: any) => c.id) || [];
       const courseMap = new Map(courses?.map((c: any) => [c.id, c.title]) || []);

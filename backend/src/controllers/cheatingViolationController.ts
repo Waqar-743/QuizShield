@@ -5,10 +5,22 @@ import { asyncHandler } from '../middleware/errorHandler';
 // Report a violation
 export const reportViolation = asyncHandler(async (req: Request, res: Response) => {
   const { attemptId } = req.params;
-  const { violationType, detectionMethod, timestamp, quizId, teacherId } = req.body;
+  const {
+    violationType,
+    violation_type,
+    detectionMethod,
+    event_timestamp,
+    alert_message,
+    duration_seconds,
+    meta_data,
+    quizId,
+    teacherId,
+  } = req.body;
   const userId = (req as any).user?.id;
 
-  if (!attemptId || !violationType) {
+  const normalizedViolationType = violation_type || violationType;
+
+  if (!attemptId || !normalizedViolationType) {
     res.status(400).json({
       success: false,
       error: { message: 'attemptId and violationType are required' }
@@ -22,11 +34,15 @@ export const reportViolation = asyncHandler(async (req: Request, res: Response) 
       studentId: userId,
       quizId: quizId || '',
       teacherId,
-      violationType: violationType as ViolationType,
+      violationType: normalizedViolationType as ViolationType,
       detectionMethod: detectionMethod || 'browser_event',
       details: {
         userAgent: req.headers['user-agent'],
-        ipAddress: req.ip
+        ipAddress: req.ip,
+        eventTimestamp: event_timestamp,
+        alertMessage: alert_message,
+        durationSeconds: duration_seconds,
+        payloadMetaData: meta_data,
       }
     });
 

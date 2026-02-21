@@ -17,5 +17,5 @@ export const config = {
   supabaseKey: process.env.SUPABASE_KEY || '',
   jwtSecret: process.env.JWT_SECRET || 'your_jwt_secret_key',
   resendApiKey: process.env.RESEND_API_KEY || '',
-  geminiApiKey: process.env.GEMINI_API_KEY || 'AIzaSyCx29qt_w-9aIofJbS3Wyc3uBhnWLJ3sQk',
+  geminiApiKey: process.env.GEMINI_API_KEY || '',
 };

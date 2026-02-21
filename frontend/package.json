@@ -17,6 +17,7 @@
     "clsx": "^2.0.0",
     "date-fns": "^2.30.0",
     "dotenv": "^17.2.3",
+    "face-api.js": "^0.22.2",
     "framer-motion": "^10.16.16",
     "lucide-react": "^0.294.0",
     "react": "^18.2.0",

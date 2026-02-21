@@ -10,6 +10,7 @@ import {
   DocumentTextIcon,
   CalendarIcon,
 } from '@heroicons/react/24/outline';
+import CameraPermissionModal from '../../../components/shared/CameraPermissionModal';
 
 const JoinQuizPage = () => {
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ const JoinQuizPage = () => {
   const [timeUntilStart, setTimeUntilStart] = useState<string | null>(null);
   const [canStart, setCanStart] = useState(true);
   const [isExpired, setIsExpired] = useState(false);
+  const [showCameraModal, setShowCameraModal] = useState(false);
 
   // Check if quiz can be started based on scheduled time and expiration
   useEffect(() => {
@@ -122,6 +124,13 @@ const JoinQuizPage = () => {
       return;
     }
 
+    // Show camera permission modal instead of starting immediately
+    setShowCameraModal(true);
+  };
+
+  // Called after camera permission is granted
+  const handleCameraAllowed = async () => {
+    setShowCameraModal(false);
     setStarting(true);
     try {
       const response = await api.post(`/quizzes/start-by-code/${code}`);
@@ -152,6 +161,10 @@ const JoinQuizPage = () => {
     }
   };
 
+  const handleCameraCancel = () => {
+    setShowCameraModal(false);
+  };
+
   const handleTryAnother = () => {
     setCode('');
     setQuizDetails(null);
@@ -159,6 +172,7 @@ const JoinQuizPage = () => {
     setIsExpired(false);
     setCanStart(true);
     setTimeUntilStart(null);
+    setShowCameraModal(false);
   };
 
   return (
@@ -347,6 +361,14 @@ const JoinQuizPage = () => {
           </div>
         )}
       </div>
+
+      {/* Camera Permission Modal — shown before quiz starts */}
+      <CameraPermissionModal
+        isOpen={showCameraModal}
+        onAllow={handleCameraAllowed}
+        onCancel={handleCameraCancel}
+        quizTitle={quizDetails?.quiz?.title}
+      />
     </div>
   );
 };

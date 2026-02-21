@@ -40,16 +40,35 @@ const FaceDetectionCamera = ({ enabled, onViolation, onAutoSubmit }: FaceDetecti
 
   const cfg = statusConfig[status];
 
+  const borderColor =
+    status === 'looking' ? 'border-green-400' :
+    status === 'away' ? 'border-yellow-400' :
+    status === 'no_face' ? 'border-red-400' :
+    'border-gray-300';
+
   return (
-    <div className="fixed top-20 left-4 z-30 w-52">
+    <div className="fixed top-20 left-4 z-30 w-64">
+      {/* Monitoring header */}
+      <div className={`flex items-center gap-2 px-3 py-1.5 rounded-t-xl text-xs font-bold text-white ${
+        status === 'looking' ? 'bg-green-600' :
+        status === 'away' ? 'bg-yellow-600' :
+        status === 'no_face' ? 'bg-red-600' :
+        'bg-gray-600'
+      }`}>
+        <span className={`h-2 w-2 rounded-full ${
+          status === 'looking' ? 'bg-green-300 animate-pulse' : 'bg-red-300 animate-pulse'
+        }`} />
+        🛡️ Proctoring Active
+      </div>
+
       {/* Camera preview */}
-      <div className="relative rounded-xl overflow-hidden border-2 border-gray-200 shadow-lg bg-black">
+      <div className={`relative overflow-hidden border-2 ${borderColor} border-t-0 rounded-b-xl shadow-lg bg-black`}>
         <video
           ref={videoRef}
           autoPlay
           playsInline
           muted
-          className="w-full h-36 object-cover mirror"
+          className="w-full h-44 object-cover"
           style={{ transform: 'scaleX(-1)' }}
         />
 

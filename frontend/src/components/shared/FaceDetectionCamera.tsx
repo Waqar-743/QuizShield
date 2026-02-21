@@ -31,7 +31,7 @@ const statusConfig: Record<FaceStatus, { label: string; color: string; bgColor: 
 };
 
 const FaceDetectionCamera = ({ enabled, onViolation, onAutoSubmit }: FaceDetectionCameraProps) => {
-  const { status, awaySeconds, violationCount, modelsLoaded, videoRef } = useFaceDetection(
+  const { status, awaySeconds, violationCount, modelsLoaded, videoRef, retryCamera } = useFaceDetection(
     enabled,
     { onViolation, onAutoSubmit },
   );
@@ -77,8 +77,34 @@ const FaceDetectionCamera = ({ enabled, onViolation, onAutoSubmit }: FaceDetecti
         {status === 'permission_denied' && (
           <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center text-white text-xs gap-2 px-3 text-center">
             <VideoCameraSlashIcon className="h-8 w-8 text-red-400" />
-            <span>Camera access denied.</span>
-            <span className="text-gray-300">Please allow camera permission and refresh.</span>
+            <span className="font-semibold">Camera access denied</span>
+            <div className="text-gray-300 text-[10px] leading-tight space-y-1">
+              <p>To fix this:</p>
+              <p>1. Click the 🔒 icon in the address bar</p>
+              <p>2. Find "Camera" → set to <strong>Allow</strong></p>
+              <p>3. Click the button below</p>
+            </div>
+            <button
+              onClick={retryCamera}
+              className="mt-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium rounded-md transition-colors"
+            >
+              🔄 Retry Camera
+            </button>
+          </div>
+        )}
+
+        {/* Error overlay */}
+        {status === 'error' && (
+          <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center text-white text-xs gap-2 px-3 text-center">
+            <VideoCameraSlashIcon className="h-8 w-8 text-red-400" />
+            <span className="font-semibold">Camera error</span>
+            <span className="text-gray-300 text-[10px]">No camera found or camera is in use by another app.</span>
+            <button
+              onClick={retryCamera}
+              className="mt-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium rounded-md transition-colors"
+            >
+              🔄 Retry
+            </button>
           </div>
         )}
       </div>

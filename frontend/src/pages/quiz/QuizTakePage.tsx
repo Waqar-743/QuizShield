@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 import { ClockIcon, CheckCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import FaceDetectionCamera from '../../components/shared/FaceDetectionCamera';
 
 interface Question {
   _id: string;
@@ -26,7 +27,7 @@ interface QuizData {
   code: string;
 }
 
-type ViolationType = 'TAB_SWITCH' | 'SYSTEM_FOCUS_LOST' | 'RESTRICTED_KEY';
+type ViolationType = 'TAB_SWITCH' | 'SYSTEM_FOCUS_LOST' | 'RESTRICTED_KEY' | 'FACE_AWAY' | 'NO_FACE';
 
 interface ViolationPayload {
   violation_type: ViolationType;
@@ -94,8 +95,12 @@ const QuizTakePage = () => {
             ? 'tab_change'
             : payload.violation_type === 'SYSTEM_FOCUS_LOST'
             ? 'right_click'
+            : payload.violation_type === 'FACE_AWAY'
+            ? 'face_away'
+            : payload.violation_type === 'NO_FACE'
+            ? 'no_face'
             : 'keyboard_shortcut',
-        detectionMethod: 'browser_event',
+        detectionMethod: payload.violation_type === 'FACE_AWAY' || payload.violation_type === 'NO_FACE' ? 'camera_face_detection' : 'browser_event',
         quizId: quizData?.quiz._id,
       });
 
@@ -109,6 +114,37 @@ const QuizTakePage = () => {
       console.error('Failed to report violation:', error);
     }
   }, [attemptId, navigate, quizData]);
+
+  // ---- Face detection violation handlers ----
+  const handleFaceViolation = useCallback((kind: 'face_away' | 'no_face') => {
+    const violationType: ViolationType = kind === 'face_away' ? 'FACE_AWAY' : 'NO_FACE';
+    const message = kind === 'face_away'
+      ? 'Face turned away from camera'
+      : 'No face detected by camera';
+    reportViolation(
+      createViolationPayload(violationType, message, { focusState: kind }),
+    );
+  }, [createViolationPayload, reportViolation]);
+
+  const handleFaceAutoSubmit = useCallback(async () => {
+    toast.error('Quiz auto-submitted: You looked away for more than 60 seconds.', { duration: 5000 });
+    try {
+      const answers = quizData?.quiz.questions.map((q, index) => ({
+        questionId: q._id,
+        selectedAnswer: selectedAnswers[index] ?? (q.questionType === 'shortAnswer' || !q.options?.length ? '' : -1),
+      })) || [];
+      await api.post(`/quizzes/${attemptId}/submit-all`, {
+        answers,
+        violations: violations.length > 0 ? violations : undefined,
+        autoSubmitReason: 'face_away_too_long',
+      });
+      sessionStorage.removeItem('currentQuiz');
+      navigate(`/quiz/results/${attemptId}`);
+    } catch (error) {
+      console.error('Auto-submit failed:', error);
+      navigate(`/quiz/results/${attemptId}`);
+    }
+  }, [attemptId, navigate, quizData, selectedAnswers, violations]);
 
   // Detect three violation scenarios
   useEffect(() => {
@@ -345,6 +381,13 @@ const QuizTakePage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 select-none">
+      {/* Face Detection Camera */}
+      <FaceDetectionCamera
+        enabled={!!quizData}
+        onViolation={handleFaceViolation}
+        onAutoSubmit={handleFaceAutoSubmit}
+      />
+
       {/* Warning Banner */}
       {showWarning && (
         <div className="fixed top-0 left-0 right-0 bg-red-500 text-white py-3 px-4 z-50 flex items-center justify-center gap-2 animate-pulse">
@@ -378,12 +421,15 @@ const QuizTakePage = () => {
                 className={`px-2 py-1 rounded text-xs flex items-center gap-1.5 ${
                   v.violation_type === 'TAB_SWITCH' ? 'bg-orange-100 text-orange-700' :
                   v.violation_type === 'SYSTEM_FOCUS_LOST' ? 'bg-red-100 text-red-700' :
+                   v.violation_type === 'FACE_AWAY' || v.violation_type === 'NO_FACE' ? 'bg-pink-100 text-pink-700' :
                   'bg-purple-100 text-purple-700'
                 }`}
               >
                 <span className="font-medium">
                   {v.violation_type === 'TAB_SWITCH' ? 'Tab Change' :
                    v.violation_type === 'SYSTEM_FOCUS_LOST' ? 'External Focus' :
+                   v.violation_type === 'FACE_AWAY' ? 'Face Away' :
+                   v.violation_type === 'NO_FACE' ? 'No Face' :
                    'Restricted Key'}
                 </span>
                 <span className="text-[10px] opacity-70">

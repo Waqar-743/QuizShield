@@ -52,6 +52,8 @@ export interface FaceDetectionState {
   modelsLoaded: boolean;
   /** Reference to attach to a <video> element for the camera preview. */
   videoRef: React.RefObject<HTMLVideoElement>;
+  /** Call to retry camera access after permission was denied. */
+  retryCamera: () => void;
 }
 
 /* ---- lightweight head-pose from 68 landmarks ---- */
@@ -133,37 +135,79 @@ export function useFaceDetection(
   }, [enabled]);
 
   /* ---- 2. Start camera ---- */
+  const [cameraRetryCount, setCameraRetryCount] = useState(0);
+
+  const startCamera = useCallback(async () => {
+    // First check if permission is already permanently denied
+    try {
+      if (navigator.permissions && navigator.permissions.query) {
+        const permResult = await navigator.permissions.query({ name: 'camera' as PermissionName });
+        if (permResult.state === 'denied') {
+          console.warn('[FaceDetection] Camera permission is permanently denied in browser settings');
+          setStatus('permission_denied');
+          return null;
+        }
+        // If 'prompt', the browser will ask; if 'granted', it's already allowed
+        console.log('[FaceDetection] Camera permission state:', permResult.state);
+      }
+    } catch {
+      // permissions.query may not support 'camera' in all browsers — continue anyway
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { width: 320, height: 240, facingMode: 'user' },
+        audio: false,
+      });
+
+      streamRef.current = stream;
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        await videoRef.current.play();
+      }
+
+      setStatus('looking');
+      console.log('[FaceDetection] Camera started successfully');
+      return stream;
+    } catch (err: any) {
+      console.error('[FaceDetection] Camera access error:', err);
+
+      if (err.name === 'NotAllowedError') {
+        setStatus('permission_denied');
+      } else if (err.name === 'NotFoundError') {
+        console.error('[FaceDetection] No camera device found');
+        setStatus('error');
+      } else if (err.name === 'NotReadableError') {
+        console.error('[FaceDetection] Camera is in use by another app');
+        setStatus('error');
+      } else {
+        setStatus('error');
+      }
+      return null;
+    }
+  }, []);
+
+  /** Retry camera access — call after the user resets browser permissions */
+  const retryCamera = useCallback(() => {
+    // Stop any existing stream
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(t => t.stop());
+      streamRef.current = null;
+    }
+    setStatus('loading');
+    setCameraRetryCount(c => c + 1);
+  }, []);
+
   useEffect(() => {
     if (!enabled || !modelsLoaded) return;
 
     let cancelled = false;
 
     (async () => {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { width: 320, height: 240, facingMode: 'user' },
-          audio: false,
-        });
-
-        if (cancelled) {
-          stream.getTracks().forEach(t => t.stop());
-          return;
-        }
-
-        streamRef.current = stream;
-
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          await videoRef.current.play();
-        }
-
-        setStatus('looking');
-        console.log('[FaceDetection] Camera started');
-      } catch (err: any) {
-        console.error('[FaceDetection] Camera access denied:', err);
-        if (!cancelled) {
-          setStatus(err.name === 'NotAllowedError' ? 'permission_denied' : 'error');
-        }
+      const stream = await startCamera();
+      if (cancelled && stream) {
+        stream.getTracks().forEach(t => t.stop());
       }
     })();
 
@@ -174,7 +218,7 @@ export function useFaceDetection(
         streamRef.current = null;
       }
     };
-  }, [enabled, modelsLoaded]);
+  }, [enabled, modelsLoaded, cameraRetryCount, startCamera]);
 
   /* ---- helper: process a single detection result ---- */
   const processDetection = useCallback((isLooking: boolean) => {
@@ -274,7 +318,7 @@ export function useFaceDetection(
     };
   }, []);
 
-  return { status, awaySeconds, violationCount, modelsLoaded, videoRef };
+  return { status, awaySeconds, violationCount, modelsLoaded, videoRef, retryCamera };
 }
 
 export default useFaceDetection;

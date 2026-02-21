@@ -6,9 +6,13 @@ export type ViolationType =
   | 'right_click'
   | 'screenshot_attempt'
   | 'keyboard_shortcut'
+  | 'face_away'
+  | 'no_face'
   | 'TAB_SWITCH'
   | 'SYSTEM_FOCUS_LOST'
-  | 'RESTRICTED_KEY';
+  | 'RESTRICTED_KEY'
+  | 'FACE_AWAY'
+  | 'NO_FACE';
 export type Severity = 'low' | 'medium' | 'high';
 
 interface ViolationInput {

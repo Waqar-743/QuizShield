@@ -30,7 +30,7 @@ const SMOOTHING_WINDOW = 5;                 // frames to average
 const SMOOTHING_MAJORITY = 3;              // ≥3 out of 5 = away
 const GRACE_PERIOD_MS = 2_000;             // ignore first 2 s of "away"
 const AWAY_LIMIT_SEC  = 60;                // auto-submit after 60 s away
-const MODEL_URL = '/models';               // relative to public/
+const MODEL_URL = `${import.meta.env.BASE_URL}models`; // works for local + GitHub Pages subpath
 
 /* ---------- types ---------- */
 export type FaceStatus = 'loading' | 'looking' | 'away' | 'no_face' | 'error' | 'permission_denied';

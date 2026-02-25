@@ -51,7 +51,7 @@ graph LR
 | **Build Tool** | Vite | Ultra-fast HMR and optimized production bundling. |
 | **Styling** | Tailwind CSS | Utility-first design system for consistent UI/UX. |
 | **State** | Zustand | Lightweight, scalable state management without Redux boilerplate. |
-| **AI Engine** | Gemini 1.5 Flash | Low-latency, high-reasoning LLM for real-time question generation. |
+| **AI Engine** | Gemini 2.5 Flash | Low-latency, high-reasoning LLM for real-time question generation. |
 | **Backend** | Node.js / Express / TS | Unified language stack with high I/O throughput. |
 | **Database** | Supabase (PostgreSQL) | Modern relational DB with Row Level Security (RLS). |
 
@@ -93,6 +93,30 @@ The "Shield" in QuizShield refers to a multi-layered security approach:
     *   **JWT Authentication**: Secure stateless session management.
     *   **Audit Logging**: Every assessment violation is captured with a high-fidelity timestamp and severity rating.
 3.  **Data Isolation**: Using Supabase RLS to ensure students can only access their own attempt data while teachers have scoped access to their courses.
+
+### Face Detection Proctoring (Implemented)
+
+QuizShield includes real-time browser-side face detection proctoring during quiz attempts:
+
+1. **Pre-Quiz Camera Gate**:
+    * When a student clicks **Start Quiz**, a camera-permission modal opens before entering the quiz.
+    * The student must grant camera permission and see a live preview to proceed.
+2. **Live Monitoring During Quiz**:
+    * Face status is tracked as `looking`, `away`, or `no_face`.
+    * A visible camera panel shows monitoring state, away timer, and violation count.
+3. **Violation Logic**:
+    * Head-pose thresholds detect face-away events.
+    * Grace period + smoothing reduce false positives.
+    * Looking away for too long triggers auto-submit.
+4. **Privacy & Architecture**:
+    * Detection runs fully in-browser using `face-api.js` (TinyFaceDetector + 68 landmarks).
+    * No raw camera stream is uploaded to the backend for detection.
+
+### GitHub Pages Deployment Note (Important)
+
+Face model files are served from `frontend/public/models` and loaded with Vite `BASE_URL`.
+
+This prevents 404 errors on repo-based GitHub Pages URLs (e.g. `/QuizShield/models/...`) where absolute root `/models/...` would fail.
 
 ---
 

@@ -2,6 +2,30 @@
 
 QuizShield is a comprehensive, AI-integrated educational platform engineered for secure asynchronous assessments and personalized learning paths. It bridges the gap between flexible online learning and stringent academic integrity.
 
+## 📸 Product Screens (Interactive)
+
+<p align="center">
+    <a href="./Teacher-Dashboard.png" target="_blank">
+        <img src="./Teacher-Dashboard.png" alt="Teacher Dashboard" width="300" />
+    </a>
+    &nbsp;&nbsp;
+    <a href="./Chatbot.png" target="_blank">
+        <img src="./Chatbot.png" alt="Chatbot" width="300" />
+    </a>
+</p>
+
+<p align="center">
+    <a href="./Quiz.png" target="_blank">
+        <img src="./Quiz.png" alt="Quiz Join Page" width="300" />
+    </a>
+    &nbsp;&nbsp;
+    <a href="./Face-detection.png" target="_blank">
+        <img src="./Face-detection.png" alt="Face Detection" width="300" />
+    </a>
+</p>
+
+<p align="center"><sub>Click any screenshot to open full size.</sub></p>
+
 ---
 
 ## � System Architecture & Design
@@ -148,32 +172,6 @@ npm install
 # Configure .env with VITE_API_URL and Supabase credentials
 npm run dev
 ```
-
----
-
-## 📸 Product Screens (Interactive)
-
-<p align="center">
-    <a href="./Teacher-Dashboard.png" target="_blank">
-        <img src="./Teacher-Dashboard.png" alt="Teacher Dashboard" width="300" />
-    </a>
-    &nbsp;&nbsp;
-    <a href="./Chatbot.png" target="_blank">
-        <img src="./Chatbot.png" alt="Chatbot" width="300" />
-    </a>
-</p>
-
-<p align="center">
-    <a href="./Quiz.png" target="_blank">
-        <img src="./Quiz.png" alt="Quiz Join Page" width="300" />
-    </a>
-    &nbsp;&nbsp;
-    <a href="./Face-detection.png" target="_blank">
-        <img src="./Face-detection.png" alt="Face Detection" width="300" />
-    </a>
-</p>
-
-<p align="center"><sub>Click any screenshot to open full size.</sub></p>
 
 ---
 

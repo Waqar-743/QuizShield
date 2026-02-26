@@ -151,6 +151,32 @@ npm run dev
 
 ---
 
+## 📸 Product Screens (Interactive)
+
+<p align="center">
+    <a href="./Teacher-Dashboard.png" target="_blank">
+        <img src="./Teacher-Dashboard.png" alt="Teacher Dashboard" width="300" />
+    </a>
+    &nbsp;&nbsp;
+    <a href="./Chatbot.png" target="_blank">
+        <img src="./Chatbot.png" alt="Chatbot" width="300" />
+    </a>
+</p>
+
+<p align="center">
+    <a href="./Quiz.png" target="_blank">
+        <img src="./Quiz.png" alt="Quiz Join Page" width="300" />
+    </a>
+    &nbsp;&nbsp;
+    <a href="./Face-detection.png" target="_blank">
+        <img src="./Face-detection.png" alt="Face Detection" width="300" />
+    </a>
+</p>
+
+<p align="center"><sub>Click any screenshot to open full size.</sub></p>
+
+---
+
 ## � Roadmap & Scalability
 
 *   **Q1 2026**: Integration of WebSocket-based real-time proctoring notifications for teachers.

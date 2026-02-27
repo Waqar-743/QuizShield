@@ -122,7 +122,7 @@ export const cheatingViolationService = {
     if (error) throw new Error(error.message);
 
     return violations.map(v => ({
-      type: v.violation_type,
+      type: v.violation_type || 'unknown',
       timestamp: v.timestamp,
       details: typeof v.details === 'string' ? v.details : JSON.stringify(v.details)
     }));

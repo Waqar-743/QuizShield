@@ -409,13 +409,22 @@ export const quizService = {
 
     return attempts.map(attempt => {
       const user = userMap.get(attempt.user_id) || { name: 'Unknown', email: '' };
+      // Normalize violations to always have a `type` field
+      const rawViolations = attempt.violations || [];
+      const normalizedViolations = Array.isArray(rawViolations) 
+        ? rawViolations.map((v: any) => ({
+            type: v?.type || v?.violation_type || 'unknown',
+            timestamp: v?.timestamp || v?.created_at || new Date().toISOString(),
+            details: v?.details || undefined,
+          }))
+        : [];
       return {
         id: attempt.id,
         quizId: attempt.quiz_id,
         quizTitle: quizMap.get(attempt.quiz_id) || 'Unknown Quiz',
         studentId: attempt.user_id,
-        studentName: user.name,
-        studentEmail: user.email,
+        studentName: user.name || 'Unknown',
+        studentEmail: user.email || '',
         score: attempt.score,
         maxScore: attempt.max_score,
         percentage: attempt.max_score > 0 ? Math.round((attempt.score / attempt.max_score) * 100) : 0,
@@ -425,7 +434,7 @@ export const quizService = {
         teacherGrade: attempt.teacher_grade,
         teacherFeedback: attempt.teacher_feedback,
         answers: attempt.answers || [],
-        violations: attempt.violations || [],
+        violations: normalizedViolations,
         autoSubmitted: attempt.auto_submitted,
         submissionReason: attempt.submission_reason,
       };

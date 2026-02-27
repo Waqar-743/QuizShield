@@ -16,7 +16,7 @@ export const reportViolation = asyncHandler(async (req: Request, res: Response) 
     quizId,
     teacherId,
   } = req.body;
-  const userId = (req as any).user?.id;
+  const userId = req.user?._id || (req as any).user?.id;
 
   const normalizedViolationType = violation_type || violationType;
 
@@ -61,8 +61,8 @@ export const reportViolation = asyncHandler(async (req: Request, res: Response) 
 // Get violations for an attempt
 export const getViolations = asyncHandler(async (req: Request, res: Response) => {
   const { attemptId } = req.params;
-  const userId = (req as any).user?.id;
-  const userRole = (req as any).user?.role || 'student';
+  const userId = req.user?._id || (req as any).user?.id;
+  const userRole = req.user?.role || (req as any).user?.role || 'student';
 
   try {
     const result = await cheatingViolationService.getViolationsForAttempt(
@@ -86,7 +86,7 @@ export const getViolations = asyncHandler(async (req: Request, res: Response) =>
 // Get violation summary for teacher
 export const getViolationSummary = asyncHandler(async (req: Request, res: Response) => {
   const { quizId } = req.query;
-  const userId = (req as any).user?.id;
+  const userId = req.user?._id || (req as any).user?.id;
 
   try {
     const result = await cheatingViolationService.getViolationSummary(
@@ -109,7 +109,7 @@ export const getViolationSummary = asyncHandler(async (req: Request, res: Respon
 // Flag an attempt
 export const flagAttempt = asyncHandler(async (req: Request, res: Response) => {
   const { attemptId } = req.params;
-  const userId = (req as any).user?.id;
+  const userId = req.user?._id || (req as any).user?.id;
 
   try {
     const result = await cheatingViolationService.flagAttempt(attemptId, userId);
@@ -129,7 +129,7 @@ export const flagAttempt = asyncHandler(async (req: Request, res: Response) => {
 // Invalidate an attempt
 export const invalidateAttempt = asyncHandler(async (req: Request, res: Response) => {
   const { attemptId } = req.params;
-  const userId = (req as any).user?.id;
+  const userId = req.user?._id || (req as any).user?.id;
 
   try {
     const result = await cheatingViolationService.invalidateAttempt(attemptId, userId);

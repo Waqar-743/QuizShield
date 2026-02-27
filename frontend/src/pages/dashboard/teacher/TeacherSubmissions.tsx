@@ -13,6 +13,7 @@ import {
 
 interface Violation {
   type: string;
+  violation_type?: string;
   timestamp: string;
   details?: string;
 }
@@ -130,8 +131,8 @@ const TeacherSubmissions = () => {
 
   const filteredSubmissions = submissions.filter(sub => {
     const matchesSearch = 
-      sub.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      sub.quizTitle.toLowerCase().includes(searchTerm.toLowerCase());
+      (sub.studentName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (sub.quizTitle || '').toLowerCase().includes(searchTerm.toLowerCase());
     
     if (filter === 'pending') return matchesSearch && sub.teacherGrade === undefined;
     if (filter === 'graded') return matchesSearch && sub.teacherGrade !== undefined;
@@ -398,8 +399,8 @@ const TeacherSubmissions = () => {
                           )}
                           
                           <div className={`h-6 w-6 rounded-full flex-shrink-0 z-10 flex items-center justify-center ${
-                            v.type.includes('tab') ? 'bg-orange-500' :
-                            v.type.includes('copy') ? 'bg-red-500' :
+                            (v.type || v.violation_type || '').includes('tab') ? 'bg-orange-500' :
+                            (v.type || v.violation_type || '').includes('copy') ? 'bg-red-500' :
                             'bg-primary-500'
                           }`}>
                             <ExclamationTriangleIcon className="h-4 w-4 text-white" />
@@ -408,7 +409,7 @@ const TeacherSubmissions = () => {
                           <div className="flex-1 pb-4">
                             <div className="flex items-center justify-between">
                               <p className="text-sm font-bold text-gray-900 capitalize">
-                                {v.type.replace(/_/g, ' ')}
+                                {(v.type || v.violation_type || 'unknown').replace(/_/g, ' ')}
                               </p>
                               <span className="text-xs text-gray-500">
                                 {new Date(v.timestamp).toLocaleTimeString()}

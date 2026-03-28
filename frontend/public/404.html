@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quiz Shield</title>
+    <script type="text/javascript">
+      (function () {
+        var location = window.location;
+        var pathSegmentsToKeep = 1; // Keep "/QuizShield" for GitHub Pages
+        var basePath = location.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/');
+        var newPath = basePath + '/?/' + location.pathname.split('/').slice(1 + pathSegmentsToKeep).join('/');
+        var search = location.search ? location.search.replace(/&/g, '~and~') : '';
+        location.replace(newPath + search + location.hash);
+      })();
+    </script>
+  </head>
+  <body></body>
+</html>

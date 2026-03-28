@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuthStore } from './store/authStore';
 
@@ -10,45 +10,39 @@ import { DashboardLayout } from './components/shared';
 // Route Guards
 import { StudentRoute, TeacherRoute } from './components/routes';
 
-// Pages
-import LandingPage from './pages/LandingPage';
-import LoginPage from './pages/auth/LoginPage';
-import RegisterPage from './pages/auth/RegisterPage';
-import DashboardPage from './pages/dashboard/DashboardPage';
-import CoursesPage from './pages/courses/CoursesPage';
-import CourseDetailPage from './pages/courses/CourseDetailPage';
-import TopicPage from './pages/courses/TopicPage';
-import QuizStartPage from './pages/quiz/QuizStartPage';
-import QuizPage from './pages/quiz/QuizPage';
-import QuizResultsPage from './pages/quiz/QuizResultsPage';
-import AccessByCodePage from './pages/quiz/AccessByCodePage';
-import QuizTakePage from './pages/quiz/QuizTakePage';
-import TeacherQuizResultsPage from './pages/quiz/TeacherQuizResultsPage';
-import AnalyticsPage from './pages/analytics/AnalyticsPage';
-import ProfilePage from './pages/profile/ProfilePage';
-import CreateQuestionPage from './pages/dashboard/CreateQuestionPage';
-import NotFoundPage from './pages/NotFoundPage';
+// Lazy-loaded pages to reduce initial bundle size
+const LandingPage = lazy(() => import('./pages/LandingPage'));
+const LoginPage = lazy(() => import('./pages/auth/LoginPage'));
+const RegisterPage = lazy(() => import('./pages/auth/RegisterPage'));
+const DashboardPage = lazy(() => import('./pages/dashboard/DashboardPage'));
+const CoursesPage = lazy(() => import('./pages/courses/CoursesPage'));
+const CourseDetailPage = lazy(() => import('./pages/courses/CourseDetailPage'));
+const TopicPage = lazy(() => import('./pages/courses/TopicPage'));
+const QuizStartPage = lazy(() => import('./pages/quiz/QuizStartPage'));
+const QuizPage = lazy(() => import('./pages/quiz/QuizPage'));
+const QuizResultsPage = lazy(() => import('./pages/quiz/QuizResultsPage'));
+const AccessByCodePage = lazy(() => import('./pages/quiz/AccessByCodePage'));
+const QuizTakePage = lazy(() => import('./pages/quiz/QuizTakePage'));
+const TeacherQuizResultsPage = lazy(() => import('./pages/quiz/TeacherQuizResultsPage'));
+const AnalyticsPage = lazy(() => import('./pages/analytics/AnalyticsPage'));
+const ProfilePage = lazy(() => import('./pages/profile/ProfilePage'));
+const CreateQuestionPage = lazy(() => import('./pages/dashboard/CreateQuestionPage'));
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
-// Student Dashboard Pages
-import {
-  StudentOverview,
-  StudentCourses,
-  StudentQuizHistory,
-  StudentRecommendations,
-  JoinQuizPage,
-} from './pages/dashboard/student';
+const StudentOverview = lazy(() => import('./pages/dashboard/student/StudentOverview'));
+const StudentCourses = lazy(() => import('./pages/dashboard/student/StudentCourses'));
+const StudentQuizHistory = lazy(() => import('./pages/dashboard/student/StudentQuizHistory'));
+const StudentRecommendations = lazy(() => import('./pages/dashboard/student/StudentRecommendations'));
+const JoinQuizPage = lazy(() => import('./pages/dashboard/student/JoinQuizPage'));
 
-// Teacher Dashboard Pages
-import {
-  TeacherOverview,
-  TeacherCourses,
-  TeacherTopics,
-  TeacherQuestions,
-  TeacherAnalytics,
-  CreateCoursePage,
-  TeacherQuizzes,
-  TeacherSubmissions,
-} from './pages/dashboard/teacher';
+const TeacherOverview = lazy(() => import('./pages/dashboard/teacher/TeacherOverview'));
+const TeacherCourses = lazy(() => import('./pages/dashboard/teacher/TeacherCourses'));
+const TeacherTopics = lazy(() => import('./pages/dashboard/teacher/TeacherTopics'));
+const TeacherQuestions = lazy(() => import('./pages/dashboard/teacher/TeacherQuestions'));
+const TeacherAnalytics = lazy(() => import('./pages/dashboard/teacher/TeacherAnalytics'));
+const CreateCoursePage = lazy(() => import('./pages/dashboard/teacher/CreateCoursePage'));
+const TeacherQuizzes = lazy(() => import('./pages/dashboard/teacher/TeacherQuizzes'));
+const TeacherSubmissions = lazy(() => import('./pages/dashboard/teacher/TeacherSubmissions'));
 
 // Protected Route Component
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
@@ -103,6 +97,7 @@ function App() {
   }, []);
 
   return (
+    <Suspense fallback={<div className="flex items-center justify-center h-screen">Loading page...</div>}>
     <Routes>
       {/* Public Routes */}
       <Route path="/" element={<LandingPage />} />
@@ -199,6 +194,7 @@ function App() {
       {/* 404 */}
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
+    </Suspense>
   );
 }
 

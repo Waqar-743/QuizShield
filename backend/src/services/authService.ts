@@ -1,8 +1,15 @@
 import { supabase } from '../config/supabase';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import { config } from '../config/environment';
 import { emailService } from './emailService';
+
+const createHttpError = (message: string, statusCode = 400) =>
+  Object.assign(new Error(message), { statusCode });
+
+const PASSWORD_RESET_TOKEN_TTL_MS = 60 * 60 * 1000;
+const PASSWORD_RESET_SUCCESS_MESSAGE = 'If an account with that email exists, a password reset link has been sent.';
 
 export const authService = {
   async register(userData: any) {
@@ -274,6 +281,111 @@ export const authService = {
       },
       token,
     };
+  },
+
+  async requestPasswordReset(email: string) {
+    const normalizedEmail = email?.trim();
+    if (!normalizedEmail) {
+      throw createHttpError('Email is required');
+    }
+
+    const { data: users, error } = await supabase
+      .from('users')
+      .select('id, email, name')
+      .eq('email', normalizedEmail)
+      .limit(1);
+
+    if (error) {
+      console.error('Error finding user for password reset:', error);
+      throw new Error('Database error');
+    }
+
+    const user = users && users.length > 0 ? users[0] : null;
+    if (!user) {
+      return { message: PASSWORD_RESET_SUCCESS_MESSAGE };
+    }
+
+    const rawToken = crypto.randomBytes(32).toString('hex');
+    const hashedToken = crypto.createHash('sha256').update(rawToken).digest('hex');
+    const resetPasswordExpiresAt = new Date(Date.now() + PASSWORD_RESET_TOKEN_TTL_MS).toISOString();
+
+    const { error: updateError } = await supabase
+      .from('users')
+      .update({
+        reset_password_token: hashedToken,
+        reset_password_expires_at: resetPasswordExpiresAt,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', user.id);
+
+    if (updateError) {
+      console.error('Error saving password reset token:', updateError);
+      throw new Error('Database error');
+    }
+
+    const resetUrl = `${config.frontendAppUrl}/reset-password?token=${encodeURIComponent(rawToken)}`;
+    await emailService.sendPasswordResetEmail(user.email, user.name, resetUrl);
+
+    return { message: PASSWORD_RESET_SUCCESS_MESSAGE };
+  },
+
+  async resetPassword(token: string, newPassword: string) {
+    const normalizedToken = token?.trim();
+    if (!normalizedToken) {
+      throw createHttpError('Reset token is required');
+    }
+
+    if (!newPassword) {
+      throw createHttpError('New password is required');
+    }
+
+    if (newPassword.length < 8) {
+      throw createHttpError('Password must be at least 8 characters');
+    }
+
+    if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(newPassword)) {
+      throw createHttpError('Password must contain at least one uppercase letter, one lowercase letter, and one number');
+    }
+
+    const hashedToken = crypto.createHash('sha256').update(normalizedToken).digest('hex');
+    const now = new Date().toISOString();
+
+    const { data: users, error } = await supabase
+      .from('users')
+      .select('id, password')
+      .eq('reset_password_token', hashedToken)
+      .gt('reset_password_expires_at', now)
+      .limit(1);
+
+    if (error) {
+      console.error('Error verifying password reset token:', error);
+      throw new Error('Database error');
+    }
+
+    const user = users && users.length > 0 ? users[0] : null;
+    if (!user) {
+      throw createHttpError('This password reset link is invalid or has expired.');
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    const { error: updateError } = await supabase
+      .from('users')
+      .update({
+        password: hashedPassword,
+        reset_password_token: null,
+        reset_password_expires_at: null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', user.id);
+
+    if (updateError) {
+      console.error('Error updating password after reset:', updateError);
+      throw new Error('Database error');
+    }
+
+    return { message: 'Password reset successful. You can now sign in with your new password.' };
   },
 
   async getCurrentUser(userId: string) {

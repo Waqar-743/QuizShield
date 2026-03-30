@@ -20,6 +20,8 @@ interface AuthState {
   verifyFaceLogin: (faceEncoding: number[]) => Promise<void>;
   cancelFaceVerification: () => void;
   register: (data: any) => Promise<void>;
+  requestPasswordReset: (email: string) => Promise<string>;
+  resetPassword: (token: string, password: string) => Promise<string>;
   logout: () => void;
   checkAuth: () => Promise<void>;
   updateProfile: (data: Partial<User>) => Promise<void>;
@@ -103,6 +105,34 @@ export const useAuthStore = create<AuthState>((set, _get) => ({
       set({ isLoading: false, error: null });
     } catch (error: any) {
       const message = error.response?.data?.message || error.response?.data?.error?.message || 'Registration failed';
+      set({ error: message, isLoading: false });
+      throw error;
+    }
+  },
+
+  requestPasswordReset: async (email) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await api.post<any>('/auth/forgot-password', { email });
+      const message = response.data.data?.message || 'If an account with that email exists, a password reset link has been sent.';
+      set({ isLoading: false, error: null });
+      return message;
+    } catch (error: any) {
+      const message = error.response?.data?.message || error.response?.data?.error?.message || 'Failed to send reset email';
+      set({ error: message, isLoading: false });
+      throw error;
+    }
+  },
+
+  resetPassword: async (token, password) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await api.post<any>('/auth/reset-password', { token, password });
+      const message = response.data.data?.message || 'Password reset successful.';
+      set({ isLoading: false, error: null });
+      return message;
+    } catch (error: any) {
+      const message = error.response?.data?.message || error.response?.data?.error?.message || 'Failed to reset password';
       set({ error: message, isLoading: false });
       throw error;
     }

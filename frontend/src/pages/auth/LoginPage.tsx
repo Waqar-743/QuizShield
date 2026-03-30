@@ -314,6 +314,11 @@ const LoginPage = () => {
                 <p className="mt-1 text-sm text-red-600">{errors.password.message as string}</p>
               )}
             </div>
+            <div className="mt-2 text-right">
+              <Link to="/forgot-password" className="text-sm font-medium text-primary-600 hover:text-primary-500">
+                Forgot password?
+              </Link>
+            </div>
           </div>
 
           <div>

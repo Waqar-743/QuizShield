@@ -1,6 +1,6 @@
 import express from 'express';
 import multer from 'multer';
-import { register, login, getCurrentUser, updateProfile, switchRole, verifyFaceLogin } from '../controllers/authController';
+import { register, login, forgotPassword, resetPassword, getCurrentUser, updateProfile, switchRole, verifyFaceLogin } from '../controllers/authController';
 import { uploadProfilePicture, uploadRegistrationPicture } from '../controllers/profilePictureController';
 import { protect } from '../middleware/auth';
 
@@ -21,6 +21,8 @@ const router = express.Router();
 // Public routes
 router.post('/register', register);
 router.post('/login', login);
+router.post('/forgot-password', forgotPassword);
+router.post('/reset-password', resetPassword);
 router.post('/validate-picture', upload.single('profilePicture'), uploadRegistrationPicture);
 router.post('/verify-face-login', verifyFaceLogin);
 

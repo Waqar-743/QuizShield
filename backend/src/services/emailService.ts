@@ -60,5 +60,41 @@ export const emailService = {
       console.error('Error sending enrollment email:', error);
       return null;
     }
+  },
+
+  async sendPasswordResetEmail(email: string, name: string, resetUrl: string) {
+    if (!config.resendApiKey) {
+      throw Object.assign(new Error('Password reset email service is not configured.'), { statusCode: 503 });
+    }
+
+    try {
+      const data = await resend.emails.send({
+        from: 'QuizShield <onboarding@resend.dev>',
+        to: [email],
+        subject: 'Reset your QuizShield password',
+        html: `
+          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2>Hello ${name},</h2>
+            <p>We received a request to reset your QuizShield password.</p>
+            <p>
+              <a
+                href="${resetUrl}"
+                style="display: inline-block; padding: 12px 20px; background: #2563eb; color: #ffffff; text-decoration: none; border-radius: 8px;"
+              >
+                Reset Password
+              </a>
+            </p>
+            <p>This link will expire in 1 hour.</p>
+            <p>If you did not request this, you can safely ignore this email.</p>
+          </div>
+        `,
+      });
+
+      console.log('Password reset email sent successfully:', data);
+      return data;
+    } catch (error) {
+      console.error('Error sending password reset email:', error);
+      throw Object.assign(new Error('Failed to send password reset email.'), { statusCode: 503 });
+    }
   }
 };

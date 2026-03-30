@@ -10,6 +10,8 @@ CREATE TABLE IF NOT EXISTS users (
   role VARCHAR(50) DEFAULT 'student',
   bio TEXT,
   interests TEXT[] DEFAULT '{}',
+  reset_password_token TEXT,
+  reset_password_expires_at TIMESTAMP WITH TIME ZONE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -177,6 +179,7 @@ CREATE INDEX IF NOT EXISTS idx_enrollments_course_id ON enrollments(course_id);
 CREATE INDEX IF NOT EXISTS idx_quiz_attempts_user_id ON quiz_attempts(user_id);
 CREATE INDEX IF NOT EXISTS idx_quiz_codes_code ON quiz_codes(code);
 CREATE INDEX IF NOT EXISTS idx_violations_student_id ON cheating_violations(student_id);
+CREATE INDEX IF NOT EXISTS idx_users_reset_password_token ON users(reset_password_token);
 
 -- Disable RLS for now (for easier development)
 ALTER TABLE users DISABLE ROW LEVEL SECURITY;

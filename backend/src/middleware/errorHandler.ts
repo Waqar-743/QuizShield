@@ -11,7 +11,7 @@ export const errorHandler = (err: any, req: Request, res: Response, next: NextFu
   console.error(`[Error] ${req.method} ${req.originalUrl}:`, err);
   
   // Determine status code from error message or default to 500
-  let statusCode = res.statusCode === 200 ? 500 : res.statusCode;
+  let statusCode = err.statusCode || (res.statusCode === 200 ? 500 : res.statusCode);
   
   // Map common error messages to appropriate status codes
   const message = err.message || 'Server error';

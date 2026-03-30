@@ -20,6 +20,24 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
   });
 });
 
+export const forgotPassword = asyncHandler(async (req: Request, res: Response) => {
+  const result = await authService.requestPasswordReset(req.body.email);
+
+  res.status(200).json({
+    success: true,
+    data: result,
+  });
+});
+
+export const resetPassword = asyncHandler(async (req: Request, res: Response) => {
+  const result = await authService.resetPassword(req.body.token, req.body.password);
+
+  res.status(200).json({
+    success: true,
+    data: result,
+  });
+});
+
 export const getCurrentUser = asyncHandler(async (req: Request, res: Response) => {
   // req.user is attached by auth middleware
   const user = await authService.getCurrentUser(req.user!._id.toString());

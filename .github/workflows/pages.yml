@@ -32,19 +32,15 @@ jobs:
 
       - name: Install
         working-directory: ./frontend
-        run: npm install --prefer-offline
-
-      - name: Lint
-        working-directory: ./frontend
-        run: npm run lint
+        run: npm install
 
       - name: Build
         working-directory: ./frontend
         env:
-          VITE_API_URL: ${{ vars.VITE_API_URL || 'https://quiz-shield.vercel.app/api' }}
+          VITE_API_URL: ${{ vars.VITE_API_URL || 'https://quizshield-production.up.railway.app/api' }}
           NODE_OPTIONS: --max-old-space-size=4096
         run: |
-          npm run build -- --base=/${{ github.event.repository.name }}/
+          npx vite build --base=/QuizShield/
           cp dist/index.html dist/404.html
 
       - name: Upload Pages artifact

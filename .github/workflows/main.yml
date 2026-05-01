@@ -38,8 +38,7 @@ jobs:
         SUPABASE_KEY: ${{ secrets.SUPABASE_KEY || 'placeholder-key' }}
 
     - name: Build
-      continue-on-error: true
-      run: npm run build --verbose
+      run: npm run build
       env:
         NODE_ENV: production
 
@@ -74,7 +73,7 @@ jobs:
       run: npm run lint
 
     - name: Build
-      continue-on-error: true
-      run: npm run build --verbose
+      run: npm run build
       env:
         VITE_API_URL: ${{ secrets.VITE_API_URL || 'https://quiz-shield.vercel.app/api' }}
+        NODE_OPTIONS: --max-old-space-size=4096

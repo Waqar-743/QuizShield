@@ -8,61 +8,44 @@ export const analyticsService = {
     const streakDays = 0;
 
     try {
-      // 1. Enrolled Courses
-      const { count, error: coursesError } = await supabase
+      const { count } = await supabase
         .from('enrollments')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', userId);
-
-      if (!coursesError) {
-        coursesEnrolled = count || 0;
-      }
+      coursesEnrolled = count || 0;
     } catch (e) {
       console.error('Error fetching enrollments:', e);
     }
 
     try {
-      // 2. Quizzes Completed
-      const { count, error: quizzesError } = await supabase
+      const { count } = await supabase
         .from('quiz_attempts')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', userId)
         .eq('status', 'completed');
-
-      if (!quizzesError) {
-        quizzesCompleted = count || 0;
-      }
+      quizzesCompleted = count || 0;
     } catch (e) {
       console.error('Error fetching quiz attempts:', e);
     }
 
     try {
-      // 3. Average Score
-      const { data: attempts, error: attemptsError } = await supabase
+      const { data: attempts } = await supabase
         .from('quiz_attempts')
         .select('score, max_score')
         .eq('user_id', userId)
         .eq('status', 'completed');
 
-      if (!attemptsError && attempts && attempts.length > 0) {
-        let totalScore = 0;
-        attempts.forEach((attempt: any) => {
-          if (attempt.max_score > 0) {
-            totalScore += (attempt.score / attempt.max_score) * 100;
-          }
-        });
-        averageScore = Math.round(totalScore / attempts.length);
+      if (attempts && attempts.length > 0) {
+        const total = attempts.reduce((sum: number, a: any) => {
+          return sum + (a.max_score > 0 ? (a.score / a.max_score) * 100 : 0);
+        }, 0);
+        averageScore = Math.round(total / attempts.length);
       }
     } catch (e) {
       console.error('Error calculating average score:', e);
     }
 
-    return {
-      coursesEnrolled,
-      quizzesCompleted,
-      averageScore,
-      streakDays
-    };
+    return { coursesEnrolled, quizzesCompleted, averageScore, streakDays };
   },
 
   // ============ Teacher Analytics ============
@@ -76,273 +59,203 @@ export const analyticsService = {
     let activeEnrollments = 0;
 
     try {
-      // 1. Total courses created by teacher
-      const { count: coursesCount } = await supabase
-        .from('courses')
-        .select('*', { count: 'exact', head: true })
-        .eq('created_by', teacherId);
+      // Fetch courses, topics, and enrollments in parallel
+      const [coursesResult, quizzesResult] = await Promise.all([
+        supabase.from('courses').select('id', { count: 'exact' }).eq('created_by', teacherId),
+        supabase.from('teacher_quizzes').select('id').eq('teacher_id', teacherId),
+      ]);
 
-      totalCourses = coursesCount || 0;
-    } catch (e) {
-      console.error('Error fetching teacher courses:', e);
-    }
-
-    try {
-      // 2. Get course IDs for this teacher
-      const { data: teacherCourses } = await supabase
-        .from('courses')
-        .select('id')
-        .eq('created_by', teacherId);
-
-      const courseIds = teacherCourses?.map(c => c.id) || [];
+      totalCourses = coursesResult.count || 0;
+      const courseIds = (coursesResult.data || []).map((c: any) => c.id);
 
       if (courseIds.length > 0) {
-        // 3. Total students enrolled in teacher's courses
-        const { count: enrollmentsCount } = await supabase
-          .from('enrollments')
-          .select('*', { count: 'exact', head: true })
-          .in('course_id', courseIds);
+        const [enrollResult, topicResult] = await Promise.all([
+          supabase.from('enrollments').select('*', { count: 'exact', head: true }).in('course_id', courseIds),
+          supabase.from('topics').select('id', { count: 'exact' }).in('course_id', courseIds),
+        ]);
 
-        totalStudents = enrollmentsCount || 0;
-        activeEnrollments = enrollmentsCount || 0;
+        totalStudents = enrollResult.count || 0;
+        activeEnrollments = enrollResult.count || 0;
+        totalTopics = topicResult.count || 0;
 
-        // 4. Get topics for teacher's courses
-        const { data: topics, count: topicsCount } = await supabase
-          .from('topics')
-          .select('id', { count: 'exact' })
-          .in('course_id', courseIds);
-
-        totalTopics = topicsCount || 0;
-
-        const topicIds = topics?.map(t => t.id) || [];
-
+        const topicIds = (topicResult.data || []).map((t: any) => t.id);
         if (topicIds.length > 0) {
-          // 5. Total questions in teacher's topics
-          const { count: questionsCount } = await supabase
+          const { count: qCount } = await supabase
             .from('questions')
             .select('*', { count: 'exact', head: true })
             .in('topic_id', topicIds);
+          totalQuestions = qCount || 0;
+        }
+      }
 
-          totalQuestions = questionsCount || 0;
+      // Calculate avg score from teacher_quizzes attempts
+      const quizIds = (quizzesResult.data || []).map((q: any) => q.id);
+      if (quizIds.length > 0) {
+        const { data: attempts } = await supabase
+          .from('quiz_attempts')
+          .select('score, max_score')
+          .in('quiz_id', quizIds)
+          .eq('status', 'completed');
 
-          // 6. Average student score on teacher's quizzes
-          const { data: quizzes } = await supabase
-            .from('quizzes')
-            .select('id')
-            .in('topic_id', topicIds);
-
-          const quizIds = quizzes?.map(q => q.id) || [];
-
-          if (quizIds.length > 0) {
-            const { data: attempts } = await supabase
-              .from('quiz_attempts')
-              .select('score, max_score')
-              .in('quiz_id', quizIds)
-              .eq('status', 'completed');
-
-            if (attempts && attempts.length > 0) {
-              let totalScore = 0;
-              attempts.forEach((attempt: any) => {
-                if (attempt.max_score > 0) {
-                  totalScore += (attempt.score / attempt.max_score) * 100;
-                }
-              });
-              avgStudentScore = Math.round(totalScore / attempts.length);
-            }
-          }
+        if (attempts && attempts.length > 0) {
+          const total = attempts.reduce((sum: number, a: any) =>
+            sum + (a.max_score > 0 ? (a.score / a.max_score) * 100 : 0), 0);
+          avgStudentScore = Math.round(total / attempts.length);
         }
       }
     } catch (e) {
       console.error('Error fetching teacher stats:', e);
     }
 
-    return {
-      totalCourses,
-      totalStudents,
-      totalQuestions,
-      totalTopics,
-      avgStudentScore,
-      activeEnrollments,
-    };
+    return { totalCourses, totalStudents, totalQuestions, totalTopics, avgStudentScore, activeEnrollments };
   },
 
   async getTeacherCoursePerformance(teacherId: string) {
-    const coursePerformance: any[] = [];
-
     try {
-      // Get teacher's courses with enrollment count
       const { data: courses } = await supabase
         .from('courses')
         .select('id, title')
         .eq('created_by', teacherId);
 
-      if (courses && courses.length > 0) {
-        for (const course of courses) {
-          // Get enrollments for this course
-          const { count: enrollments } = await supabase
-            .from('enrollments')
-            .select('*', { count: 'exact', head: true })
-            .eq('course_id', course.id);
+      if (!courses || courses.length === 0) return [];
 
-          // Get topics for this course
-          const { data: topics } = await supabase
-            .from('topics')
-            .select('id')
-            .eq('course_id', course.id);
+      const courseIds = courses.map((c: any) => c.id);
 
-          const topicIds = topics?.map(t => t.id) || [];
+      // Fetch all data in parallel — no per-course loops
+      const [enrollResult, quizResult] = await Promise.all([
+        supabase.from('enrollments').select('course_id').in('course_id', courseIds),
+        supabase.from('teacher_quizzes').select('id, course_id').in('course_id', courseIds),
+      ]);
 
-          let avgScore = 0;
-          let completionRate = 0;
+      const quizIds = (quizResult.data || []).map((q: any) => q.id);
+      const attemptResult = quizIds.length > 0
+        ? await supabase.from('quiz_attempts').select('score, max_score, status, quiz_id').in('quiz_id', quizIds)
+        : { data: [] };
 
-          if (topicIds.length > 0) {
-            // Get quizzes for these topics
-            const { data: quizzes } = await supabase
-              .from('quizzes')
-              .select('id')
-              .in('topic_id', topicIds);
+      // Group in memory
+      const enrollmentsByCourse: Record<string, number> = {};
+      for (const e of (enrollResult.data || [])) {
+        enrollmentsByCourse[e.course_id] = (enrollmentsByCourse[e.course_id] || 0) + 1;
+      }
 
-            const quizIds = quizzes?.map(q => q.id) || [];
-
-            if (quizIds.length > 0) {
-              const { data: attempts } = await supabase
-                .from('quiz_attempts')
-                .select('score, max_score, status')
-                .in('quiz_id', quizIds);
-
-              if (attempts && attempts.length > 0) {
-                const completedAttempts = attempts.filter(a => a.status === 'completed');
-                if (completedAttempts.length > 0) {
-                  let totalScore = 0;
-                  completedAttempts.forEach((attempt: any) => {
-                    if (attempt.max_score > 0) {
-                      totalScore += (attempt.score / attempt.max_score) * 100;
-                    }
-                  });
-                  avgScore = Math.round(totalScore / completedAttempts.length);
-                  completionRate = Math.round((completedAttempts.length / attempts.length) * 100);
-                }
-              }
-            }
-          }
-
-          coursePerformance.push({
-            courseName: course.title,
-            avgScore,
-            completionRate,
-            enrollments: enrollments || 0,
-          });
+      const quizByCourse: Record<string, string[]> = {};
+      for (const q of (quizResult.data || [])) {
+        if (q.course_id) {
+          if (!quizByCourse[q.course_id]) quizByCourse[q.course_id] = [];
+          quizByCourse[q.course_id].push(q.id);
         }
       }
+
+      const attemptsByQuiz: Record<string, any[]> = {};
+      for (const a of (attemptResult.data || [])) {
+        if (!attemptsByQuiz[a.quiz_id]) attemptsByQuiz[a.quiz_id] = [];
+        attemptsByQuiz[a.quiz_id].push(a);
+      }
+
+      return courses.map((course: any) => {
+        const courseQuizIds = quizByCourse[course.id] || [];
+        const allAttempts = courseQuizIds.flatMap(qid => attemptsByQuiz[qid] || []);
+        const completed = allAttempts.filter((a: any) => a.status === 'completed');
+
+        let avgScore = 0;
+        let completionRate = 0;
+        if (completed.length > 0) {
+          const total = completed.reduce((sum: number, a: any) =>
+            sum + (a.max_score > 0 ? (a.score / a.max_score) * 100 : 0), 0);
+          avgScore = Math.round(total / completed.length);
+          completionRate = allAttempts.length > 0
+            ? Math.round((completed.length / allAttempts.length) * 100)
+            : 0;
+        }
+
+        return {
+          courseName: course.title,
+          avgScore,
+          completionRate,
+          enrollments: enrollmentsByCourse[course.id] || 0,
+        };
+      });
     } catch (e) {
       console.error('Error fetching course performance:', e);
+      return [];
     }
-
-    return coursePerformance;
   },
 
   async getTeacherCourseAnalytics(teacherId: string) {
-    // Similar to course performance but with more detail
     return this.getTeacherCoursePerformance(teacherId);
   },
 
   async getTeacherTimeSeries(teacherId: string, range: string) {
-    const timeSeriesData: any[] = [];
-
     try {
-      // Get date range
       const now = new Date();
       let startDate: Date;
 
       switch (range) {
-        case '7d':
-          startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-          break;
-        case '90d':
-          startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
-          break;
-        case 'all':
-          startDate = new Date('2020-01-01');
-          break;
-        default: // 30d
-          startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        case '7d':  startDate = new Date(now.getTime() - 7  * 24 * 60 * 60 * 1000); break;
+        case '90d': startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000); break;
+        case 'all': startDate = new Date('2020-01-01'); break;
+        default:    startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
       }
 
-      // Get teacher's course IDs
+      // Get teacher's quizzes (teacher_quizzes table — the active one)
+      const { data: quizzes } = await supabase
+        .from('teacher_quizzes')
+        .select('id')
+        .eq('teacher_id', teacherId);
+
+      const quizIds = (quizzes || []).map((q: any) => q.id);
+
+      // Get teacher's courses for enrollment data
       const { data: courses } = await supabase
         .from('courses')
         .select('id')
         .eq('created_by', teacherId);
 
-      const courseIds = courses?.map(c => c.id) || [];
+      const courseIds = (courses || []).map((c: any) => c.id);
 
-      if (courseIds.length > 0) {
-        // Group by week for simplicity
-        const weeks = Math.ceil((now.getTime() - startDate.getTime()) / (7 * 24 * 60 * 60 * 1000));
-        
-        for (let i = 0; i < Math.min(weeks, 12); i++) {
-          const weekStart = new Date(now.getTime() - (i + 1) * 7 * 24 * 60 * 60 * 1000);
-          const weekEnd = new Date(now.getTime() - i * 7 * 24 * 60 * 60 * 1000);
+      // Fetch all attempts and enrollments in one round-trip each
+      const [attemptResult, enrollResult] = await Promise.all([
+        quizIds.length > 0
+          ? supabase.from('quiz_attempts').select('started_at').in('quiz_id', quizIds).gte('started_at', startDate.toISOString())
+          : Promise.resolve({ data: [] }),
+        courseIds.length > 0
+          ? supabase.from('enrollments').select('enrolled_at').in('course_id', courseIds).gte('enrolled_at', startDate.toISOString())
+          : Promise.resolve({ data: [] }),
+      ]);
 
-          // Count enrollments in this week
-          const { count: enrollments } = await supabase
-            .from('enrollments')
-            .select('*', { count: 'exact', head: true })
-            .in('course_id', courseIds)
-            .gte('enrolled_at', weekStart.toISOString())
-            .lt('enrolled_at', weekEnd.toISOString());
+      const attempts = attemptResult.data || [];
+      const enrollments = enrollResult.data || [];
 
-          // Get topics for quiz counting
-          const { data: topics } = await supabase
-            .from('topics')
-            .select('id')
-            .in('course_id', courseIds);
+      // Build weekly buckets in memory
+      const weeks = Math.min(12, Math.ceil((now.getTime() - startDate.getTime()) / (7 * 24 * 60 * 60 * 1000)));
+      const timeSeriesData: any[] = [];
 
-          const topicIds = topics?.map(t => t.id) || [];
-          let quizAttempts = 0;
+      for (let i = weeks - 1; i >= 0; i--) {
+        const weekStart = new Date(now.getTime() - (i + 1) * 7 * 24 * 60 * 60 * 1000);
+        const weekEnd   = new Date(now.getTime() - i       * 7 * 24 * 60 * 60 * 1000);
 
-          if (topicIds.length > 0) {
-            const { data: quizzes } = await supabase
-              .from('quizzes')
-              .select('id')
-              .in('topic_id', topicIds);
+        const weekAttempts = attempts.filter((a: any) => {
+          const d = new Date(a.started_at);
+          return d >= weekStart && d < weekEnd;
+        }).length;
 
-            const quizIds = quizzes?.map(q => q.id) || [];
+        const weekEnrollments = enrollments.filter((e: any) => {
+          const d = new Date(e.enrolled_at);
+          return d >= weekStart && d < weekEnd;
+        }).length;
 
-            if (quizIds.length > 0) {
-              const { count } = await supabase
-                .from('quiz_attempts')
-                .select('*', { count: 'exact', head: true })
-                .in('quiz_id', quizIds)
-                .gte('started_at', weekStart.toISOString())
-                .lt('started_at', weekEnd.toISOString());
-
-              quizAttempts = count || 0;
-            }
-          }
-
-          timeSeriesData.unshift({
-            date: `Week ${weeks - i}`,
-            enrollments: enrollments || 0,
-            quizzes: quizAttempts,
-          });
-        }
+        timeSeriesData.push({
+          date: `Week ${weeks - i}`,
+          enrollments: weekEnrollments,
+          quizzes: weekAttempts,
+        });
       }
+
+      return timeSeriesData;
     } catch (e) {
       console.error('Error fetching time series:', e);
+      return [];
     }
-
-    // Return mock data if no real data
-    if (timeSeriesData.length === 0) {
-      return [
-        { date: 'Week 1', enrollments: 12, quizzes: 45 },
-        { date: 'Week 2', enrollments: 18, quizzes: 62 },
-        { date: 'Week 3', enrollments: 15, quizzes: 78 },
-        { date: 'Week 4', enrollments: 22, quizzes: 95 },
-      ];
-    }
-
-    return timeSeriesData;
   },
 
   async getTeacherCourses(teacherId: string) {
@@ -354,32 +267,34 @@ export const analyticsService = {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
+      if (!courses || courses.length === 0) return [];
 
-      // Add enrollment count for each course
-      const coursesWithStats = await Promise.all(
-        (courses || []).map(async (course: any) => {
-          const { count } = await supabase
-            .from('enrollments')
-            .select('*', { count: 'exact', head: true })
-            .eq('course_id', course.id);
+      const courseIds = courses.map((c: any) => c.id);
 
-          return {
-            _id: course.id,
-            title: course.title,
-            description: course.description,
-            category: course.category,
-            difficulty: course.difficulty,
-            thumbnail: course.thumbnail,
-            topics: [],
-            createdBy: course.created_by,
-            isPublished: course.is_published,
-            enrollmentCount: count || 0,
-            avgScore: 0, // Would need to calculate
-          };
-        })
-      );
+      // Single query for all enrollment counts
+      const { data: enrollments } = await supabase
+        .from('enrollments')
+        .select('course_id')
+        .in('course_id', courseIds);
 
-      return coursesWithStats;
+      const countByCourse: Record<string, number> = {};
+      for (const e of (enrollments || [])) {
+        countByCourse[e.course_id] = (countByCourse[e.course_id] || 0) + 1;
+      }
+
+      return courses.map((course: any) => ({
+        _id: course.id,
+        title: course.title,
+        description: course.description,
+        category: course.category,
+        difficulty: course.difficulty,
+        thumbnail: course.thumbnail,
+        topics: [],
+        createdBy: course.created_by,
+        isPublished: course.is_published,
+        enrollmentCount: countByCourse[course.id] || 0,
+        avgScore: 0,
+      }));
     } catch (e) {
       console.error('Error fetching teacher courses:', e);
       return [];
@@ -388,18 +303,15 @@ export const analyticsService = {
 
   async getTeacherTopics(teacherId: string) {
     try {
-      // Get teacher's courses first
       const { data: courses } = await supabase
         .from('courses')
         .select('id, title')
         .eq('created_by', teacherId);
 
-      const courseIds = courses?.map(c => c.id) || [];
-      const courseMap = new Map(courses?.map(c => [c.id, c.title]) || []);
-
+      const courseIds = (courses || []).map((c: any) => c.id);
+      const courseMap = new Map((courses || []).map((c: any) => [c.id, c.title]));
       if (courseIds.length === 0) return [];
 
-      // Get topics for these courses
       const { data: topics, error } = await supabase
         .from('topics')
         .select('*')
@@ -407,28 +319,30 @@ export const analyticsService = {
         .order('order', { ascending: true });
 
       if (error) throw error;
+      if (!topics || topics.length === 0) return [];
 
-      // Add question count for each topic
-      const topicsWithStats = await Promise.all(
-        (topics || []).map(async (topic: any) => {
-          const { count } = await supabase
-            .from('questions')
-            .select('*', { count: 'exact', head: true })
-            .eq('topic_id', topic.id);
+      const topicIds = topics.map((t: any) => t.id);
 
-          return {
-            _id: topic.id,
-            title: topic.title,
-            description: topic.description,
-            courseId: topic.course_id,
-            order: topic.order,
-            courseName: courseMap.get(topic.course_id) || 'Unknown',
-            questionCount: count || 0,
-          };
-        })
-      );
+      // Single batch query for all question counts
+      const { data: questions } = await supabase
+        .from('questions')
+        .select('topic_id')
+        .in('topic_id', topicIds);
 
-      return topicsWithStats;
+      const questionCountByTopic: Record<string, number> = {};
+      for (const q of (questions || [])) {
+        questionCountByTopic[q.topic_id] = (questionCountByTopic[q.topic_id] || 0) + 1;
+      }
+
+      return topics.map((topic: any) => ({
+        _id: topic.id,
+        title: topic.title,
+        description: topic.description,
+        courseId: topic.course_id,
+        order: topic.order,
+        courseName: courseMap.get(topic.course_id) || 'Unknown',
+        questionCount: questionCountByTopic[topic.id] || 0,
+      }));
     } catch (e) {
       console.error('Error fetching teacher topics:', e);
       return [];
@@ -437,14 +351,11 @@ export const analyticsService = {
 
   async getTeacherQuestions(teacherId: string) {
     try {
-      // Get teacher's topics first
       const topics = await this.getTeacherTopics(teacherId);
-      const topicIds = topics.map(t => t._id);
-      const topicMap = new Map(topics.map(t => [t._id, { name: t.title, course: t.courseName }]));
-
+      const topicIds = topics.map((t: any) => t._id);
+      const topicMap = new Map(topics.map((t: any) => [t._id, { name: t.title, course: t.courseName }]));
       if (topicIds.length === 0) return [];
 
-      // Get questions for these topics
       const { data: questions, error } = await supabase
         .from('questions')
         .select('*')

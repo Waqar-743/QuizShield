@@ -157,15 +157,15 @@ const LandingPage = () => {
           <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
             <p className="text-sm text-slate-500">© 2023 Quiz Shield Inc. All rights reserved.</p>
             <div className="flex items-center gap-6 text-sm text-slate-500">
-              <a href="#" className="hover:text-slate-900">
+              <Link to="/privacy" className="hover:text-slate-900">
                 Privacy
-              </a>
-              <a href="#" className="hover:text-slate-900">
+              </Link>
+              <Link to="/terms" className="hover:text-slate-900">
                 Terms
-              </a>
-              <a href="#" className="hover:text-slate-900">
+              </Link>
+              <Link to="/contact" className="hover:text-slate-900">
                 Contact
-              </a>
+              </Link>
             </div>
           </div>
         </div>

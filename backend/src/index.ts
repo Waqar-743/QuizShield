@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
+import rateLimit from 'express-rate-limit';
 import { config } from './config/environment';
 import { connectDatabase } from './config/database';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
@@ -14,15 +15,14 @@ import aiRoutes from './routes/ai';
 import questionRoutes from './routes/questions';
 import notificationRoutes from './routes/notifications';
 
-// Initialize app
 const app = express();
 
-// Connect to database
 connectDatabase();
 
-// Middleware
-// Allow strictly defined origins
-const allowedOrigins = [
+// ---------------------------------------------------------------------------
+// CORS — strict exact-match only (no startsWith to prevent subdomain spoofing)
+// ---------------------------------------------------------------------------
+const allowedOrigins = new Set([
   config.frontendUrl,
   'https://waqar-743.github.io',
   'https://quiz-shield.vercel.app',
@@ -30,40 +30,93 @@ const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:5173',
   'http://127.0.0.1:3000',
-  'http://127.0.0.1:5173'
-];
-
-console.log('CORS Configured for origins:', allowedOrigins);
+  'http://127.0.0.1:5173',
+].filter(Boolean));
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
-
-    const isGitLabPagesOrigin = /^https:\/\/[a-z0-9-]+\.gitlab\.io$/i.test(origin);
-
-    // Check against allowed origins (case-insensitive)
-    const isAllowed = allowedOrigins.some(o => {
-      // Handle potential undefined/null in allowedOrigins
-      if (!o) return false;
-      return origin.toLowerCase() === o.toLowerCase() ||
-        origin.toLowerCase().startsWith(o.toLowerCase());
-    });
-
-    if (isAllowed || isGitLabPagesOrigin) {
+    const isGitLabPages = /^https:\/\/[a-z0-9-]+\.gitlab\.io$/i.test(origin);
+    if (allowedOrigins.has(origin) || isGitLabPages) {
       return callback(null, true);
     }
-
-    console.warn(`Blocked CORS request from: ${origin}`);
     return callback(new Error('Not allowed by CORS'), false);
   },
   credentials: true,
 }));
+
+// ---------------------------------------------------------------------------
+// Body parsing
+// ---------------------------------------------------------------------------
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-app.use(morgan(config.nodeEnv === 'development' ? 'dev' : 'combined'));
 
+// ---------------------------------------------------------------------------
+// Logging — redact tokens from URLs in production
+// ---------------------------------------------------------------------------
+const morganFormat = config.nodeEnv === 'development' ? 'dev' : 'tiny';
+app.use(morgan(morganFormat, {
+  stream: {
+    write: (msg: string) =>
+      process.stdout.write(msg.replace(/token=[^&\s"]+/gi, 'token=[REDACTED]')),
+  },
+}));
+
+// ---------------------------------------------------------------------------
+// Rate limiting
+// ---------------------------------------------------------------------------
+const authLoginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, error: { message: 'Too many login attempts. Please try again in 15 minutes.' } },
+});
+
+const faceVerifyLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, error: { message: 'Too many face verification attempts. Please try again in 15 minutes.' } },
+});
+
+const passwordResetLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, error: { message: 'Too many password reset requests. Please try again in an hour.' } },
+});
+
+const aiLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, error: { message: 'Too many AI requests. Please slow down.' } },
+});
+
+const violationLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 120,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => (req as any).user?._id || req.ip || 'unknown',
+  message: { success: false, error: { message: 'Violation report rate limit exceeded.' } },
+});
+
+// Apply targeted rate limits before routes
+app.use('/api/auth/login', authLoginLimiter);
+app.use('/api/auth/verify-face-login', faceVerifyLimiter);
+app.use('/api/auth/forgot-password', passwordResetLimiter);
+app.use('/api/auth/reset-password', passwordResetLimiter);
+app.use('/api/ai', aiLimiter);
+app.use('/api/quizzes/attempts', violationLimiter);
+
+// ---------------------------------------------------------------------------
 // Routes
+// ---------------------------------------------------------------------------
 app.use('/api/auth', authRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api/quizzes', quizRoutes);
@@ -72,46 +125,62 @@ app.use('/api/ai', aiRoutes);
 app.use('/api/questions', questionRoutes);
 app.use('/api/notifications', notificationRoutes);
 
-// Health check
-app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'ok', timestamp: new Date() });
-});
+// ---------------------------------------------------------------------------
+// Health check — verifies DB reachability
+// ---------------------------------------------------------------------------
+app.get('/health', async (_req, res) => {
+  const checks: Record<string, string> = {};
 
-// Root route for basic verification
-app.get('/', (req, res) => {
-  res.status(200).json({
-    message: 'Adaptive Learning API is running',
-    environment: config.nodeEnv,
-    version: '1.0.0'
+  try {
+    const { supabase } = await import('./config/supabase');
+    const { error } = await supabase.from('users').select('id').limit(1);
+    checks.database = error ? 'degraded' : 'ok';
+  } catch {
+    checks.database = 'degraded';
+  }
+
+  checks.ai = config.geminiApiKey ? 'ok' : 'degraded';
+
+  const allOk = Object.values(checks).every(v => v === 'ok');
+  res.status(allOk ? 200 : 503).json({
+    status: allOk ? 'ok' : 'degraded',
+    checks,
+    timestamp: new Date().toISOString(),
   });
 });
 
+app.get('/', (_req, res) => {
+  res.status(200).json({
+    message: 'QuizShield API is running',
+    environment: config.nodeEnv,
+    version: '1.0.0',
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Error handling
+// ---------------------------------------------------------------------------
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-// Only start server if not in serverless environment (Vercel)
+// ---------------------------------------------------------------------------
+// Server startup (skipped in Vercel serverless)
+// ---------------------------------------------------------------------------
 if (process.env.VERCEL !== '1') {
   const PORT = config.port;
-
-  console.log('--- SERVER INITIALIZATION ---');
-  console.log('Process CWD:', process.cwd());
-  console.log('Attempting to bind port:', PORT);
-
   const server = app.listen(Number(PORT), '0.0.0.0', () => {
     console.log(`Server running in ${config.nodeEnv} mode on port ${PORT}`);
-    console.log(`Health check available at http://0.0.0.0:${PORT}/health`);
   });
 
   server.on('error', (error) => {
     console.error('FATAL: Server failed to start:', error);
+    process.exit(1);
   });
 }
 
-// Handle unhandled promise rejections
 process.on('unhandledRejection', (err: Error) => {
-  console.log('UNHANDLED REJECTION! 💥 Shutting down...');
-  console.log(err.name, err.message);
+  console.error('UNHANDLED REJECTION:', err?.name, err?.message);
+  if (process.env.VERCEL !== '1') process.exit(1);
 });
 
 export default app;

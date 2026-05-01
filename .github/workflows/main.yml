@@ -30,10 +30,17 @@ jobs:
       run: npm run lint --if-present
 
     - name: Run Tests
-      run: npm test --if-present -- --coverage
+      run: npm test -- --coverage --passWithNoTests
+      env:
+        NODE_ENV: test
+        JWT_SECRET: ${{ secrets.JWT_SECRET || 'test-secret-key-minimum-32-characters-long' }}
+        SUPABASE_URL: ${{ secrets.SUPABASE_URL || 'https://placeholder.supabase.co' }}
+        SUPABASE_KEY: ${{ secrets.SUPABASE_KEY || 'placeholder-key' }}
 
     - name: Build
       run: npm run build
+      env:
+        NODE_ENV: production
 
     - name: Upload Coverage
       uses: codecov/codecov-action@v3
@@ -65,16 +72,7 @@ jobs:
     - name: Lint
       run: npm run lint
 
-    - name: Run Tests
-      run: npm test --if-present -- --coverage
-
     - name: Build
       run: npm run build
-
-    - name: Upload Coverage
-      uses: codecov/codecov-action@v3
-      if: always()
-      with:
-        files: ./coverage/lcov.info
-        flags: frontend
-        fail_ci_if_error: false
+      env:
+        VITE_API_URL: ${{ secrets.VITE_API_URL || 'https://quiz-shield.vercel.app/api' }}

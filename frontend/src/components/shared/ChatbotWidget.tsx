@@ -39,7 +39,7 @@ const ChatbotWidget = () => {
     const trimmed = input.trim();
     if (!trimmed || loading) return;
 
-    const nextMessages = [...messages, { role: 'user', content: trimmed }];
+    const nextMessages = [...messages, { role: 'user' as const, content: trimmed }];
     setMessages(nextMessages);
     setInput('');
     setLoading(true);

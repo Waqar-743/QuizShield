@@ -1,8 +1,9 @@
 import { Request, Response } from 'express';
 import { cheatingViolationService, ViolationType } from '../services/cheatingViolationService';
 import { asyncHandler } from '../middleware/errorHandler';
+import { supabase } from '../config/supabase';
 
-// Report a violation
+// Report a violation — student must own the attempt
 export const reportViolation = asyncHandler(async (req: Request, res: Response) => {
   const { attemptId } = req.params;
   const {
@@ -23,7 +24,22 @@ export const reportViolation = asyncHandler(async (req: Request, res: Response) 
   if (!attemptId || !normalizedViolationType) {
     res.status(400).json({
       success: false,
-      error: { message: 'attemptId and violationType are required' }
+      error: { message: 'attemptId and violationType are required' },
+    });
+    return;
+  }
+
+  // Verify the attempt belongs to the requesting student
+  const { data: attempt } = await supabase
+    .from('quiz_attempts')
+    .select('user_id')
+    .eq('id', attemptId)
+    .single();
+
+  if (!attempt || attempt.user_id !== userId) {
+    res.status(403).json({
+      success: false,
+      error: { message: 'Not authorized to report violations for this attempt' },
     });
     return;
   }
@@ -43,18 +59,12 @@ export const reportViolation = asyncHandler(async (req: Request, res: Response) 
         alertMessage: alert_message,
         durationSeconds: duration_seconds,
         payloadMetaData: meta_data,
-      }
+      },
     });
 
-    res.status(200).json({
-      success: true,
-      data: result
-    });
+    res.status(200).json({ success: true, data: result });
   } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      error: { message: error.message }
-    });
+    res.status(500).json({ success: false, error: { message: error.message } });
   }
 });
 
@@ -68,18 +78,12 @@ export const getViolations = asyncHandler(async (req: Request, res: Response) =>
     const result = await cheatingViolationService.getViolationsForAttempt(
       attemptId,
       userId,
-      userRole
+      userRole,
     );
-
-    res.status(200).json({
-      success: true,
-      data: result
-    });
+    res.status(200).json({ success: true, data: result });
   } catch (error: any) {
-    res.status(error.message.includes('authorized') ? 403 : 500).json({
-      success: false,
-      error: { message: error.message }
-    });
+    const status = error.message.includes('authorized') ? 403 : 500;
+    res.status(status).json({ success: false, error: { message: error.message } });
   }
 });
 
@@ -91,58 +95,48 @@ export const getViolationSummary = asyncHandler(async (req: Request, res: Respon
   try {
     const result = await cheatingViolationService.getViolationSummary(
       userId,
-      quizId as string | undefined
+      quizId as string | undefined,
     );
-
-    res.status(200).json({
-      success: true,
-      data: result
-    });
+    res.status(200).json({ success: true, data: result });
   } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      error: { message: error.message }
-    });
+    res.status(500).json({ success: false, error: { message: error.message } });
   }
 });
 
-// Flag an attempt
+// Flag an attempt — teachers only
 export const flagAttempt = asyncHandler(async (req: Request, res: Response) => {
   const { attemptId } = req.params;
   const userId = req.user?._id || (req as any).user?.id;
+  const userRole = req.user?.role;
+
+  if (userRole !== 'teacher' && userRole !== 'admin') {
+    res.status(403).json({ success: false, error: { message: 'Only teachers can flag attempts' } });
+    return;
+  }
 
   try {
     const result = await cheatingViolationService.flagAttempt(attemptId, userId);
-
-    res.status(200).json({
-      success: true,
-      data: result
-    });
+    res.status(200).json({ success: true, data: result });
   } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      error: { message: error.message }
-    });
+    res.status(500).json({ success: false, error: { message: error.message } });
   }
 });
 
-// Invalidate an attempt
+// Invalidate an attempt — teachers only
 export const invalidateAttempt = asyncHandler(async (req: Request, res: Response) => {
   const { attemptId } = req.params;
   const userId = req.user?._id || (req as any).user?.id;
+  const userRole = req.user?.role;
+
+  if (userRole !== 'teacher' && userRole !== 'admin') {
+    res.status(403).json({ success: false, error: { message: 'Only teachers can invalidate attempts' } });
+    return;
+  }
 
   try {
     const result = await cheatingViolationService.invalidateAttempt(attemptId, userId);
-
-    res.status(200).json({
-      success: true,
-      data: result,
-      message: 'Attempt has been invalidated'
-    });
+    res.status(200).json({ success: true, data: result, message: 'Attempt has been invalidated' });
   } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      error: { message: error.message }
-    });
+    res.status(500).json({ success: false, error: { message: error.message } });
   }
 });

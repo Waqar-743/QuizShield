@@ -84,6 +84,8 @@ export interface QuizAttempt {
   attemptedAt: string;
   difficulty: 'Easy' | 'Medium' | 'Hard';
   nextDifficultyRecommendation: 'Easy' | 'Medium' | 'Hard';
+  autoSubmitted?: boolean;
+  submissionReason?: string;
 }
 
 export interface Analytics {

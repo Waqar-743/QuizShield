@@ -24,11 +24,15 @@ pages:
   script:
     - cd frontend
     - npm ci
-    - VITE_API_URL=https://quiz-shield.vercel.app/api npm run build -- --base=/
+    - npm run build -- --base=/
     - cp dist/index.html dist/404.html
     - mv dist ../public
   artifacts:
     paths:
       - public
+  variables:
+    # Set VITE_API_URL_PROD in GitLab → Settings → CI/CD → Variables
+    # so the backend URL is not hardcoded into the pipeline file.
+    VITE_API_URL: $VITE_API_URL_PROD
   only:
     - main

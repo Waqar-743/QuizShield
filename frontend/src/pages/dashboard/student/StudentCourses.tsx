@@ -100,12 +100,7 @@ const StudentCourses = () => {
             <PlusIcon className="h-5 w-5" />
             Join Course
           </button>
-          <Link
-            to="/courses"
-            className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors shadow-sm"
-          >
-            Browse Courses
-          </Link>
+
         </div>
       </header>
 

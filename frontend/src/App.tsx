@@ -20,7 +20,7 @@ const RegisterPage = lazy(() => import('./pages/auth/RegisterPage'));
 const ForgotPasswordPage = lazy(() => import('./pages/auth/ForgotPasswordPage'));
 const ResetPasswordPage = lazy(() => import('./pages/auth/ResetPasswordPage'));
 const DashboardPage = lazy(() => import('./pages/dashboard/DashboardPage'));
-const CoursesPage = lazy(() => import('./pages/courses/CoursesPage'));
+
 const CourseDetailPage = lazy(() => import('./pages/courses/CourseDetailPage'));
 const TopicPage = lazy(() => import('./pages/courses/TopicPage'));
 const QuizStartPage = lazy(() => import('./pages/quiz/QuizStartPage'));
@@ -130,7 +130,7 @@ function App() {
       }>
         <Route path="/dashboard" element={<DashboardRedirect />} />
         <Route path="/dashboard-old" element={<DashboardPage />} />
-        <Route path="/courses" element={<CoursesPage />} />
+
         <Route path="/courses/:courseId" element={<CourseDetailPage />} />
         <Route path="/courses/:courseId/topics/:topicId" element={<TopicPage />} />
         <Route path="/analytics" element={<AnalyticsPage />} />

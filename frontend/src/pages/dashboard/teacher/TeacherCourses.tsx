@@ -43,7 +43,7 @@ const TeacherCourses = () => {
   const fetchCourses = async () => {
     setLoading(true);
     try {
-      const response = await api.get('/courses/teacher/my-courses');
+      const response = await api.get('/courses');
       setCourses(response.data.data || []);
     } catch (error) {
       console.error('Error fetching courses:', error);

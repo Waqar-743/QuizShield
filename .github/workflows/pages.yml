@@ -36,12 +36,15 @@ jobs:
         working-directory: ./frontend
         run: npm ci
 
+      - name: Lint
+        working-directory: ./frontend
+        run: npm run lint
+
       - name: Build
         working-directory: ./frontend
         env:
-          # Set this in GitHub: Settings -> Secrets and variables -> Actions -> Variables
-          # Example: https://your-railway-domain.up.railway.app/api
-          VITE_API_URL: ${{ vars.VITE_API_URL }}
+          VITE_API_URL: ${{ vars.VITE_API_URL || 'https://quiz-shield.vercel.app/api' }}
+          NODE_OPTIONS: --max-old-space-size=4096
         run: |
           npm run build -- --base=/${{ github.event.repository.name }}/
           cp dist/index.html dist/404.html

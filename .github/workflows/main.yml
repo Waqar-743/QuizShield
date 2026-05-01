@@ -63,28 +63,16 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '22.x'
-        cache: 'npm'
-        cache-dependency-path: frontend/package-lock.json
 
     - name: Install Dependencies
-      run: npm ci
+      run: npm install --prefer-offline
 
     - name: Lint
       run: npm run lint
 
     - name: Build
-      run: |
-        echo "=== Node $(node --version) | npm $(npm --version) ==="
-        echo "=== Vite binary ===" && ls node_modules/.bin/vite
-        npm run build 2>&1 | tee /tmp/frontend-build.log
-        exit ${PIPESTATUS[0]}
+      shell: bash
+      run: npm run build
       env:
         VITE_API_URL: ${{ secrets.VITE_API_URL || 'https://quiz-shield.vercel.app/api' }}
         NODE_OPTIONS: --max-old-space-size=4096
-
-    - name: Upload build log on failure
-      if: failure()
-      uses: actions/upload-artifact@v4
-      with:
-        name: frontend-build-log
-        path: /tmp/frontend-build.log

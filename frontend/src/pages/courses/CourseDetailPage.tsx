@@ -4,7 +4,7 @@ import { useCourses } from '../../hooks/useCourses';
 import { BookOpenIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 
 const CourseDetailPage: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+  const { courseId: id } = useParams<{ courseId: string }>();
   const { 
     currentCourse, 
     topics, 
@@ -94,7 +94,7 @@ const CourseDetailPage: React.FC = () => {
                     </div>
                     <div className="flex items-center space-x-4">
                       <Link
-                        to={`/topics/${topic._id}`}
+                        to={`/courses/${id}/topics/${topic._id}`}
                         className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                       >
                         <BookOpenIcon className="-ml-0.5 mr-2 h-4 w-4 text-gray-500" aria-hidden="true" />

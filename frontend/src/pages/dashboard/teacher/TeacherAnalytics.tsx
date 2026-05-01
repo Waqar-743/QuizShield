@@ -15,12 +15,10 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  PieChart,
-  Pie,
   Cell,
-  Legend,
   LineChart,
   Line,
+  Legend,
 } from 'recharts';
 
 interface AnalyticsData {
@@ -167,27 +165,47 @@ const TeacherAnalytics = () => {
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Score Distribution</h3>
               <div className="h-72">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
+                {(analytics?.scoreDistribution || []).length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
                       data={analytics?.scoreDistribution || []}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={90}
-                      paddingAngle={2}
-                      dataKey="count"
-                      label={({ range, count }: { range: string; count: number }) => `${range}: ${count}`}
-                      labelLine={false}
+                      margin={{ top: 10, right: 10, left: 0, bottom: 20 }}
                     >
-                      {(analytics?.scoreDistribution || []).map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+                      <XAxis
+                        dataKey="range"
+                        stroke="#6b7280"
+                        fontSize={12}
+                        tick={{ fill: '#374151' }}
+                        label={{ value: 'Score Range', position: 'insideBottom', offset: -10, fill: '#6b7280', fontSize: 12 }}
+                      />
+                      <YAxis
+                        stroke="#6b7280"
+                        fontSize={12}
+                        allowDecimals={false}
+                        label={{ value: 'Students', angle: -90, position: 'insideLeft', fill: '#6b7280', fontSize: 12 }}
+                      />
+                      <Tooltip
+                        formatter={(value: any) => [`${value} student${value !== 1 ? 's' : ''}`, 'Count']}
+                        contentStyle={{
+                          backgroundColor: '#fff',
+                          border: '1px solid #e5e7eb',
+                          borderRadius: '8px',
+                          boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
+                        }}
+                      />
+                      <Bar dataKey="count" name="Students" radius={[6, 6, 0, 0]}>
+                        {(analytics?.scoreDistribution || []).map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color || '#4ca1af'} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="flex items-center justify-center h-full text-gray-400">
+                    <p>No score data available yet</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>

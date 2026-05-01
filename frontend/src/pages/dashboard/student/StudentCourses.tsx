@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useCourses } from '../../../hooks/useCourses';
 import { CourseCard } from '../../../components/shared';
 import { Course } from '../../../types';
@@ -15,6 +15,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 const StudentCourses = () => {
+  const navigate = useNavigate();
   const { courses: enrolledCourses, loading, fetchEnrolledCourses } = useCourses();
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState<'all' | 'in-progress' | 'completed'>('all');
@@ -170,6 +171,7 @@ const StudentCourses = () => {
               key={course._id}
               course={course}
               progress={(course as any).progress}
+              onContinue={() => navigate(`/courses/${course._id}`)}
             />
           ))}
         </div>

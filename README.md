@@ -1,12 +1,12 @@
 # QuizShield
 
-> A final-year project by **Waqar** — built out of frustration, shipped as a real platform.
+> Our ICAT project by **Waqar** — built out of frustration, shipped as a real platform.
 
 ---
 
 ## The problem that started it all
 
-My final-year semester moved online. So did the exams. Within a week, everyone knew the trick: open a second tab, mute the mic, look busy. Teachers could see us on Zoom but couldn't see what we were actually doing. The "honor system" was doing a lot of heavy lifting it wasn't built for.
+Durig COVID classes were moved online. So did the exams. Within a week, everyone knew the trick: open a second tab, mute the mic, look busy. Teachers could see us on Zoom but couldn't see what we were actually doing. The "honor system" was doing a lot of heavy lifting it wasn't built for.
 
 I thought: *what if the platform itself was the invigilator?*
 

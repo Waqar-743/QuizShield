@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import { config } from './config/environment';
@@ -16,6 +17,15 @@ import questionRoutes from './routes/questions';
 import notificationRoutes from './routes/notifications';
 
 const app = express();
+
+// Trust proxy (Vercel/Cloudflare) — required for correct req.ip in rate limiters
+app.set('trust proxy', 1);
+
+// Security headers — disable CSP since this is an API (frontend on separate origin)
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+}));
 
 connectDatabase();
 
@@ -48,8 +58,10 @@ app.use(cors({
 // ---------------------------------------------------------------------------
 // Body parsing
 // ---------------------------------------------------------------------------
+// 10mb is wide enough for face encodings + base64 profile pictures used during
+// registration. Tighten if those flows move to multipart uploads.
 app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '2mb' }));
 
 // ---------------------------------------------------------------------------
 // Logging — redact tokens from URLs in production
@@ -58,7 +70,12 @@ const morganFormat = config.nodeEnv === 'development' ? 'dev' : 'tiny';
 app.use(morgan(morganFormat, {
   stream: {
     write: (msg: string) =>
-      process.stdout.write(msg.replace(/token=[^&\s"]+/gi, 'token=[REDACTED]')),
+      process.stdout.write(
+        msg
+          .replace(/token=[^&\s"]+/gi, 'token=[REDACTED]')
+          .replace(/code=[^&\s"]+/gi, 'code=[REDACTED]')
+          .replace(/password=[^&\s"]+/gi, 'password=[REDACTED]'),
+      ),
   },
 }));
 

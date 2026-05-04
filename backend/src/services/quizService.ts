@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import { supabase } from '../config/supabase';
 import { aiService } from './aiService';
 
@@ -21,29 +22,90 @@ interface QuizData {
   questions: QuizQuestion[];
 }
 
-export const quizService = {
-  // Generate unique 4-digit code
-  async generateUniqueCode(): Promise<string> {
-    let code = Math.floor(1000 + Math.random() * 9000).toString();
-    let attempts = 0;
-    const maxAttempts = 20;
+const MAX_TITLE_LEN = 200;
+const MAX_DESCRIPTION_LEN = 2000;
+const MAX_QUESTIONS = 200;
+const MAX_QUESTION_TEXT_LEN = 2000;
+const MAX_OPTION_LEN = 500;
+const MAX_OPTIONS = 10;
 
-    while (attempts < maxAttempts) {
+function validateQuizPayload(data: QuizData) {
+  const err = (m: string) => Object.assign(new Error(m), { statusCode: 400 });
+  if (!data.title || typeof data.title !== 'string' || data.title.trim().length === 0) {
+    throw err('Quiz title is required');
+  }
+  if (data.title.length > MAX_TITLE_LEN) throw err(`Title must be at most ${MAX_TITLE_LEN} characters`);
+  if (data.description && data.description.length > MAX_DESCRIPTION_LEN) {
+    throw err(`Description must be at most ${MAX_DESCRIPTION_LEN} characters`);
+  }
+  if (data.timeLimit !== undefined && data.timeLimit !== null) {
+    if (typeof data.timeLimit !== 'number' || data.timeLimit < 1 || data.timeLimit > 600) {
+      throw err('Time limit must be between 1 and 600 minutes');
+    }
+  }
+  if (!Array.isArray(data.questions) || data.questions.length === 0) {
+    throw err('Quiz must contain at least one question');
+  }
+  if (data.questions.length > MAX_QUESTIONS) {
+    throw err(`Quiz cannot have more than ${MAX_QUESTIONS} questions`);
+  }
+  data.questions.forEach((q, i) => {
+    if (!q.text || typeof q.text !== 'string' || q.text.trim().length === 0) {
+      throw err(`Question ${i + 1}: text is required`);
+    }
+    if (q.text.length > MAX_QUESTION_TEXT_LEN) {
+      throw err(`Question ${i + 1}: text exceeds ${MAX_QUESTION_TEXT_LEN} characters`);
+    }
+    const isShortAnswer = q.questionType === 'shortAnswer';
+    if (!isShortAnswer) {
+      if (!Array.isArray(q.options) || q.options.length < 2) {
+        throw err(`Question ${i + 1}: must have at least 2 options`);
+      }
+      if (q.options.length > MAX_OPTIONS) {
+        throw err(`Question ${i + 1}: at most ${MAX_OPTIONS} options allowed`);
+      }
+      if (q.options.some((o) => typeof o !== 'string' || o.length > MAX_OPTION_LEN)) {
+        throw err(`Question ${i + 1}: option exceeds ${MAX_OPTION_LEN} characters`);
+      }
+      if (
+        typeof q.correctAnswer !== 'number' ||
+        q.correctAnswer < 0 ||
+        q.correctAnswer >= q.options.length
+      ) {
+        throw err(`Question ${i + 1}: correctAnswer index is out of range`);
+      }
+    } else {
+      if (!q.answerText || typeof q.answerText !== 'string' || q.answerText.trim().length === 0) {
+        throw err(`Question ${i + 1}: answerText is required for short answer`);
+      }
+    }
+  });
+}
+
+export const quizService = {
+  // Generate a unique 4-digit access code. Cryptographically random to avoid
+  // predictability; uses maybeSingle() so a no-row response is not treated as
+  // an error. The 9000-key space is small — pair with a UNIQUE constraint on
+  // teacher_quizzes.access_code so a race between two creators surfaces as a
+  // DB error instead of silently overwriting.
+  async generateUniqueCode(): Promise<string> {
+    const randomCode = () => {
+      const n = crypto.randomInt(1000, 10000);
+      return n.toString();
+    };
+    const maxAttempts = 25;
+
+    for (let i = 0; i < maxAttempts; i++) {
+      const code = randomCode();
       const { data: existing } = await supabase
         .from('teacher_quizzes')
         .select('id')
         .eq('access_code', code)
-        .single();
-
-      if (!existing) break;
-      code = Math.floor(1000 + Math.random() * 9000).toString();
-      attempts++;
+        .maybeSingle();
+      if (!existing) return code;
     }
 
-    if (attempts >= maxAttempts) {
-      throw new Error('Failed to generate unique code. Please try again.');
-    }
-    return code;
+    throw new Error('Failed to generate unique code. Please try again.');
   },
 
   // Send notification only to students enrolled in the quiz course
@@ -98,6 +160,7 @@ export const quizService = {
     if (!data.courseId) {
       throw new Error('Course is required to create a quiz');
     }
+    validateQuizPayload(data);
 
     const { data: courseOwner } = await supabase
       .from('courses')
@@ -190,6 +253,7 @@ export const quizService = {
   },
 
   async updateQuiz(quizId: string, teacherId: string, data: QuizData) {
+    validateQuizPayload(data);
     const { data: quiz, error } = await supabase
       .from('teacher_quizzes')
       .update({
@@ -253,38 +317,51 @@ export const quizService = {
       }
     }
 
-    // Check if quiz has a scheduled start time
+    // Check if quiz has a scheduled start time. The teacher-defined `time_limit`
+    // is the per-attempt duration, NOT the availability window. The availability
+    // window is controlled separately by `is_active`. We only block early starts.
     if (quiz.scheduled_start) {
       const scheduledTime = new Date(quiz.scheduled_start);
       const now = new Date();
-      
-      // Check if quiz hasn't started yet
       if (now < scheduledTime) {
         throw new Error(`Quiz will start at ${scheduledTime.toLocaleString()}. Please wait.`);
       }
-      
-      // Check if quiz has expired (scheduled_start + time_limit)
-      const timeLimit = quiz.time_limit || 30; // default 30 minutes
-      const expiryTime = new Date(scheduledTime.getTime() + timeLimit * 60 * 1000);
-      if (now > expiryTime) {
-        throw new Error('QUIZ_EXPIRED');
-      }
     }
 
-    // Create a quiz attempt
-    const { data: attempt, error: attemptError } = await supabase
-      .from('quiz_attempts')
-      .insert([{
-        user_id: userId,
-        quiz_id: quiz.id,
-        started_at: new Date(),
-        status: 'in-progress',
-        max_score: quiz.questions?.length || 0,
-      }])
-      .select()
-      .single();
+    if (quiz.is_active === false) {
+      throw new Error('This quiz is no longer accepting attempts.');
+    }
 
-    if (attemptError) throw new Error(attemptError.message);
+    // Reuse an existing in-progress attempt instead of spawning duplicates.
+    // This also prevents a student from racing two concurrent attempts to
+    // submit different answer sets.
+    const { data: existing } = await supabase
+      .from('quiz_attempts')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('quiz_id', quiz.id)
+      .eq('status', 'in-progress')
+      .order('started_at', { ascending: false })
+      .limit(1);
+
+    let attempt = existing && existing.length > 0 ? existing[0] : null;
+
+    if (!attempt) {
+      const { data: created, error: attemptError } = await supabase
+        .from('quiz_attempts')
+        .insert([{
+          user_id: userId,
+          quiz_id: quiz.id,
+          started_at: new Date(),
+          status: 'in-progress',
+          max_score: quiz.questions?.length || 0,
+        }])
+        .select()
+        .single();
+
+      if (attemptError) throw new Error(attemptError.message);
+      attempt = created;
+    }
 
     return {
       attemptId: attempt.id,
@@ -545,9 +622,19 @@ export const quizService = {
     // Calculate score
     let score = 0;
     const questions = quiz.questions || [];
-    
+
+    // Robustly extract the trailing question index from a "<quizId>-q<N>" id.
+    // The previous `split('-q')[1]` was fragile because quiz UUIDs can contain
+    // a literal "-q" segment.
+    const extractQuestionIndex = (qid: string): number => {
+      if (typeof qid !== 'string') return NaN;
+      const m = qid.match(/-q(\d+)$/);
+      return m ? parseInt(m[1], 10) : NaN;
+    };
+
     answers.forEach((answer) => {
-      const questionIndex = parseInt(answer.questionId.split('-q')[1]);
+      const questionIndex = extractQuestionIndex(answer.questionId);
+      if (Number.isNaN(questionIndex)) return;
       const question = questions[questionIndex];
       if (!question) return;
 
@@ -576,12 +663,20 @@ export const quizService = {
       updateData.violation_count = violations.length;
     }
 
-    const { error: updateError } = await supabase
+    // Atomic guard: only the first concurrent submit succeeds. The
+    // `.eq('status', 'in-progress')` filter prevents a double-submit from
+    // overwriting the original score with a second answer set.
+    const { data: updatedRows, error: updateError } = await supabase
       .from('quiz_attempts')
       .update(updateData)
-      .eq('id', attemptId);
+      .eq('id', attemptId)
+      .eq('status', 'in-progress')
+      .select('id');
 
     if (updateError) throw new Error(updateError.message);
+    if (!updatedRows || updatedRows.length === 0) {
+      throw new Error('Quiz already submitted');
+    }
 
     if (quiz.teacher_id) {
       const { error: notifyError } = await supabase.from('notifications').insert([{

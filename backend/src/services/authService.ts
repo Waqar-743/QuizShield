@@ -12,32 +12,51 @@ const PASSWORD_RESET_TOKEN_TTL_MS = 60 * 60 * 1000;
 const PASSWORD_RESET_SUCCESS_MESSAGE =
   'If an account with that email exists, a password reset link has been sent.';
 const ALLOWED_ROLES = ['student', 'teacher'] as const;
+const BCRYPT_ROUNDS = 12;
+const ACCESS_TOKEN_TTL = '7d';
+const FACE_VERIFY_TOKEN_TTL = '5m';
+const MAX_NAME_LEN = 80;
+const MAX_EMAIL_LEN = 254;
+const MAX_PASSWORD_LEN = 128;
+const MAX_BIO_LEN = 500;
 
 export const authService = {
   async register(userData: any) {
     const { name, email, password, role = 'student', profilePictureBase64, faceEncoding } = userData;
 
     if (!name || name.trim().length < 2) throw createHttpError('Name must be at least 2 characters');
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw createHttpError('Valid email is required');
+    if (name.trim().length > MAX_NAME_LEN) throw createHttpError(`Name must be at most ${MAX_NAME_LEN} characters`);
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > MAX_EMAIL_LEN) {
+      throw createHttpError('Valid email is required');
+    }
     if (!password || password.length < 8) throw createHttpError('Password must be at least 8 characters');
+    if (password.length > MAX_PASSWORD_LEN) throw createHttpError(`Password must be at most ${MAX_PASSWORD_LEN} characters`);
+    if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
+      throw createHttpError('Password must contain at least one uppercase letter, one lowercase letter, and one number');
+    }
     if (!ALLOWED_ROLES.includes(role)) throw createHttpError('Invalid role specified');
+
+    const normalizedEmail = email.toLowerCase().trim();
 
     const { data: existingUsers, error: checkError } = await supabase
       .from('users')
       .select('id')
-      .eq('email', email.toLowerCase().trim());
+      .eq('email', normalizedEmail);
 
     if (checkError) throw new Error('Database error');
-    if (existingUsers && existingUsers.length > 0) throw createHttpError('User already exists');
+    // Generic message — do not confirm whether the email is registered.
+    if (existingUsers && existingUsers.length > 0) {
+      throw createHttpError('Unable to register with the provided details', 409);
+    }
 
-    const salt = await bcrypt.genSalt(10);
+    const salt = await bcrypt.genSalt(BCRYPT_ROUNDS);
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const { data: newUser, error } = await supabase
       .from('users')
       .insert([{
         name: name.trim(),
-        email: email.toLowerCase().trim(),
+        email: normalizedEmail,
         password: hashedPassword,
         role,
         interests: [],
@@ -114,7 +133,7 @@ export const authService = {
     const normalizedRole = (user.role || '').toLowerCase();
 
     if (normalizedRole === 'teacher') {
-      const token = jwt.sign({ id: user.id, role: user.role }, config.jwtSecret, { expiresIn: '30d' });
+      const token = jwt.sign({ id: user.id, role: user.role }, config.jwtSecret, { expiresIn: ACCESS_TOKEN_TTL });
       return {
         requiresFaceVerification: false,
         user: { _id: user.id, name: user.name, email: user.email, role: user.role },
@@ -126,13 +145,13 @@ export const authService = {
       const tempToken = jwt.sign(
         { id: user.id, role: user.role, type: 'face_verification' },
         config.jwtSecret,
-        { expiresIn: '5m' },
+        { expiresIn: FACE_VERIFY_TOKEN_TTL },
       );
       return { requiresFaceVerification: true, tempToken, userName: user.name };
     }
 
     // Fallback for unknown roles — issue token so app doesn't deadlock
-    const token = jwt.sign({ id: user.id, role: user.role }, config.jwtSecret, { expiresIn: '30d' });
+    const token = jwt.sign({ id: user.id, role: user.role }, config.jwtSecret, { expiresIn: ACCESS_TOKEN_TTL });
     return {
       requiresFaceVerification: false,
       user: { _id: user.id, name: user.name, email: user.email, role: user.role },
@@ -193,7 +212,7 @@ export const authService = {
       }
     }
 
-    const token = jwt.sign({ id: user.id, role: user.role }, config.jwtSecret, { expiresIn: '30d' });
+    const token = jwt.sign({ id: user.id, role: user.role }, config.jwtSecret, { expiresIn: ACCESS_TOKEN_TTL });
     return {
       user: { _id: user.id, name: user.name, email: user.email, role: user.role },
       token,
@@ -260,7 +279,7 @@ export const authService = {
     const user = users && users.length > 0 ? users[0] : null;
     if (!user) throw createHttpError('This password reset link is invalid or has expired.');
 
-    const salt = await bcrypt.genSalt(10);
+    const salt = await bcrypt.genSalt(BCRYPT_ROUNDS);
     const hashedPassword = await bcrypt.hash(newPassword, salt);
 
     const { error: updateError } = await supabase
@@ -292,9 +311,32 @@ export const authService = {
   async updateProfile(userId: string, updateData: any) {
     const { name, bio, interests } = updateData;
 
+    const cleanName = typeof name === 'string' ? name.trim() : undefined;
+    if (cleanName !== undefined) {
+      if (cleanName.length < 2) throw createHttpError('Name must be at least 2 characters');
+      if (cleanName.length > MAX_NAME_LEN) throw createHttpError(`Name must be at most ${MAX_NAME_LEN} characters`);
+    }
+    if (bio !== undefined && bio !== null && typeof bio !== 'string') {
+      throw createHttpError('Bio must be a string');
+    }
+    if (typeof bio === 'string' && bio.length > MAX_BIO_LEN) {
+      throw createHttpError(`Bio must be at most ${MAX_BIO_LEN} characters`);
+    }
+    if (interests !== undefined && !Array.isArray(interests)) {
+      throw createHttpError('Interests must be an array');
+    }
+    if (Array.isArray(interests) && interests.length > 20) {
+      throw createHttpError('At most 20 interests are allowed');
+    }
+
+    const patch: Record<string, any> = {};
+    if (cleanName !== undefined) patch.name = cleanName;
+    if (bio !== undefined) patch.bio = bio;
+    if (interests !== undefined) patch.interests = interests;
+
     const { data: user, error } = await supabase
       .from('users')
-      .update({ name: name?.trim(), bio, interests })
+      .update(patch)
       .eq('id', userId)
       .select()
       .single();
@@ -317,7 +359,7 @@ export const authService = {
 
     if (error) throw new Error(error.message);
 
-    const token = jwt.sign({ id: user.id, role: user.role }, config.jwtSecret, { expiresIn: '30d' });
+    const token = jwt.sign({ id: user.id, role: user.role }, config.jwtSecret, { expiresIn: ACCESS_TOKEN_TTL });
     return { user: { ...user, _id: user.id }, token };
   },
 };

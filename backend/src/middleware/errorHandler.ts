@@ -1,34 +1,65 @@
 import { Request, Response, NextFunction } from 'express';
 
+const isProd = process.env.NODE_ENV === 'production';
+
+// Errors whose .message is safe to surface to clients verbatim. Any other
+// message at status 500 is replaced with a generic 'Server error' so that
+// raw DB / supabase errors do not leak schema details to attackers.
+const SAFE_400_MESSAGES = new Set<string>([
+  'Invalid credentials',
+  'Not authorized',
+  'No token provided',
+  'User not found',
+]);
+
 export const notFoundHandler = (req: Request, res: Response, next: NextFunction) => {
   console.warn(`[404] Route not found: ${req.method} ${req.originalUrl}`);
-  const error = new Error(`Not Found - ${req.originalUrl}`);
-  res.status(404);
+  const error: any = new Error(`Not Found - ${req.originalUrl}`);
+  error.statusCode = 404;
   next(error);
 };
 
-export const errorHandler = (err: any, req: Request, res: Response, next: NextFunction) => {
-  console.error(`[Error] ${req.method} ${req.originalUrl}:`, err);
-  
-  // Determine status code from error message or default to 500
-  let statusCode = err.statusCode || (res.statusCode === 200 ? 500 : res.statusCode);
-  
-  // Map common error messages to appropriate status codes
-  const message = err.message || 'Server error';
-  if (message === 'Invalid credentials' || message === 'Not authorized' || message === 'No token provided') {
-    statusCode = 401;
-  } else if (message === 'User already exists' || message === 'User not found') {
-    statusCode = 400;
+export const errorHandler = (err: any, req: Request, _res: Response, _next: NextFunction) => {
+  // Always log the full error server-side
+  console.error(`[Error] ${req.method} ${req.originalUrl}:`, err?.message || err);
+  if (err?.stack && !isProd) console.error(err.stack);
+
+  let statusCode: number = err.statusCode || 0;
+  let message: string = err.message || 'Server error';
+
+  // Map common auth/registration messages to canonical HTTP codes
+  if (!statusCode) {
+    if (
+      message === 'Invalid credentials' ||
+      message === 'Not authorized' ||
+      message === 'No token provided'
+    ) {
+      statusCode = 401;
+    } else if (message === 'User not found') {
+      statusCode = 404;
+    } else if (message.startsWith('Unable to register')) {
+      statusCode = 409;
+    } else {
+      statusCode = 500;
+    }
   }
-  
-  res.status(statusCode);
-  res.json({
+
+  // In production, never echo raw 500 messages — they often contain DB
+  // internals (constraint names, query fragments).
+  if (statusCode >= 500 && isProd) {
+    message = 'Server error';
+  } else if (statusCode >= 400 && statusCode < 500 && isProd) {
+    // 4xx is generally safe, but redact anything that looks like a stack frame
+    if (message.includes('\n') || message.length > 500) {
+      message = SAFE_400_MESSAGES.has(message) ? message : 'Bad request';
+    }
+  }
+
+  _res.status(statusCode).json({
     success: false,
-    message, // Keep top level for some clients
-    error: {
-      message,
-    },
-    stack: process.env.NODE_ENV === 'production' ? null : err.stack,
+    message,
+    error: { message },
+    ...(isProd ? {} : { stack: err.stack }),
   });
 };
 

@@ -1,13 +1,24 @@
 import { supabase } from '../config/supabase';
 import { emailService } from './emailService';
 
+function isMissingColumnError(err: any, column: string): boolean {
+  if (!err) return false;
+  const haystack = `${err.message || ''} ${err.details || ''}`.toLowerCase();
+  return err.code === '42703' || haystack.includes(`column "${column}"`) || haystack.includes(`column ${column} does not exist`);
+}
+
 // Throws 400 when an enrollment would exceed the teacher-defined cap.
+// If migration 006 hasn't run, the column is missing — treat as uncapped.
 async function assertCourseHasCapacity(courseId: string): Promise<void> {
-  const { data: course } = await supabase
+  const { data: course, error } = await supabase
     .from('courses')
     .select('max_students')
     .eq('id', courseId)
     .single();
+  if (error) {
+    if (isMissingColumnError(error, 'max_students')) return;
+    return;
+  }
   const cap = course?.max_students;
   if (typeof cap === 'number' && cap > 0) {
     const { count } = await supabase
@@ -15,9 +26,9 @@ async function assertCourseHasCapacity(courseId: string): Promise<void> {
       .select('*', { count: 'exact', head: true })
       .eq('course_id', courseId);
     if ((count || 0) >= cap) {
-      const err: any = new Error('This course is full. Please contact your teacher.');
-      err.statusCode = 400;
-      throw err;
+      const e: any = new Error('This course is full. Please contact your teacher.');
+      e.statusCode = 400;
+      throw e;
     }
   }
 }
@@ -203,19 +214,29 @@ export const courseService = {
     }
     
     console.log('Insert data:', insertData);
-    
-    const { data: course, error } = await supabase
+
+    let insertResult = await supabase
       .from('courses')
       .insert([insertData])
       .select()
       .single();
 
+    if (insertResult.error && isMissingColumnError(insertResult.error, 'max_students')) {
+      console.warn('courses.max_students missing — run migration 006. Falling back without it.');
+      const { max_students, ...fallback } = insertData;
+      insertResult = await supabase
+        .from('courses')
+        .insert([fallback])
+        .select()
+        .single();
+    }
+
+    const { data: course, error } = insertResult;
     if (error) {
       console.error('Supabase error creating course:', error);
       throw new Error(error.message);
     }
 
-    console.log('Course created successfully:', course);
     return { ...course, _id: course.id, createdBy: course.created_by, courseCode: course.course_code };
   },
 
@@ -244,13 +265,25 @@ export const courseService = {
       if (Number.isFinite(n) && n > 0) updatePayload.max_students = Math.floor(n);
     }
 
-    const { data: course, error } = await supabase
+    let updateResult = await supabase
       .from('courses')
       .update(updatePayload)
       .eq('id', courseId)
       .select()
       .single();
 
+    if (updateResult.error && isMissingColumnError(updateResult.error, 'max_students')) {
+      console.warn('courses.max_students missing — run migration 006. Falling back without it.');
+      const { max_students, ...fallback } = updatePayload;
+      updateResult = await supabase
+        .from('courses')
+        .update(fallback)
+        .eq('id', courseId)
+        .select()
+        .single();
+    }
+
+    const { data: course, error } = updateResult;
     if (error) {
       throw new Error(error.message);
     }

@@ -23,6 +23,22 @@ interface QuizData {
   cameraMonitoring?: boolean;
 }
 
+// PostgREST returns 42703 / "column ... does not exist" when a referenced
+// column is missing. We use this to fall back gracefully when an optional
+// migration hasn't been applied yet.
+function isMissingColumnError(err: any, column: string): boolean {
+  if (!err) return false;
+  const msg: string = err.message || '';
+  const details: string = err.details || '';
+  const haystack = `${msg} ${details}`.toLowerCase();
+  return (
+    err.code === '42703' ||
+    haystack.includes(`column "${column}"`) ||
+    haystack.includes(`'${column}' column`) ||
+    haystack.includes(`column ${column} does not exist`)
+  );
+}
+
 const MAX_TITLE_LEN = 200;
 const MAX_DESCRIPTION_LEN = 2000;
 const MAX_QUESTIONS = 200;
@@ -176,24 +192,37 @@ export const quizService = {
     // Generate unique 4-digit access code
     const accessCode = await this.generateUniqueCode();
 
-    const { data: quiz, error } = await supabase
+    const baseInsert: any = {
+      teacher_id: teacherId,
+      title: data.title,
+      description: data.description || '',
+      course_id: data.courseId,
+      time_limit: data.timeLimit,
+      questions: data.questions,
+      access_code: accessCode,
+      scheduled_start: data.scheduledStart || null,
+      is_active: true,
+      created_at: new Date(),
+    };
+
+    // camera_monitoring column was added in migration 005. If the DB hasn't
+    // been migrated yet, retry without that field rather than 500ing.
+    let insertResult = await supabase
       .from('teacher_quizzes')
-      .insert([{
-        teacher_id: teacherId,
-        title: data.title,
-        description: data.description || '',
-        course_id: data.courseId,
-        time_limit: data.timeLimit,
-        questions: data.questions,
-        access_code: accessCode,
-        scheduled_start: data.scheduledStart || null,
-        is_active: true,
-        camera_monitoring: data.cameraMonitoring !== false,
-        created_at: new Date(),
-      }])
+      .insert([{ ...baseInsert, camera_monitoring: data.cameraMonitoring !== false }])
       .select()
       .single();
 
+    if (insertResult.error && isMissingColumnError(insertResult.error, 'camera_monitoring')) {
+      console.warn('teacher_quizzes.camera_monitoring missing — run migration 005. Falling back without it.');
+      insertResult = await supabase
+        .from('teacher_quizzes')
+        .insert([baseInsert])
+        .select()
+        .single();
+    }
+
+    const { data: quiz, error } = insertResult;
     if (error) throw new Error(error.message);
 
     // Send notification only to enrolled students in selected course
@@ -258,24 +287,37 @@ export const quizService = {
 
   async updateQuiz(quizId: string, teacherId: string, data: QuizData) {
     validateQuizPayload(data);
-    const updatePayload: any = {
+    const baseUpdate: any = {
       title: data.title,
       description: data.description || '',
       time_limit: data.timeLimit,
       questions: data.questions,
       updated_at: new Date(),
     };
-    if (typeof data.cameraMonitoring === 'boolean') {
-      updatePayload.camera_monitoring = data.cameraMonitoring;
-    }
-    const { data: quiz, error } = await supabase
+    const withCamera = typeof data.cameraMonitoring === 'boolean'
+      ? { ...baseUpdate, camera_monitoring: data.cameraMonitoring }
+      : baseUpdate;
+
+    let updateResult = await supabase
       .from('teacher_quizzes')
-      .update(updatePayload)
+      .update(withCamera)
       .eq('id', quizId)
       .eq('teacher_id', teacherId)
       .select()
       .single();
 
+    if (updateResult.error && isMissingColumnError(updateResult.error, 'camera_monitoring')) {
+      console.warn('teacher_quizzes.camera_monitoring missing — run migration 005. Falling back without it.');
+      updateResult = await supabase
+        .from('teacher_quizzes')
+        .update(baseUpdate)
+        .eq('id', quizId)
+        .eq('teacher_id', teacherId)
+        .select()
+        .single();
+    }
+
+    const { data: quiz, error } = updateResult;
     if (error) throw new Error(error.message);
     return {
       _id: quiz.id,

@@ -187,18 +187,19 @@ const TeacherQuizzes = () => {
     e.preventDefault();
 
     if (formMode === 'question') {
-      const question = formData.questions[0];
       if (!formData.courseId) {
         toast.error('Please select a course');
         return;
       }
       if (!formData.questionTitle.trim()) {
-        toast.error('Question title is required');
+        toast.error('Title is required');
         return;
       }
-      if (!question.text.trim()) {
-        toast.error('Question text is required');
-        return;
+      for (const q of formData.questions) {
+        if (!q.text.trim()) {
+          toast.error('All questions must have text');
+          return;
+        }
       }
 
       try {
@@ -206,31 +207,35 @@ const TeacherQuizzes = () => {
           ? new Date(formData.questionScheduledStart).toISOString()
           : null;
 
+        const totalSeconds = formData.questions.reduce((sum, q) => sum + (q.timeLimit || 60), 0);
+
         await api.post('/quizzes', {
           title: formData.questionTitle,
-          description: formData.description || 'Single-question assessment',
+          description: formData.description || 'Short-answer assessment',
           courseId: formData.courseId,
           scheduledStart: questionScheduledStart,
-          timeLimit: Math.ceil((question.timeLimit || 60) / 60),
+          timeLimit: Math.max(1, Math.ceil(totalSeconds / 60)),
           cameraMonitoring: formData.cameraMonitoring,
-          questions: [{
-            text: question.text,
+          questions: formData.questions.map((q) => ({
+            text: q.text,
             options: [],
             correctAnswer: -1,
-            answerText: question.answerText,
+            answerText: q.answerText,
             questionType: 'shortAnswer',
-            difficulty: question.difficulty,
-            explanation: question.explanation,
-            timeLimit: question.timeLimit || 60,
-          }],
+            difficulty: q.difficulty,
+            explanation: q.explanation,
+            timeLimit: q.timeLimit || 60,
+          })),
         });
 
-        toast.success('Question created with quiz features successfully');
+        toast.success(formData.questions.length > 1
+          ? `${formData.questions.length} questions created successfully`
+          : 'Question created successfully');
         setModalOpen(false);
         fetchQuizzes();
       } catch (error: any) {
         console.error('Save Question Error:', error);
-        const message = error.response?.data?.message || error.message || 'Failed to save question';
+        const message = error.response?.data?.error?.message || error.response?.data?.message || error.message || 'Failed to save question';
         toast.error(message);
       }
       return;
@@ -610,23 +615,19 @@ const TeacherQuizzes = () => {
 
               <div className="border-t pt-4">
                 <div className="flex items-center justify-between mb-4">
-                  <h4 className="text-md font-semibold text-gray-900">
-                    {formMode === 'quiz' ? 'Questions' : 'Question'}
-                  </h4>
-                  {formMode === 'quiz' && (
-                    <button
-                      type="button"
-                      onClick={addQuestion}
-                      className="inline-flex items-center gap-1 px-3 py-1.5 text-sm bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors"
-                    >
-                      <PlusIcon className="h-4 w-4" />
-                      Add Question
-                    </button>
-                  )}
+                  <h4 className="text-md font-semibold text-gray-900">Questions</h4>
+                  <button
+                    type="button"
+                    onClick={addQuestion}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 text-sm bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors"
+                  >
+                    <PlusIcon className="h-4 w-4" />
+                    Add Question
+                  </button>
                 </div>
 
                 <div className="space-y-6">
-                  {(formMode === 'quiz' ? formData.questions : [formData.questions[0]]).map((question, qIndex) => (
+                  {formData.questions.map((question, qIndex) => (
                     <div key={qIndex} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
                       <div className="flex items-center justify-between mb-3">
                         <span className="font-medium text-gray-700">Question {qIndex + 1}</span>
@@ -658,7 +659,7 @@ const TeacherQuizzes = () => {
                             <option value="Hard">Hard</option>
                           </select>
 
-                          {formMode === 'quiz' && formData.questions.length > 1 && (
+                          {formData.questions.length > 1 && (
                             <button
                               type="button"
                               onClick={() => removeQuestion(qIndex)}

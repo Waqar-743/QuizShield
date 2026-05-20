@@ -220,7 +220,6 @@ const TeacherQuizzes = () => {
             text: q.text,
             options: [],
             correctAnswer: -1,
-            answerText: q.answerText,
             questionType: 'shortAnswer',
             difficulty: q.difficulty,
             explanation: q.explanation,
@@ -706,15 +705,8 @@ const TeacherQuizzes = () => {
                           ))}
                         </div>
                       ) : (
-                        <div className="mb-3">
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Answer</label>
-                          <textarea
-                            value={question.answerText || ''}
-                            onChange={(e) => updateQuestion(qIndex, 'answerText', e.target.value)}
-                            rows={3}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                            placeholder="Expected answer (optional)"
-                          />
+                        <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-700">
+                          Students will type their own answer. You will grade their submissions manually from the Submissions page.
                         </div>
                       )}
 

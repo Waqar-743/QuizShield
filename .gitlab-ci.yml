@@ -31,8 +31,7 @@ pages:
     paths:
       - public
   variables:
-    # Set VITE_API_URL_PROD in GitLab → Settings → CI/CD → Variables
-    # so the backend URL is not hardcoded into the pipeline file.
-    VITE_API_URL: $VITE_API_URL_PROD
+    # Public backend URL — hardcoded so forks build without extra CI setup.
+    VITE_API_URL: "https://quiz-shield.vercel.app/api"
   only:
     - main

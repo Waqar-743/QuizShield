@@ -64,5 +64,5 @@ jobs:
     - name: Build
       run: npx vite build
       env:
-        VITE_API_URL: ${{ vars.VITE_API_URL || 'https://quiz-shield.vercel.app/api' }}
+        VITE_API_URL: 'https://quiz-shield.vercel.app/api'
         NODE_OPTIONS: --max-old-space-size=4096

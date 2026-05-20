@@ -92,8 +92,9 @@ function validateQuizPayload(data: QuizData) {
         throw err(`Question ${i + 1}: correctAnswer index is out of range`);
       }
     } else {
-      if (!q.answerText || typeof q.answerText !== 'string' || q.answerText.trim().length === 0) {
-        throw err(`Question ${i + 1}: answerText is required for short answer`);
+      // Short-answer questions are teacher-graded; no expected answer required.
+      if (q.answerText && typeof q.answerText !== 'string') {
+        throw err(`Question ${i + 1}: answerText must be a string`);
       }
     }
   });
@@ -205,8 +206,7 @@ export const quizService = {
       created_at: new Date(),
     };
 
-    // camera_monitoring column was added in migration 005. If the DB hasn't
-    // been migrated yet, retry without that field rather than 500ing.
+    // camera_monitoring column was added in migration 005.
     let insertResult = await supabase
       .from('teacher_quizzes')
       .insert([{ ...baseInsert, camera_monitoring: data.cameraMonitoring !== false }])
@@ -214,7 +214,16 @@ export const quizService = {
       .single();
 
     if (insertResult.error && isMissingColumnError(insertResult.error, 'camera_monitoring')) {
-      console.warn('teacher_quizzes.camera_monitoring missing — run migration 005. Falling back without it.');
+      // If teacher explicitly opted OUT of camera, we must refuse — silently
+      // falling back would persist the wrong setting and surprise the student.
+      if (data.cameraMonitoring === false) {
+        const err: any = new Error(
+          'Database is missing the camera_monitoring column. Please run migration 005_add_camera_monitoring.sql in Supabase before disabling camera for a quiz.'
+        );
+        err.statusCode = 500;
+        throw err;
+      }
+      console.warn('teacher_quizzes.camera_monitoring missing — run migration 005. Falling back to default (camera on).');
       insertResult = await supabase
         .from('teacher_quizzes')
         .insert([baseInsert])

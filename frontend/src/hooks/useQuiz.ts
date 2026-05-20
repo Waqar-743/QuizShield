@@ -91,7 +91,7 @@ export const useQuiz = () => {
   const getAttemptResults = useCallback(async (attemptId: string) => {
     setLoading(true);
     try {
-      const response = await api.get(`/quizzes/attempt/${attemptId}`);
+      const response = await api.get(`/quizzes/attempt/${attemptId}/results`);
       setCurrentAttempt(response.data.data);
       setError(null);
     } catch (err: any) {

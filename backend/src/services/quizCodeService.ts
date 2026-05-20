@@ -107,6 +107,7 @@ export const quizCodeService = {
         timeLimit: quiz.time_limit,
         questionCount: quiz.questions?.length || 0,
         scheduledStart: quiz.scheduled_start,
+        cameraMonitoring: quiz.camera_monitoring !== false,
         expiresAt,
         isExpired,
       },

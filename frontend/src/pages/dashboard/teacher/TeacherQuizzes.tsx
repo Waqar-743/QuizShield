@@ -21,6 +21,7 @@ interface Quiz {
   questions: QuestionItem[];
   timeLimit?: number;
   scheduledStart?: string;
+  cameraMonitoring?: boolean;
   createdAt: string;
   accessCode: string;
 }
@@ -54,6 +55,7 @@ const TeacherQuizzes = () => {
     courseId: '',
     timeLimit: 0,
     scheduledStart: '',
+    cameraMonitoring: true,
     questionTitle: '',
     questionScheduledStart: '',
     questions: [
@@ -118,6 +120,7 @@ const TeacherQuizzes = () => {
         courseId: quiz.courseId || '',
         timeLimit: quiz.timeLimit || 0,
         scheduledStart: quiz.scheduledStart ? utcToLocal(quiz.scheduledStart) : '',
+        cameraMonitoring: quiz.cameraMonitoring !== false,
         questionTitle: '',
         questionScheduledStart: '',
         questions: quiz.questions.length > 0 ? quiz.questions.map(q => ({
@@ -137,6 +140,7 @@ const TeacherQuizzes = () => {
         courseId: '',
         timeLimit: 0,
         scheduledStart: '',
+        cameraMonitoring: true,
         questionTitle: '',
         questionScheduledStart: '',
         questions: [
@@ -208,6 +212,7 @@ const TeacherQuizzes = () => {
           courseId: formData.courseId,
           scheduledStart: questionScheduledStart,
           timeLimit: Math.ceil((question.timeLimit || 60) / 60),
+          cameraMonitoring: formData.cameraMonitoring,
           questions: [{
             text: question.text,
             options: [],
@@ -251,8 +256,9 @@ const TeacherQuizzes = () => {
     const submitData = {
       ...formData,
       scheduledStart: formData.scheduledStart && formData.scheduledStart.trim() !== ''
-        ? new Date(formData.scheduledStart).toISOString() 
+        ? new Date(formData.scheduledStart).toISOString()
         : null,
+      cameraMonitoring: formData.cameraMonitoring,
     };
 
     try {
@@ -524,6 +530,22 @@ const TeacherQuizzes = () => {
                       placeholder="Brief description of the quiz"
                     />
                   </div>
+
+                  <div className="flex items-start gap-3 p-3 border border-gray-200 rounded-lg bg-gray-50">
+                    <input
+                      id="cameraMonitoring"
+                      type="checkbox"
+                      checked={formData.cameraMonitoring}
+                      onChange={(e) => setFormData({ ...formData, cameraMonitoring: e.target.checked })}
+                      className="mt-1 h-4 w-4 text-indigo-600 focus:ring-indigo-500 rounded"
+                    />
+                    <label htmlFor="cameraMonitoring" className="text-sm text-gray-700 cursor-pointer">
+                      <span className="font-medium">Require camera monitoring</span>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        When ON, students must enable their webcam to take this quiz. When OFF, no camera is required.
+                      </p>
+                    </label>
+                  </div>
                 </>
               )}
 
@@ -567,6 +589,21 @@ const TeacherQuizzes = () => {
                     <p className="mt-1 text-xs text-gray-500">
                       If set, students cannot start the question before this time
                     </p>
+                  </div>
+                  <div className="md:col-span-3 flex items-start gap-3 p-3 border border-gray-200 rounded-lg bg-gray-50">
+                    <input
+                      id="cameraMonitoringQ"
+                      type="checkbox"
+                      checked={formData.cameraMonitoring}
+                      onChange={(e) => setFormData({ ...formData, cameraMonitoring: e.target.checked })}
+                      className="mt-1 h-4 w-4 text-indigo-600 focus:ring-indigo-500 rounded"
+                    />
+                    <label htmlFor="cameraMonitoringQ" className="text-sm text-gray-700 cursor-pointer">
+                      <span className="font-medium">Require camera monitoring</span>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        When ON, students must enable their webcam. When OFF, no camera is required.
+                      </p>
+                    </label>
                   </div>
                 </div>
               )}

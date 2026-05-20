@@ -15,3 +15,6 @@ coverage/
 .git_backup/
 frontend/.git_backup/
 .vercel
+.claude/
+Untitled-1.json
+install.cmd

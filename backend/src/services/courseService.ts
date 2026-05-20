@@ -1,6 +1,27 @@
 import { supabase } from '../config/supabase';
 import { emailService } from './emailService';
 
+// Throws 400 when an enrollment would exceed the teacher-defined cap.
+async function assertCourseHasCapacity(courseId: string): Promise<void> {
+  const { data: course } = await supabase
+    .from('courses')
+    .select('max_students')
+    .eq('id', courseId)
+    .single();
+  const cap = course?.max_students;
+  if (typeof cap === 'number' && cap > 0) {
+    const { count } = await supabase
+      .from('enrollments')
+      .select('*', { count: 'exact', head: true })
+      .eq('course_id', courseId);
+    if ((count || 0) >= cap) {
+      const err: any = new Error('This course is full. Please contact your teacher.');
+      err.statusCode = 400;
+      throw err;
+    }
+  }
+}
+
 export const courseService = {
   async getAllCourses(filters: any = {}) {
     let query = supabase.from('courses').select('*');
@@ -21,8 +42,20 @@ export const courseService = {
       throw new Error(error.message);
     }
 
-    // Map id to _id for frontend compatibility
-    return courses.map(course => ({ ...course, _id: course.id }));
+    return Promise.all(
+      (courses || []).map(async (course: any) => {
+        const { count } = await supabase
+          .from('enrollments')
+          .select('*', { count: 'exact', head: true })
+          .eq('course_id', course.id);
+        return {
+          ...course,
+          _id: course.id,
+          maxStudents: course.max_students ?? null,
+          enrollmentCount: count || 0,
+        };
+      })
+    );
   },
 
   async getCourseById(courseId: string) {
@@ -51,6 +84,8 @@ export const courseService = {
     if (existing) {
       return { message: 'Already enrolled' };
     }
+
+    await assertCourseHasCapacity(courseId);
 
     const { error } = await supabase
       .from('enrollments')
@@ -130,6 +165,8 @@ export const courseService = {
       return { message: 'Already enrolled in this course', course: { _id: course.id, title: course.title } };
     }
 
+    await assertCourseHasCapacity(course.id);
+
     const { error } = await supabase
       .from('enrollments')
       .insert([{ user_id: userId, course_id: course.id, enrolled_at: new Date() }]);
@@ -152,7 +189,7 @@ export const courseService = {
     
     const courseCode = await this.generateUniqueCourseCode();
 
-    const insertData = {
+    const insertData: any = {
       title: courseData.title,
       description: courseData.description || '',
       category: courseData.category || 'Other',
@@ -160,6 +197,10 @@ export const courseService = {
       created_by: teacherId,
       course_code: courseCode,
     };
+    if (courseData.maxStudents !== undefined && courseData.maxStudents !== null && courseData.maxStudents !== '') {
+      const n = Number(courseData.maxStudents);
+      if (Number.isFinite(n) && n > 0) insertData.max_students = Math.floor(n);
+    }
     
     console.log('Insert data:', insertData);
     
@@ -190,14 +231,22 @@ export const courseService = {
       throw new Error('Not authorized to update this course');
     }
 
+    const updatePayload: any = {
+      title: courseData.title,
+      description: courseData.description,
+      category: courseData.category,
+      difficulty: courseData.difficulty,
+    };
+    if (courseData.maxStudents === null || courseData.maxStudents === '') {
+      updatePayload.max_students = null;
+    } else if (courseData.maxStudents !== undefined) {
+      const n = Number(courseData.maxStudents);
+      if (Number.isFinite(n) && n > 0) updatePayload.max_students = Math.floor(n);
+    }
+
     const { data: course, error } = await supabase
       .from('courses')
-      .update({
-        title: courseData.title,
-        description: courseData.description,
-        category: courseData.category,
-        difficulty: courseData.difficulty,
-      })
+      .update(updatePayload)
       .eq('id', courseId)
       .select()
       .single();
@@ -206,7 +255,7 @@ export const courseService = {
       throw new Error(error.message);
     }
 
-    return { ...course, _id: course.id, createdBy: course.created_by };
+    return { ...course, _id: course.id, createdBy: course.created_by, maxStudents: course.max_students };
   },
 
   async deleteCourse(teacherId: string, courseId: string) {
@@ -600,6 +649,7 @@ export const courseService = {
             topics: topics?.map((t: any) => t.id) || [],
             createdBy: course.created_by,
             enrollmentCount: enrollmentCount || 0,
+            maxStudents: course.max_students ?? null,
             avgScore: 0,
           };
         })

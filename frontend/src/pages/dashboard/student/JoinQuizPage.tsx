@@ -118,13 +118,17 @@ const JoinQuizPage = () => {
       toast.error('This quiz has expired and is no longer accessible.');
       return;
     }
-    
+
     if (!canStart) {
       toast.error('Quiz has not started yet. Please wait.');
       return;
     }
 
-    // Show camera permission modal instead of starting immediately
+    // Only request camera permission if the teacher enabled monitoring for this quiz.
+    if (quizDetails?.quiz?.cameraMonitoring === false) {
+      handleCameraAllowed();
+      return;
+    }
     setShowCameraModal(true);
   };
 

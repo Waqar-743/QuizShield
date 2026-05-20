@@ -20,6 +20,7 @@ interface QuizData {
   scheduledStart?: string;
   courseId?: string;
   questions: QuizQuestion[];
+  cameraMonitoring?: boolean;
 }
 
 const MAX_TITLE_LEN = 200;
@@ -187,6 +188,7 @@ export const quizService = {
         access_code: accessCode,
         scheduled_start: data.scheduledStart || null,
         is_active: true,
+        camera_monitoring: data.cameraMonitoring !== false,
         created_at: new Date(),
       }])
       .select()
@@ -213,6 +215,7 @@ export const quizService = {
       questions: quiz.questions,
       accessCode: quiz.access_code,
       scheduledStart: quiz.scheduled_start,
+      cameraMonitoring: quiz.camera_monitoring !== false,
       createdAt: quiz.created_at,
     };
   },
@@ -248,21 +251,26 @@ export const quizService = {
       questions: q.questions || [],
       accessCode: q.access_code,
       scheduledStart: q.scheduled_start,
+      cameraMonitoring: q.camera_monitoring !== false,
       createdAt: q.created_at,
     }));
   },
 
   async updateQuiz(quizId: string, teacherId: string, data: QuizData) {
     validateQuizPayload(data);
+    const updatePayload: any = {
+      title: data.title,
+      description: data.description || '',
+      time_limit: data.timeLimit,
+      questions: data.questions,
+      updated_at: new Date(),
+    };
+    if (typeof data.cameraMonitoring === 'boolean') {
+      updatePayload.camera_monitoring = data.cameraMonitoring;
+    }
     const { data: quiz, error } = await supabase
       .from('teacher_quizzes')
-      .update({
-        title: data.title,
-        description: data.description || '',
-        time_limit: data.timeLimit,
-        questions: data.questions,
-        updated_at: new Date(),
-      })
+      .update(updatePayload)
       .eq('id', quizId)
       .eq('teacher_id', teacherId)
       .select()
@@ -371,6 +379,7 @@ export const quizService = {
         description: quiz.description,
         courseId: quiz.course_id,
         timeLimit: quiz.time_limit,
+        cameraMonitoring: quiz.camera_monitoring !== false,
         questions: quiz.questions?.map((q: any, index: number) => ({
           _id: `${quiz.id}-q${index}`,
           text: q.text,
@@ -409,6 +418,9 @@ export const quizService = {
 
     const isReviewed = attempt.teacher_grade !== null && attempt.teacher_grade !== undefined;
 
+    // Students never see violation details — only teachers/admins.
+    const showViolations = !isStudentOwner;
+
     if (isStudentOwner && !isReviewed) {
       return {
         id: attempt.id,
@@ -418,11 +430,10 @@ export const quizService = {
         reviewPending: true,
         reviewStatus: 'pending',
         autoSubmitted: attempt.auto_submitted,
-        submissionReason: attempt.submission_reason,
-        violations: attempt.violations || [],
         quiz: quiz ? {
           title: quiz.title,
           description: quiz.description,
+          cameraMonitoring: quiz.camera_monitoring !== false,
           questions: [],
         } : null,
       };
@@ -437,16 +448,21 @@ export const quizService = {
       startedAt: attempt.started_at,
       completedAt: attempt.completed_at,
       answers: attempt.answers || [],
-      violations: attempt.violations || [],
+      ...(showViolations
+        ? {
+            violations: attempt.violations || [],
+            submissionReason: attempt.submission_reason,
+          }
+        : {}),
       teacherGrade: attempt.teacher_grade,
       teacherFeedback: attempt.teacher_feedback,
       reviewPending: false,
       reviewStatus: 'reviewed',
       autoSubmitted: attempt.auto_submitted,
-      submissionReason: attempt.submission_reason,
       quiz: quiz ? {
         title: quiz.title,
         description: quiz.description,
+        cameraMonitoring: quiz.camera_monitoring !== false,
         questions: quiz.questions || [],
       } : null,
     };

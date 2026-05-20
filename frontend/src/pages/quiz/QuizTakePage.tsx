@@ -22,6 +22,7 @@ interface QuizData {
     title: string;
     description: string;
     timeLimit: number;
+    cameraMonitoring?: boolean;
     questions: Question[];
   };
   code: string;
@@ -141,8 +142,7 @@ const QuizTakePage = () => {
   const handleFaceViolation = useCallback((kind: 'face_away' | 'no_face') => {
     reportViolation(createViolationPayload(
       kind === 'face_away' ? 'FACE_AWAY' : 'NO_FACE',
-      kind === 'face_away' ? 'Face turned away from camera' : 'No face detected by camera',
-      { focusState: kind },
+      kind === 'face_away' ? 'Face Away Violation' : 'No Face Detected Violation',
     ));
   }, [createViolationPayload, reportViolation]);
 
@@ -181,7 +181,7 @@ const QuizTakePage = () => {
         tabHiddenStartRef.current = null;
         reportViolation(createViolationPayload(
           'TAB_SWITCH',
-          `Tab was hidden for ${durationSeconds} second${durationSeconds !== 1 ? 's' : ''}`,
+          'Tab Switch Violation',
           { durationSeconds },
         ));
         setTimeout(() => { violationCooldownRef.current = false; }, 500);
@@ -197,8 +197,7 @@ const QuizTakePage = () => {
         if (document.visibilityState === 'visible' && !violationCooldownRef.current) {
           reportViolation(createViolationPayload(
             'SYSTEM_FOCUS_LOST',
-            'Window focus lost — possible external application access',
-            { focusState: 'Active Focus Lost' },
+            'External System/File Access Violation',
           ));
         }
       }, 300);
@@ -213,7 +212,7 @@ const QuizTakePage = () => {
       else if (e.key === 'PrintScreen')         keyName = 'PrintScreen';
       if (!keyName) return;
       e.preventDefault();
-      reportViolation(createViolationPayload('RESTRICTED_KEY', 'Restricted key pressed', { keyName }));
+      reportViolation(createViolationPayload('RESTRICTED_KEY', 'Restricted Key Violation', { keyName }));
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
@@ -422,9 +421,9 @@ const QuizTakePage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 select-none">
-      {/* Face Detection Camera */}
+      {/* Face Detection Camera — only when the teacher enabled monitoring for this quiz */}
       <FaceDetectionCamera
-        enabled={!!quizData}
+        enabled={!!quizData && quizData.quiz.cameraMonitoring !== false}
         onViolation={handleFaceViolation}
         onAutoSubmit={handleFaceAutoSubmit}
       />

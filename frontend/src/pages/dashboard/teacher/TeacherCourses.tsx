@@ -24,8 +24,17 @@ interface TeacherCourse {
   topics: string[];
   createdBy: string;
   enrollmentCount?: number;
+  maxStudents?: number | null;
   avgScore?: number;
   isPublished?: boolean;
+}
+
+interface EditForm {
+  title: string;
+  description: string;
+  category: string;
+  difficulty: string;
+  maxStudents: string;
 }
 
 const TeacherCourses = () => {
@@ -35,6 +44,11 @@ const TeacherCourses = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [courseToDelete, setCourseToDelete] = useState<TeacherCourse | null>(null);
+  const [editingCourse, setEditingCourse] = useState<TeacherCourse | null>(null);
+  const [editForm, setEditForm] = useState<EditForm>({
+    title: '', description: '', category: 'Other', difficulty: 'Beginner', maxStudents: '',
+  });
+  const [savingEdit, setSavingEdit] = useState(false);
 
   useEffect(() => {
     fetchCourses();
@@ -43,13 +57,61 @@ const TeacherCourses = () => {
   const fetchCourses = async () => {
     setLoading(true);
     try {
-      const response = await api.get('/courses');
+      // Teacher endpoint returns enrollmentCount + maxStudents for the
+      // signed-in teacher's own courses; the public list does not.
+      const response = await api.get('/courses/teacher/my-courses');
       setCourses(response.data.data || []);
     } catch (error) {
       console.error('Error fetching courses:', error);
       setCourses([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const openEditModal = (course: TeacherCourse) => {
+    setEditingCourse(course);
+    setEditForm({
+      title: course.title || '',
+      description: course.description || '',
+      category: course.category || 'Other',
+      difficulty: course.difficulty || 'Beginner',
+      maxStudents: course.maxStudents != null ? String(course.maxStudents) : '',
+    });
+  };
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingCourse) return;
+    if (!editForm.title.trim()) {
+      toast.error('Title is required');
+      return;
+    }
+    let maxStudentsValue: number | null = null;
+    if (editForm.maxStudents.trim() !== '') {
+      const n = Number(editForm.maxStudents);
+      if (!Number.isFinite(n) || n < 1) {
+        toast.error('Max students must be a positive number, or leave blank for unlimited.');
+        return;
+      }
+      maxStudentsValue = Math.floor(n);
+    }
+    setSavingEdit(true);
+    try {
+      await api.put(`/courses/${editingCourse._id}`, {
+        title: editForm.title.trim(),
+        description: editForm.description,
+        category: editForm.category,
+        difficulty: editForm.difficulty,
+        maxStudents: maxStudentsValue,
+      });
+      toast.success('Course updated');
+      setEditingCourse(null);
+      await fetchCourses();
+    } catch (error: any) {
+      toast.error(error.response?.data?.error?.message || 'Failed to update course');
+    } finally {
+      setSavingEdit(false);
     }
   };
 
@@ -147,7 +209,10 @@ const TeacherCourses = () => {
       render: (course: TeacherCourse) => (
         <div className="flex items-center gap-1 text-gray-600">
           <UserGroupIcon className="h-4 w-4" />
-          <span>{course.enrollmentCount || 0}</span>
+          <span>
+            {course.enrollmentCount || 0}
+            {course.maxStudents ? ` / ${course.maxStudents}` : ''}
+          </span>
         </div>
       ),
     },
@@ -188,7 +253,7 @@ const TeacherCourses = () => {
             <EyeIcon className="h-5 w-5" />
           </button>
           <button
-            onClick={() => navigate(`/dashboard/teacher/courses/${course._id}/edit`)}
+            onClick={() => openEditModal(course)}
             className="p-1.5 text-gray-500 hover:text-primary-700 hover:bg-primary-50 rounded-lg transition-colors"
             title="Edit"
           >
@@ -250,6 +315,93 @@ const TeacherCourses = () => {
           emptyMessage="No courses found. Create your first course to get started!"
         />
       </div>
+
+      {/* Edit Course Modal */}
+      {editingCourse && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <form
+            onSubmit={handleEditSubmit}
+            className="bg-white rounded-xl p-6 max-w-lg w-full space-y-4 max-h-[90vh] overflow-y-auto"
+          >
+            <h3 className="text-lg font-semibold text-gray-900">Edit Course</h3>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+              <input
+                type="text"
+                value={editForm.title}
+                onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+              <textarea
+                value={editForm.description}
+                onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                rows={3}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                <input
+                  type="text"
+                  value={editForm.category}
+                  onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Difficulty</label>
+                <select
+                  value={editForm.difficulty}
+                  onChange={(e) => setEditForm({ ...editForm, difficulty: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                >
+                  <option value="Beginner">Beginner</option>
+                  <option value="Intermediate">Intermediate</option>
+                  <option value="Advanced">Advanced</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Max Students
+                <span className="text-gray-400 font-normal ml-1">(blank = unlimited)</span>
+              </label>
+              <input
+                type="number"
+                min="1"
+                value={editForm.maxStudents}
+                onChange={(e) => setEditForm({ ...editForm, maxStudents: e.target.value })}
+                placeholder="e.g. 50"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+              />
+              <p className="mt-1 text-xs text-gray-500">
+                Currently enrolled: {editingCourse.enrollmentCount || 0}
+              </p>
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setEditingCourse(null)}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={savingEdit}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50"
+              >
+                {savingEdit ? 'Saving…' : 'Save Changes'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
 
       {/* Delete Confirmation Modal */}
       {deleteModalOpen && (

@@ -15,6 +15,7 @@ import analyticsRoutes from './routes/analytics';
 import aiRoutes from './routes/ai';
 import questionRoutes from './routes/questions';
 import notificationRoutes from './routes/notifications';
+import automationRoutes from './routes/automations';
 
 const app = express();
 
@@ -141,6 +142,7 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/questions', questionRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/automations', automationRoutes);
 
 // ---------------------------------------------------------------------------
 // Health check — verifies DB reachability
@@ -183,7 +185,7 @@ app.use(errorHandler);
 // ---------------------------------------------------------------------------
 // Server startup (skipped in Vercel serverless)
 // ---------------------------------------------------------------------------
-if (process.env.VERCEL !== '1') {
+if (process.env.VERCEL !== '1' && config.nodeEnv !== 'test') {
   const PORT = config.port;
   const server = app.listen(Number(PORT), '0.0.0.0', () => {
     console.log(`Server running in ${config.nodeEnv} mode on port ${PORT}`);

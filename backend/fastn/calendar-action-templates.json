@@ -1,0 +1,826 @@
+{
+  "connectorId": "c557ffdb-1192-4819-99e4-c5b60cc718dd",
+  "connectorSlug": "quizshieldGoogleCalendar",
+  "modelledFrom": "Google Calendar official API docs; live reconciliation pending OAuth",
+  "actions": [
+    {
+      "name": "List Owned Calendars",
+      "slug": "listOwnedCalendars",
+      "description": "List only calendars owned by the connected teacher to verify destination ownership.",
+      "httpConfig": {
+        "url": "https://www.googleapis.com",
+        "path": "/calendar/v3/users/me/calendarList?minAccessRole=owner",
+        "method": "GET"
+      },
+      "inputContract": {
+        "type": "object",
+        "properties": {
+          "maxResults": {
+            "type": "integer",
+            "title": "Page Size",
+            "description": "Maximum calendars in this page.",
+            "minimum": 1,
+            "maximum": 250
+          },
+          "pageToken": {
+            "type": "string",
+            "title": "Page Token",
+            "description": "The nextPageToken from the preceding response."
+          }
+        },
+        "required": []
+      },
+      "outputContract": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "Calendars owned by the signed-in Google user.",
+            "items": {
+              "type": "object",
+              "description": "Owned calendar.",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "title": "Calendar ID",
+                  "description": "The Google calendar owned by the connected teacher."
+                },
+                "summary": {
+                  "type": "string",
+                  "title": "Calendar Name",
+                  "description": "Name of the calendar."
+                },
+                "accessRole": {
+                  "type": "string",
+                  "description": "The connected user's role.",
+                  "enum": [
+                    "owner"
+                  ]
+                },
+                "primary": {
+                  "type": "boolean",
+                  "description": "Whether this is the connected user's primary calendar."
+                }
+              }
+            }
+          },
+          "nextPageToken": {
+            "type": "string",
+            "title": "Next Page",
+            "description": "Token for the next page."
+          }
+        }
+      }
+    },
+    {
+      "name": "Get Assessment Event",
+      "slug": "getAssessmentEvent",
+      "description": "Read an assessment event by its deterministic ID without modifying it.",
+      "httpConfig": {
+        "url": "https://www.googleapis.com",
+        "path": "/calendar/v3/calendars/{{input.calendarId}}/events/{{input.eventId}}",
+        "method": "GET"
+      },
+      "inputContract": {
+        "type": "object",
+        "properties": {
+          "calendarId": {
+            "type": "string",
+            "title": "Calendar ID",
+            "description": "The Google calendar owned by the connected teacher."
+          },
+          "eventId": {
+            "type": "string",
+            "title": "Event ID",
+            "description": "The deterministic SHA-256 ID of the QuizShield assessment.",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        },
+        "required": [
+          "calendarId",
+          "eventId"
+        ]
+      },
+      "outputContract": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Event ID",
+            "description": "Google's accepted event ID."
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Google event lifecycle status."
+          },
+          "summary": {
+            "type": "string",
+            "title": "Title",
+            "description": "Saved event title."
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "description": "Saved instructions."
+          },
+          "start": {
+            "type": "object",
+            "title": "Assessment Time",
+            "description": "A timezone-aware assessment availability boundary.",
+            "required": [
+              "dateTime",
+              "timeZone"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "dateTime": {
+                "type": "string",
+                "title": "Date and Time",
+                "description": "RFC 3339 timestamp including its UTC offset.",
+                "format": "date-time"
+              },
+              "timeZone": {
+                "type": "string",
+                "title": "Time Zone",
+                "description": "IANA timezone, for example Asia/Karachi."
+              }
+            }
+          },
+          "end": {
+            "type": "object",
+            "title": "Assessment Time",
+            "description": "A timezone-aware assessment availability boundary.",
+            "required": [
+              "dateTime",
+              "timeZone"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "dateTime": {
+                "type": "string",
+                "title": "Date and Time",
+                "description": "RFC 3339 timestamp including its UTC offset.",
+                "format": "date-time"
+              },
+              "timeZone": {
+                "type": "string",
+                "title": "Time Zone",
+                "description": "IANA timezone, for example Asia/Karachi."
+              }
+            }
+          },
+          "reminders": {
+            "type": "object",
+            "title": "Reminder Policy",
+            "description": "Calendar notifications are disabled; QuizShield handles its optional reminder.",
+            "additionalProperties": false,
+            "properties": {
+              "useDefault": {
+                "type": "boolean",
+                "title": "Default Reminders",
+                "description": "Always false.",
+                "enum": [
+                  false
+                ]
+              }
+            }
+          },
+          "attendees": {
+            "type": "array",
+            "title": "Attendees",
+            "description": "Must be empty; student invitations are never created.",
+            "maxItems": 0,
+            "items": {
+              "type": "object",
+              "description": "No attendee objects are permitted.",
+              "properties": {}
+            }
+          },
+          "extendedProperties": {
+            "type": "object",
+            "title": "Revision Metadata",
+            "description": "Private schedule revision used for reconciliation.",
+            "additionalProperties": false,
+            "properties": {
+              "private": {
+                "type": "object",
+                "title": "Private Metadata",
+                "description": "Revision visible only to the calendar owner.",
+                "additionalProperties": false,
+                "properties": {
+                  "quizshieldRevision": {
+                    "type": "string",
+                    "title": "Schedule Revision",
+                    "description": "QuizShield's current schedule revision as text."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Create Assessment Event",
+      "slug": "createAssessmentEvent",
+      "description": "Create a deterministic QuizShield assessment event with no attendees, no Calendar reminders and sendUpdates=none.",
+      "httpConfig": {
+        "url": "https://www.googleapis.com",
+        "path": "/calendar/v3/calendars/{{input.calendarId}}/events",
+        "method": "POST",
+        "bodyType": "json",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "queryParams": {
+          "sendUpdates": "none"
+        },
+        "bodyTemplate": "{\"id\":\"{{input.resource.id}}\",\"summary\":\"{{input.resource.summary}}\",\"description\":\"{{input.resource.description}}\",\"start\":\"{{input.resource.start}}\",\"end\":\"{{input.resource.end}}\",\"extendedProperties\":\"{{input.resource.extendedProperties}}\",\"reminders\":{\"useDefault\":false},\"attendees\":[]}"
+      },
+      "inputContract": {
+        "type": "object",
+        "properties": {
+          "calendarId": {
+            "type": "string",
+            "title": "Calendar ID",
+            "description": "The Google calendar owned by the connected teacher."
+          },
+          "resource": {
+            "type": "object",
+            "title": "Assessment Event",
+            "description": "Assessment schedule fields only. This action always disables reminders and sends no invitations.",
+            "required": [
+              "id",
+              "start",
+              "end"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "title": "Event ID",
+                "description": "The deterministic SHA-256 ID of the QuizShield assessment.",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "summary": {
+                "type": "string",
+                "title": "Assessment Title",
+                "description": "The title saved in QuizShield."
+              },
+              "description": {
+                "type": "string",
+                "title": "Instructions",
+                "description": "A short instruction to open QuizShield; excludes student records."
+              },
+              "start": {
+                "type": "object",
+                "title": "Assessment Time",
+                "description": "A timezone-aware assessment availability boundary.",
+                "required": [
+                  "dateTime",
+                  "timeZone"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "dateTime": {
+                    "type": "string",
+                    "title": "Date and Time",
+                    "description": "RFC 3339 timestamp including its UTC offset.",
+                    "format": "date-time"
+                  },
+                  "timeZone": {
+                    "type": "string",
+                    "title": "Time Zone",
+                    "description": "IANA timezone, for example Asia/Karachi."
+                  }
+                }
+              },
+              "end": {
+                "type": "object",
+                "title": "Assessment Time",
+                "description": "A timezone-aware assessment availability boundary.",
+                "required": [
+                  "dateTime",
+                  "timeZone"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "dateTime": {
+                    "type": "string",
+                    "title": "Date and Time",
+                    "description": "RFC 3339 timestamp including its UTC offset.",
+                    "format": "date-time"
+                  },
+                  "timeZone": {
+                    "type": "string",
+                    "title": "Time Zone",
+                    "description": "IANA timezone, for example Asia/Karachi."
+                  }
+                }
+              },
+              "extendedProperties": {
+                "type": "object",
+                "title": "Revision Metadata",
+                "description": "Private schedule revision used for reconciliation.",
+                "additionalProperties": false,
+                "properties": {
+                  "private": {
+                    "type": "object",
+                    "title": "Private Metadata",
+                    "description": "Revision visible only to the calendar owner.",
+                    "additionalProperties": false,
+                    "properties": {
+                      "quizshieldRevision": {
+                        "type": "string",
+                        "title": "Schedule Revision",
+                        "description": "QuizShield's current schedule revision as text."
+                      }
+                    }
+                  }
+                }
+              },
+              "reminders": {
+                "type": "object",
+                "title": "Reminder Policy",
+                "description": "Calendar notifications are disabled; QuizShield handles its optional reminder.",
+                "additionalProperties": false,
+                "properties": {
+                  "useDefault": {
+                    "type": "boolean",
+                    "title": "Default Reminders",
+                    "description": "Always false.",
+                    "enum": [
+                      false
+                    ]
+                  }
+                }
+              },
+              "attendees": {
+                "type": "array",
+                "title": "Attendees",
+                "description": "Must be empty; student invitations are never created.",
+                "maxItems": 0,
+                "items": {
+                  "type": "object",
+                  "description": "No attendee objects are permitted.",
+                  "properties": {}
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "calendarId",
+          "resource"
+        ]
+      },
+      "outputContract": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Event ID",
+            "description": "Google's accepted event ID."
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Google event lifecycle status."
+          },
+          "summary": {
+            "type": "string",
+            "title": "Title",
+            "description": "Saved event title."
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "description": "Saved instructions."
+          },
+          "start": {
+            "type": "object",
+            "title": "Assessment Time",
+            "description": "A timezone-aware assessment availability boundary.",
+            "required": [
+              "dateTime",
+              "timeZone"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "dateTime": {
+                "type": "string",
+                "title": "Date and Time",
+                "description": "RFC 3339 timestamp including its UTC offset.",
+                "format": "date-time"
+              },
+              "timeZone": {
+                "type": "string",
+                "title": "Time Zone",
+                "description": "IANA timezone, for example Asia/Karachi."
+              }
+            }
+          },
+          "end": {
+            "type": "object",
+            "title": "Assessment Time",
+            "description": "A timezone-aware assessment availability boundary.",
+            "required": [
+              "dateTime",
+              "timeZone"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "dateTime": {
+                "type": "string",
+                "title": "Date and Time",
+                "description": "RFC 3339 timestamp including its UTC offset.",
+                "format": "date-time"
+              },
+              "timeZone": {
+                "type": "string",
+                "title": "Time Zone",
+                "description": "IANA timezone, for example Asia/Karachi."
+              }
+            }
+          },
+          "reminders": {
+            "type": "object",
+            "title": "Reminder Policy",
+            "description": "Calendar notifications are disabled; QuizShield handles its optional reminder.",
+            "additionalProperties": false,
+            "properties": {
+              "useDefault": {
+                "type": "boolean",
+                "title": "Default Reminders",
+                "description": "Always false.",
+                "enum": [
+                  false
+                ]
+              }
+            }
+          },
+          "attendees": {
+            "type": "array",
+            "title": "Attendees",
+            "description": "Must be empty; student invitations are never created.",
+            "maxItems": 0,
+            "items": {
+              "type": "object",
+              "description": "No attendee objects are permitted.",
+              "properties": {}
+            }
+          },
+          "extendedProperties": {
+            "type": "object",
+            "title": "Revision Metadata",
+            "description": "Private schedule revision used for reconciliation.",
+            "additionalProperties": false,
+            "properties": {
+              "private": {
+                "type": "object",
+                "title": "Private Metadata",
+                "description": "Revision visible only to the calendar owner.",
+                "additionalProperties": false,
+                "properties": {
+                  "quizshieldRevision": {
+                    "type": "string",
+                    "title": "Schedule Revision",
+                    "description": "QuizShield's current schedule revision as text."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Update Assessment Event",
+      "slug": "updateAssessmentEvent",
+      "description": "Replace the same assessment event after rescheduling, retaining its ID and disabling Calendar reminders and invitations.",
+      "httpConfig": {
+        "url": "https://www.googleapis.com",
+        "path": "/calendar/v3/calendars/{{input.calendarId}}/events/{{input.eventId}}",
+        "method": "PUT",
+        "bodyType": "json",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "queryParams": {
+          "sendUpdates": "none"
+        },
+        "bodyTemplate": "{\"id\":\"{{input.resource.id}}\",\"summary\":\"{{input.resource.summary}}\",\"description\":\"{{input.resource.description}}\",\"start\":\"{{input.resource.start}}\",\"end\":\"{{input.resource.end}}\",\"extendedProperties\":\"{{input.resource.extendedProperties}}\",\"reminders\":{\"useDefault\":false},\"attendees\":[]}"
+      },
+      "inputContract": {
+        "type": "object",
+        "properties": {
+          "calendarId": {
+            "type": "string",
+            "title": "Calendar ID",
+            "description": "The Google calendar owned by the connected teacher."
+          },
+          "eventId": {
+            "type": "string",
+            "title": "Event ID",
+            "description": "The deterministic SHA-256 ID of the QuizShield assessment.",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "resource": {
+            "type": "object",
+            "title": "Assessment Event",
+            "description": "Assessment schedule fields only. This action always disables reminders and sends no invitations.",
+            "required": [
+              "id",
+              "start",
+              "end"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "title": "Event ID",
+                "description": "The deterministic SHA-256 ID of the QuizShield assessment.",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "summary": {
+                "type": "string",
+                "title": "Assessment Title",
+                "description": "The title saved in QuizShield."
+              },
+              "description": {
+                "type": "string",
+                "title": "Instructions",
+                "description": "A short instruction to open QuizShield; excludes student records."
+              },
+              "start": {
+                "type": "object",
+                "title": "Assessment Time",
+                "description": "A timezone-aware assessment availability boundary.",
+                "required": [
+                  "dateTime",
+                  "timeZone"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "dateTime": {
+                    "type": "string",
+                    "title": "Date and Time",
+                    "description": "RFC 3339 timestamp including its UTC offset.",
+                    "format": "date-time"
+                  },
+                  "timeZone": {
+                    "type": "string",
+                    "title": "Time Zone",
+                    "description": "IANA timezone, for example Asia/Karachi."
+                  }
+                }
+              },
+              "end": {
+                "type": "object",
+                "title": "Assessment Time",
+                "description": "A timezone-aware assessment availability boundary.",
+                "required": [
+                  "dateTime",
+                  "timeZone"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "dateTime": {
+                    "type": "string",
+                    "title": "Date and Time",
+                    "description": "RFC 3339 timestamp including its UTC offset.",
+                    "format": "date-time"
+                  },
+                  "timeZone": {
+                    "type": "string",
+                    "title": "Time Zone",
+                    "description": "IANA timezone, for example Asia/Karachi."
+                  }
+                }
+              },
+              "extendedProperties": {
+                "type": "object",
+                "title": "Revision Metadata",
+                "description": "Private schedule revision used for reconciliation.",
+                "additionalProperties": false,
+                "properties": {
+                  "private": {
+                    "type": "object",
+                    "title": "Private Metadata",
+                    "description": "Revision visible only to the calendar owner.",
+                    "additionalProperties": false,
+                    "properties": {
+                      "quizshieldRevision": {
+                        "type": "string",
+                        "title": "Schedule Revision",
+                        "description": "QuizShield's current schedule revision as text."
+                      }
+                    }
+                  }
+                }
+              },
+              "reminders": {
+                "type": "object",
+                "title": "Reminder Policy",
+                "description": "Calendar notifications are disabled; QuizShield handles its optional reminder.",
+                "additionalProperties": false,
+                "properties": {
+                  "useDefault": {
+                    "type": "boolean",
+                    "title": "Default Reminders",
+                    "description": "Always false.",
+                    "enum": [
+                      false
+                    ]
+                  }
+                }
+              },
+              "attendees": {
+                "type": "array",
+                "title": "Attendees",
+                "description": "Must be empty; student invitations are never created.",
+                "maxItems": 0,
+                "items": {
+                  "type": "object",
+                  "description": "No attendee objects are permitted.",
+                  "properties": {}
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "calendarId",
+          "eventId",
+          "resource"
+        ]
+      },
+      "outputContract": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Event ID",
+            "description": "Google's accepted event ID."
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Google event lifecycle status."
+          },
+          "summary": {
+            "type": "string",
+            "title": "Title",
+            "description": "Saved event title."
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "description": "Saved instructions."
+          },
+          "start": {
+            "type": "object",
+            "title": "Assessment Time",
+            "description": "A timezone-aware assessment availability boundary.",
+            "required": [
+              "dateTime",
+              "timeZone"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "dateTime": {
+                "type": "string",
+                "title": "Date and Time",
+                "description": "RFC 3339 timestamp including its UTC offset.",
+                "format": "date-time"
+              },
+              "timeZone": {
+                "type": "string",
+                "title": "Time Zone",
+                "description": "IANA timezone, for example Asia/Karachi."
+              }
+            }
+          },
+          "end": {
+            "type": "object",
+            "title": "Assessment Time",
+            "description": "A timezone-aware assessment availability boundary.",
+            "required": [
+              "dateTime",
+              "timeZone"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "dateTime": {
+                "type": "string",
+                "title": "Date and Time",
+                "description": "RFC 3339 timestamp including its UTC offset.",
+                "format": "date-time"
+              },
+              "timeZone": {
+                "type": "string",
+                "title": "Time Zone",
+                "description": "IANA timezone, for example Asia/Karachi."
+              }
+            }
+          },
+          "reminders": {
+            "type": "object",
+            "title": "Reminder Policy",
+            "description": "Calendar notifications are disabled; QuizShield handles its optional reminder.",
+            "additionalProperties": false,
+            "properties": {
+              "useDefault": {
+                "type": "boolean",
+                "title": "Default Reminders",
+                "description": "Always false.",
+                "enum": [
+                  false
+                ]
+              }
+            }
+          },
+          "attendees": {
+            "type": "array",
+            "title": "Attendees",
+            "description": "Must be empty; student invitations are never created.",
+            "maxItems": 0,
+            "items": {
+              "type": "object",
+              "description": "No attendee objects are permitted.",
+              "properties": {}
+            }
+          },
+          "extendedProperties": {
+            "type": "object",
+            "title": "Revision Metadata",
+            "description": "Private schedule revision used for reconciliation.",
+            "additionalProperties": false,
+            "properties": {
+              "private": {
+                "type": "object",
+                "title": "Private Metadata",
+                "description": "Revision visible only to the calendar owner.",
+                "additionalProperties": false,
+                "properties": {
+                  "quizshieldRevision": {
+                    "type": "string",
+                    "title": "Schedule Revision",
+                    "description": "QuizShield's current schedule revision as text."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Cancel Assessment Event",
+      "slug": "cancelAssessmentEvent",
+      "description": "Delete a cancelled QuizShield assessment event by ID with sendUpdates=none.",
+      "httpConfig": {
+        "url": "https://www.googleapis.com",
+        "path": "/calendar/v3/calendars/{{input.calendarId}}/events/{{input.eventId}}",
+        "method": "DELETE",
+        "queryParams": {
+          "sendUpdates": "none"
+        }
+      },
+      "inputContract": {
+        "type": "object",
+        "properties": {
+          "calendarId": {
+            "type": "string",
+            "title": "Calendar ID",
+            "description": "The Google calendar owned by the connected teacher."
+          },
+          "eventId": {
+            "type": "string",
+            "title": "Event ID",
+            "description": "The deterministic SHA-256 ID of the QuizShield assessment.",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        },
+        "required": [
+          "calendarId",
+          "eventId"
+        ]
+      },
+      "outputContract": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  ]
+}

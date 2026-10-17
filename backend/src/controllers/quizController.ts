@@ -4,7 +4,7 @@ import { asyncHandler } from '../middleware/errorHandler';
 
 // Teacher endpoints
 export const createQuiz = asyncHandler(async (req: Request, res: Response) => {
-  const { title, description, timeLimit, scheduledStart, questions, courseId } = req.body;
+  const { title, description, timeLimit, scheduledStart, closesAt, timezone, assignedStudentIds, cameraMonitoring, questions, courseId } = req.body;
   const teacherId = req.user!._id.toString();
 
   const quiz = await quizService.createQuiz(teacherId, {
@@ -12,6 +12,7 @@ export const createQuiz = asyncHandler(async (req: Request, res: Response) => {
     description,
     timeLimit,
     scheduledStart,
+    closesAt, timezone, assignedStudentIds, cameraMonitoring,
     courseId,
     questions,
   });
@@ -34,10 +35,11 @@ export const getTeacherQuizzes = asyncHandler(async (req: Request, res: Response
 
 export const updateQuiz = asyncHandler(async (req: Request, res: Response) => {
   const { quizId } = req.params;
-  const { title, description, timeLimit, questions } = req.body;
+  const { title, description, timeLimit, scheduledStart, closesAt, timezone, assignedStudentIds, cameraMonitoring, questions } = req.body;
   const teacherId = req.user!._id.toString();
 
   const quiz = await quizService.updateQuiz(quizId, teacherId, {
+    scheduledStart, closesAt, timezone, assignedStudentIds, cameraMonitoring,
     title,
     description,
     timeLimit,
@@ -178,7 +180,8 @@ export const submitAnswer = asyncHandler(async (req: Request, res: Response) => 
   const result = await quizService.submitAnswer(
     attemptId,
     questionId,
-    answer
+    answer,
+    req.user!._id
   );
   
   res.status(200).json({

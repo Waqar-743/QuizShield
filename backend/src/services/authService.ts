@@ -101,7 +101,7 @@ export const authService = {
       }
     }
 
-    emailService.sendWelcomeEmail(newUser.email, newUser.name).catch(() => {});
+    // Routine welcome emails are opt-in per course through the durable outbox.
 
     return {
       user: {

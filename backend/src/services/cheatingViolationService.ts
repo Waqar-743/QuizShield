@@ -69,17 +69,12 @@ export const cheatingViolationService = {
     const currentCount = count || 1;
 
     // Update the quiz_attempts table with violation count
-    // Auto-submit if violations exceed 100
+    // Flags are evidence for instructor review, never an automatic grading decision.
     const updateData: any = { 
       violation_count: currentCount 
     };
 
-    if (currentCount > 100) {
-      updateData.status = 'completed';
-      updateData.completed_at = new Date().toISOString();
-      updateData.auto_submitted = true;
-      updateData.submission_reason = 'excessive_violations';
-    }
+    if (currentCount > 100) updateData.is_flagged = true;
 
     await supabase
       .from('quiz_attempts')
@@ -89,7 +84,7 @@ export const cheatingViolationService = {
     return {
       violationId: violation.id,
       violationCount: currentCount,
-      autoSubmitted: currentCount > 100
+      autoSubmitted: false
     };
   },
 

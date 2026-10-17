@@ -9,12 +9,17 @@ build/
 .env.production.local
 *.env
 *.env.*
+!backend/.env.example
 .DS_Store
 coverage/
 .vscode/
 .git_backup/
 frontend/.git_backup/
 .vercel
+**/supabase/.temp/
+# Downloaded skill archives; keep the extracted instructions in Git.
+.agents/skills/*.zip
 .claude/
 Untitled-1.json
 install.cmd
+.env*

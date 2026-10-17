@@ -33,6 +33,7 @@ export const analyticsService = {
         .from('quiz_attempts')
         .select('score, max_score')
         .eq('user_id', userId)
+        .or('results_released_at.not.is.null,topic_id.not.is.null')
         .eq('status', 'completed');
 
       if (attempts && attempts.length > 0) {

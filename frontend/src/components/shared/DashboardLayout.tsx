@@ -39,6 +39,7 @@ const studentItems: SidebarItem[] = [
   { label: 'Courses', href: '/dashboard/student/courses', icon: <Stroke d="M4 5a2 2 0 0 1 2-2h11v17H6a2 2 0 0 1-2-2V5z M9 3v17 M17 7H9 M17 11H9" /> },
   { label: 'Enter Quiz Code', href: '/dashboard/student/join-quiz', icon: <Stroke d="M4 4h6v6H4z M14 4h6v6h-6z M4 14h6v6H4z M14 14h2v2h-2z M18 14h2v2h-2z M14 18h2v2h-2z M18 18h2v2h-2z" /> },
   { label: 'Quiz History', href: '/dashboard/student/quiz-history', icon: <Stroke d="M3 12a9 9 0 1 0 3-6.7 M3 4v5h5 M12 8v4l3 2" /> },
+  { label: 'Practice suggestions', href: '/dashboard/student/recommendations', icon: <Stroke d="M12 3v3 M5 6l2 2 M19 6l-2 2 M9 18h6 M10 21h4 M8 14a6 6 0 1 1 8 0l-1 2H9l-1-2z" /> },
 ];
 
 const teacherItems: SidebarItem[] = [
@@ -48,6 +49,7 @@ const teacherItems: SidebarItem[] = [
   { label: 'Questions', href: '/dashboard/teacher/questions', icon: <Stroke d="M9 9a3 3 0 1 1 4.3 2.7c-.8.4-1.3 1-1.3 2V14 M12 18h.01 M3 12a9 9 0 1 1 18 0 9 9 0 0 1-18 0z" /> },
   { label: 'Submissions', href: '/dashboard/teacher/submissions', icon: <Stroke d="M9 3h6l2 4H7l2-4z M5 7h14v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7z M9 12h6 M9 16h4" /> },
   { label: 'Analytics', href: '/dashboard/teacher/analytics', icon: <Stroke d="M3 21h18 M6 17V9 M11 17V5 M16 17v-7 M21 17v-3" /> },
+  { label: 'Integrations & automation', href: '/dashboard/teacher/automations', icon: <Stroke d="M12 8v8 M8 12h8 M4 4h16v16H4z" /> },
 ];
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ role }) => {
@@ -321,7 +323,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ role }) => {
                     Your profile
                   </Link>
                   <Link
-                    to="/settings"
+                    to={role === 'teacher' || role === 'admin' ? '/dashboard/teacher/automations' : '/profile'}
                     onClick={() => setShowUserMenu(false)}
                     className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-ink-700 transition-colors duration-300 hover:bg-ink-50"
                   >

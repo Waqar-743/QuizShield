@@ -32,6 +32,7 @@ interface Submission {
   startedAt: string;
   completedAt: string;
   teacherGrade?: number;
+  resultsReleasedAt?: string;
   teacherFeedback?: string;
   answers: any[];
   violations?: Violation[];
@@ -112,7 +113,7 @@ const TeacherSubmissions = () => {
         feedback: feedbackInput,
       });
       
-      toast.success('Grade saved and student notified!');
+      toast.success('Grade saved privately. Release results when ready.');
       
       // Update local state
       setSubmissions(submissions.map(s => 
@@ -468,6 +469,15 @@ const TeacherSubmissions = () => {
             </div>
 
             <div className="sticky bottom-0 bg-gray-50 border-t px-6 py-4 flex justify-end gap-3">
+              {selectedSubmission.teacherGrade != null && !selectedSubmission.resultsReleasedAt && <button
+                disabled={saving} className="px-4 py-2 rounded-lg border border-primary-600 text-primary-700"
+                onClick={async () => {
+                  setSaving(true);
+                  try { await api.post(`/quizzes/submissions/${selectedSubmission.id}/release`); toast.success('Results released. Notifications and sync queued.'); closeModal(); fetchSubmissions(); }
+                  catch { toast.error('Could not release results. Save a reviewed grade first.'); }
+                  finally { setSaving(false); }
+                }}>Release saved results</button>}
+              {selectedSubmission.resultsReleasedAt && <p className="self-center text-sm text-primary-700">Results released</p>}
               <button
                 onClick={closeModal}
                 className="px-4 py-2 text-gray-600 hover:text-gray-800"
@@ -476,7 +486,7 @@ const TeacherSubmissions = () => {
               </button>
               <button
                 onClick={handleSaveGrade}
-                disabled={saving}
+                disabled={saving || Boolean(selectedSubmission.resultsReleasedAt)}
                 className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 flex items-center gap-2"
               >
                 {saving ? (

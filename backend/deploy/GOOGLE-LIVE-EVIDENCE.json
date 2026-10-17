@@ -1,0 +1,213 @@
+{
+  "environment": "staging",
+  "teacherId": "6c0dd35f-27da-4e27-96a1-0fb6736b51ad",
+  "endOrgId": "176c89cb-8a1d-4ca7-82ef-59791f590100",
+  "installationId": "inst_e162c34cd402",
+  "calendar": {
+    "id": "40635e1bdb149e35f1f678b7f26a202059af6159474e9568e753e95766869835@group.calendar.google.com",
+    "provisionExecutionId": "d6b297fd-e9ae-4ffe-ae0c-0b67d23b59b1",
+    "createdVia": "operator-owned managed connection; teacher-scoped connection subsequently confirmed owner",
+    "owner": "waqaruwaqar778@gmail.com",
+    "defaultReminders": [],
+    "eventNotifications": []
+  },
+  "sheet": {
+    "id": "1NMfl6P1F0ppqtBt_Lcs4BTFN2sG4yhhx3GLOy7wYD2Y",
+    "provisionExecutionId": "388a1b1a-bb74-419f-9b17-52d146bd0e01",
+    "url": "https://docs.google.com/spreadsheets/d/1NMfl6P1F0ppqtBt_Lcs4BTFN2sG4yhhx3GLOy7wYD2Y/edit",
+    "tab": "Sheet1",
+    "createdVia": "teacher-scoped OAuth connection"
+  },
+  "status": "PASS — controlled staging hosted email and Google acceptance",
+  "connectorChecks": {
+    "calendar": {
+      "ownedReadExecution": "82a2de7e-151e-4b2a-940e-b3f6e2151a85",
+      "missingReadExecution": "ff2d8952-91ec-4169-8914-2d05cacb81ec",
+      "createExecution": "aefe881f-89ac-4aff-a4e5-71ab410e3a99",
+      "eventId": "38d112a8becb1761a3824f1fb06c657e9249aa92cac114350bd6d91311d27b18",
+      "duplicateInsertExecution": "c9847a83-6762-4171-869a-1a3da648c1bb",
+      "duplicateStatus": 409,
+      "createReadbackExecution": "a182a086-4cc0-4170-9dbe-cd02ca3e63ee",
+      "updateExecution": "f469d3f4-af2c-4e6f-b162-2220bd911f58",
+      "updateReadbackExecution": "318697ff-8129-4709-95f5-c8a19a295dc7",
+      "deleteExecution": "246a4b92-6813-408b-ab2f-a32b2d0cd1f4",
+      "deleteStatus": 204,
+      "deletedReadbackExecution": "8b700393-42b6-47ea-a49c-897d29ea56cc",
+      "deletedReadbackStatus": "cancelled",
+      "sampleFieldsExact": true,
+      "normalization": "Google truncates subsecond event times; read-back compared at whole seconds."
+    },
+    "sheets": {
+      "attemptId": "8e8b0915-1ccb-4721-a71c-10a69acb5e32",
+      "range": "'Sheet1'!A2:F2",
+      "writeExecutions": [
+        "029f842b-34b7-4bbe-88e3-833605a21e8f",
+        "664af88b-eb5c-4b3d-b24b-6065cd71f1c6"
+      ],
+      "readbackExecution": "a107874d-6c6f-47cf-83e6-e564e582ce59",
+      "rowsAfterReplay": 1,
+      "fieldsExact": 6
+    }
+  },
+  "workflow": {
+    "id": "wf_85ec71f0f969",
+    "version": "wv_bb6373c66c8a",
+    "deployment": "wdep_1bdcd52121e1",
+    "triggerId": "b6db412e-3eb6-442d-accf-9816fa4053bb",
+    "scope": "MULTI_TENANT for both connectors",
+    "route": "Fixed verified tenant and installation; manually provisioned staging trigger"
+  },
+  "widget": {
+    "id": "wgt_2eed06caa23c",
+    "status": "active",
+    "automaticExistingInstallationTriggerFanout": "not working; Fastn feedback 01792265909-cb0b4b74"
+  },
+  "backendDeployment": "dpl_AGJGnCryph8BvYw8gfbbaPbBcKDX",
+  "hosted": {
+    "quizId": "a34932bf-35cb-4353-ac2d-a2f3800dbda6",
+    "eventId": "f8b40896b6eadc0b1b166d29205362558e11cb361a6483a95cdd1b974ff76909",
+    "attemptId": "7dede2a0-ec6b-4899-89cd-a68a1666ffe6",
+    "executions": [
+      "exec_32644c20ebc2",
+      "exec_e97c3725b949",
+      "exec_2c460d14fb89",
+      "exec_d4224024d5e0"
+    ],
+    "events": [
+      "evt_7b64af44f7ca1e7d1e0ec2534b5a31eb",
+      "evt_353c508fe45ac85606a92aef41320a75",
+      "evt_7ca4ae1856340dc72255a384e77dc2ca",
+      "evt_5fdbe10d057f04ad671c8c1ced5e420c"
+    ],
+    "createJobId": "f9927b87-3e48-4220-a8d9-229dc5d88a49",
+    "updateJobId": "5e9d12ca-eaf7-477f-abe0-1460df20337e",
+    "cancelJobId": "d4bfa9cb-a0e8-4c68-b79b-0f32586a9816",
+    "sheetJobId": "c1b0934e-6917-4fbd-9408-616711a89564",
+    "sheetReceipt": "1NMfl6P1F0ppqtBt_Lcs4BTFN2sG4yhhx3GLOy7wYD2Y:Sheet1!A3:F3",
+    "sourceFieldsPerSheetRow": 6,
+    "sourceSheetRowsAudited": 2,
+    "readbacks": {
+      "calendarUpdate": "7e92a4e1-ece6-4d25-8db8-6e4e7a5c6165",
+      "calendarCancel": "92ec27d8-5ebc-490c-afdf-17ab42a489f8",
+      "sheets": "fb772d36-456c-4ec0-a05e-5da4b7de9ac8"
+    },
+    "finalActiveCalendarEvents": 0,
+    "duplicateAttempts": 0
+  },
+  "validation": {
+    "workflowId": "wf_85ec71f0f969",
+    "status": "pass",
+    "cases": 11,
+    "localDeliveryTests": 14,
+    "isolatedDatabaseTests": 17,
+    "localWorkflowTests": 24
+  },
+  "webhookReplay": {
+    "unauthenticated": 401,
+    "statuses": [
+      409,
+      409
+    ],
+    "firstDiagnosticWithoutTenantHeaderAcceptedAsSeparateScope": true,
+    "separateScopeExecution": "exec_8164e9bcbb35",
+    "separateScopeResult": {
+      "skipped": true
+    },
+    "fixedDiagnosticCopiesWorkerContext": true
+  },
+  "cronAudit": {
+    "http": [
+      {
+        "created": "2026-10-17T19:49:00.021919+00:00",
+        "id": 135,
+        "processed": "0",
+        "status_code": 200,
+        "timed_out": false
+      },
+      {
+        "created": "2026-10-17T19:48:00.057187+00:00",
+        "id": 134,
+        "processed": "2",
+        "status_code": 200,
+        "timed_out": false
+      },
+      {
+        "created": "2026-10-17T19:47:00.067429+00:00",
+        "id": 133,
+        "processed": "8",
+        "status_code": 200,
+        "timed_out": false
+      },
+      {
+        "created": "2026-10-17T19:43:00.019105+00:00",
+        "id": 132,
+        "processed": "3",
+        "status_code": 200,
+        "timed_out": false
+      },
+      {
+        "created": "2026-10-17T19:42:00.067265+00:00",
+        "id": 131,
+        "processed": "0",
+        "status_code": 200,
+        "timed_out": false
+      },
+      {
+        "created": "2026-10-17T19:41:00.022322+00:00",
+        "id": 130,
+        "processed": "4",
+        "status_code": 200,
+        "timed_out": false
+      },
+      {
+        "created": "2026-10-17T19:40:00.066093+00:00",
+        "id": 129,
+        "processed": "3",
+        "status_code": 200,
+        "timed_out": false
+      }
+    ],
+    "runs": [
+      {
+        "runid": 135,
+        "start_time": "2026-10-17T19:49:00.016227+00:00",
+        "status": "succeeded"
+      },
+      {
+        "runid": 134,
+        "start_time": "2026-10-17T19:48:00.040735+00:00",
+        "status": "succeeded"
+      },
+      {
+        "runid": 133,
+        "start_time": "2026-10-17T19:47:00.053626+00:00",
+        "status": "succeeded"
+      },
+      {
+        "runid": 132,
+        "start_time": "2026-10-17T19:43:00.015437+00:00",
+        "status": "succeeded"
+      },
+      {
+        "runid": 131,
+        "start_time": "2026-10-17T19:42:00.052867+00:00",
+        "status": "succeeded"
+      },
+      {
+        "runid": 130,
+        "start_time": "2026-10-17T19:41:00.016907+00:00",
+        "status": "succeeded"
+      },
+      {
+        "runid": 129,
+        "start_time": "2026-10-17T19:40:00.051302+00:00",
+        "status": "succeeded"
+      }
+    ],
+    "scheduler": {
+      "active": true,
+      "jobid": 1,
+      "schedule": "* * * * *"
+    }
+  }
+}

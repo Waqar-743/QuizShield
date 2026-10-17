@@ -4,6 +4,13 @@ import { config } from '../config/environment';
 const resend = new Resend(config.resendApiKey || 're_123456789'); // Provide dummy key to prevent crash if missing
 
 export const emailService = {
+  async sendAutomationEmail(payload: { to: string; subject: string; text: string }, idempotencyKey: string) {
+    if (!config.resendApiKey) throw new Error('Resend is not configured');
+    const result = await resend.emails.send({ from: config.emailFrom, to: [payload.to],
+      subject: payload.subject, text: payload.text }, { idempotencyKey });
+    if (result.error || !result.data?.id) throw new Error('Resend delivery was not confirmed');
+    return result.data.id;
+  },
   async sendWelcomeEmail(email: string, name: string) {
     if (!config.resendApiKey) {
         console.warn('Resend API Key is missing. Email not sent.');

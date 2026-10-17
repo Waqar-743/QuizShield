@@ -1,5 +1,5 @@
 import { useEffect, lazy, Suspense } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from './store/authStore';
 
 // Layouts
@@ -37,7 +37,7 @@ const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const StudentOverview = lazy(() => import('./pages/dashboard/student/StudentOverview'));
 const StudentCourses = lazy(() => import('./pages/dashboard/student/StudentCourses'));
 const StudentQuizHistory = lazy(() => import('./pages/dashboard/student/StudentQuizHistory'));
-const StudentRecommendations = lazy(() => import('./pages/dashboard/student/StudentRecommendations'));
+const StudentRecommendations = lazy(() => import('./pages/dashboard/student/ReviewedPractice'));
 const JoinQuizPage = lazy(() => import('./pages/dashboard/student/JoinQuizPage'));
 
 const TeacherOverview = lazy(() => import('./pages/dashboard/teacher/TeacherOverview'));
@@ -48,9 +48,11 @@ const TeacherAnalytics = lazy(() => import('./pages/dashboard/teacher/TeacherAna
 const CreateCoursePage = lazy(() => import('./pages/dashboard/teacher/CreateCoursePage'));
 const TeacherQuizzes = lazy(() => import('./pages/dashboard/teacher/TeacherQuizzes'));
 const TeacherSubmissions = lazy(() => import('./pages/dashboard/teacher/TeacherSubmissions'));
+const TeacherAutomations = lazy(() => import('./pages/dashboard/teacher/TeacherAutomations'));
 
 // Protected Route Component
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
+  const location = useLocation();
   const { isAuthenticated, isAuthChecking } = useAuthStore();
   
   if (isAuthChecking) {
@@ -58,7 +60,7 @@ const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
   }
   
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" state={{ returnTo: location.pathname + location.search }} replace />;
   }
   
   return children;
@@ -66,6 +68,7 @@ const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
 
 // Guest Route Component (redirect to dashboard if already logged in)
 const GuestRoute = ({ children }: { children: JSX.Element }) => {
+  const location = useLocation();
   const { isAuthenticated, isAuthChecking, user } = useAuthStore();
   
   if (isAuthChecking) {
@@ -73,6 +76,8 @@ const GuestRoute = ({ children }: { children: JSX.Element }) => {
   }
   
   if (isAuthenticated) {
+    const returnTo = location.state?.returnTo;
+    if (typeof returnTo === 'string' && /^\/quiz\/teacher-results\/[a-f0-9-]+$/i.test(returnTo)) return <Navigate to={returnTo} replace />;
     // Redirect to role-specific dashboard
     if (user?.role === 'teacher') {
       return <Navigate to="/dashboard/teacher" replace />;
@@ -159,6 +164,7 @@ function App() {
           <Route path="courses/new" element={<CreateCoursePage />} />
           <Route path="topics" element={<TeacherTopics />} />
           <Route path="questions" element={<TeacherQuestions />} />
+          <Route path="automations" element={<TeacherAutomations />} />
         </Route>
       </Route>
       

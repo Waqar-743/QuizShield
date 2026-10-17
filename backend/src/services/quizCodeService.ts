@@ -1,4 +1,5 @@
 import { supabase } from '../config/supabase';
+import { isAssigned } from './automationPolicy';
 
 // Generate a unique 4-digit numeric code
 function generateCode(): string {
@@ -61,6 +62,9 @@ export const quizCodeService = {
     if (error || !quiz) {
       throw new Error('Invalid quiz code');
     }
+    if (quiz.lifecycle !== 'published' || quiz.is_active === false || (userRole === 'student' && !isAssigned(quiz, userId || ''))) {
+      throw Object.assign(new Error('Quiz is not available to you'), { statusCode: 403 });
+    }
 
     // If quiz is tied to a course, only enrolled students can access it
     if (quiz.course_id && userId && userRole === 'student') {
@@ -87,15 +91,8 @@ export const quizCodeService = {
     }
 
     // Calculate expiry time if scheduled
-    let expiresAt = null;
-    let isExpired = false;
-    
-    if (quiz.scheduled_start) {
-      const scheduledTime = new Date(quiz.scheduled_start);
-      const timeLimit = quiz.time_limit || 30;
-      expiresAt = new Date(scheduledTime.getTime() + timeLimit * 60 * 1000).toISOString();
-      isExpired = new Date() > new Date(expiresAt);
-    }
+    const expiresAt = quiz.closes_at || null;
+    const isExpired = Boolean(expiresAt && Date.now() >= Date.parse(expiresAt));
 
     return {
       quiz: {

@@ -110,6 +110,8 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS face_encoding TEXT;
 
 ## Validate
 
+Durable assessment scheduling and Fastn workflow setup are documented in [AUTOMATIONS.md](./AUTOMATIONS.md). Run migrations 007 and 008 in order before using the new draft/publication, results-release and verified Google connection controls. Controlled staging live acceptance passed for email, Calendar and Sheets; unrestricted student delivery remains disabled. See [the verification report](./backend/deploy/STAGING-VERIFICATION.md).
+
 ```bash
 # backend
 cd backend && npx tsc --noEmit && npm test

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { DataTable } from '../../../components/shared';
 import api from '../../../services/api';
 import toast from 'react-hot-toast';
+import { zonedInput, zonedIso } from '../../../utils/schedule';
 import {
   PlusIcon,
   MagnifyingGlassIcon,
@@ -21,6 +22,10 @@ interface Quiz {
   questions: QuestionItem[];
   timeLimit?: number;
   scheduledStart?: string;
+  closesAt?: string;
+  timezone?: string;
+  lifecycle?: 'draft' | 'published' | 'cancelled';
+  assignedStudentIds?: string[] | null;
   cameraMonitoring?: boolean;
   createdAt: string;
   accessCode: string;
@@ -48,13 +53,17 @@ const TeacherQuizzes = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [editingQuiz, setEditingQuiz] = useState<Quiz | null>(null);
+  const [defaultTimezone, setDefaultTimezone] = useState('Asia/Karachi');
+  const [students, setStudents] = useState<{ id: string; name: string; email: string }[]>([]);
+  const [savingQuiz, setSavingQuiz] = useState(false);
   const [formMode, setFormMode] = useState<'quiz' | 'question'>('quiz');
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     courseId: '',
-    timeLimit: 0,
+    timeLimit: 30,
     scheduledStart: '',
+    closesAt: '', timezone: 'Asia/Karachi', assignedStudentIds: null as string[] | null,
     cameraMonitoring: true,
     questionTitle: '',
     questionScheduledStart: '',
@@ -66,16 +75,16 @@ const TeacherQuizzes = () => {
   useEffect(() => {
     fetchQuizzes();
     fetchTeacherCourses();
+    api.get('/automations/settings').then(r => setDefaultTimezone(r.data.data.settings.timezone)).catch(() => {});
   }, []);
 
-  // Calculate total time whenever questions change
   useEffect(() => {
-    const totalSeconds = formData.questions.reduce((sum, q) => sum + (q.timeLimit || 0), 0);
-    const totalMinutes = Math.ceil(totalSeconds / 60);
-    if (formData.timeLimit !== totalMinutes) {
-      setFormData(prev => ({ ...prev, timeLimit: totalMinutes }));
-    }
-  }, [formData.questions]);
+    let active = true;
+    setStudents([]);
+    if (formData.courseId) api.get(`/automations/courses/${formData.courseId}/students`)
+      .then(r => { if (active) setStudents(r.data.data); }).catch(() => { if (active) toast.error('Could not load enrolled students'); });
+    return () => { active = false; };
+  }, [formData.courseId]);
 
   const fetchQuizzes = async () => {
     setLoading(true);
@@ -103,13 +112,6 @@ const TeacherQuizzes = () => {
   };
 
   // Convert UTC date to local datetime-local format
-  const utcToLocal = (utcDate: string) => {
-    const date = new Date(utcDate);
-    const offset = date.getTimezoneOffset();
-    const localDate = new Date(date.getTime() - offset * 60000);
-    return localDate.toISOString().slice(0, 16);
-  };
-
   const handleOpenModal = (quiz?: Quiz) => {
     if (quiz) {
       setFormMode('quiz');
@@ -118,8 +120,11 @@ const TeacherQuizzes = () => {
         title: quiz.title,
         description: quiz.description,
         courseId: quiz.courseId || '',
-        timeLimit: quiz.timeLimit || 0,
-        scheduledStart: quiz.scheduledStart ? utcToLocal(quiz.scheduledStart) : '',
+        timeLimit: quiz.timeLimit || 30,
+        scheduledStart: quiz.scheduledStart ? zonedInput(quiz.scheduledStart, quiz.timezone || defaultTimezone) : '',
+        closesAt: quiz.closesAt ? zonedInput(quiz.closesAt, quiz.timezone || defaultTimezone) : '',
+        timezone: quiz.timezone || defaultTimezone,
+        assignedStudentIds: quiz.assignedStudentIds ?? null,
         cameraMonitoring: quiz.cameraMonitoring !== false,
         questionTitle: '',
         questionScheduledStart: '',
@@ -138,8 +143,9 @@ const TeacherQuizzes = () => {
         title: '',
         description: '',
         courseId: '',
-        timeLimit: 0,
+        timeLimit: 30,
         scheduledStart: '',
+        closesAt: '', timezone: defaultTimezone, assignedStudentIds: null,
         cameraMonitoring: true,
         questionTitle: '',
         questionScheduledStart: '',
@@ -185,6 +191,13 @@ const TeacherQuizzes = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (savingQuiz) return;
+    let start: string | null, close: string | null;
+    try {
+      start = zonedIso(formMode === 'question' ? formData.questionScheduledStart : formData.scheduledStart, formData.timezone);
+      close = zonedIso(formData.closesAt, formData.timezone);
+      if (start && close && close <= start) throw new Error('Closing time must be after the start');
+    } catch (error: any) { toast.error(error.message); return; }
 
     if (formMode === 'question') {
       if (!formData.courseId) {
@@ -203,9 +216,7 @@ const TeacherQuizzes = () => {
       }
 
       try {
-        const questionScheduledStart = formData.questionScheduledStart && formData.questionScheduledStart.trim() !== ''
-          ? new Date(formData.questionScheduledStart).toISOString()
-          : null;
+        setSavingQuiz(true);
 
         const totalSeconds = formData.questions.reduce((sum, q) => sum + (q.timeLimit || 60), 0);
 
@@ -213,7 +224,8 @@ const TeacherQuizzes = () => {
           title: formData.questionTitle,
           description: formData.description || 'Short-answer assessment',
           courseId: formData.courseId,
-          scheduledStart: questionScheduledStart,
+          scheduledStart: start,
+          closesAt: close, timezone: formData.timezone, assignedStudentIds: formData.assignedStudentIds,
           timeLimit: Math.max(1, Math.ceil(totalSeconds / 60)),
           cameraMonitoring: formData.cameraMonitoring,
           questions: formData.questions.map((q) => ({
@@ -236,6 +248,8 @@ const TeacherQuizzes = () => {
         console.error('Save Question Error:', error);
         const message = error.response?.data?.error?.message || error.response?.data?.message || error.message || 'Failed to save question';
         toast.error(message);
+      } finally {
+        setSavingQuiz(false);
       }
       return;
     }
@@ -259,19 +273,18 @@ const TeacherQuizzes = () => {
     // Convert local datetime to ISO string for proper timezone handling
     const submitData = {
       ...formData,
-      scheduledStart: formData.scheduledStart && formData.scheduledStart.trim() !== ''
-        ? new Date(formData.scheduledStart).toISOString()
-        : null,
+      scheduledStart: start, closesAt: close,
       cameraMonitoring: formData.cameraMonitoring,
     };
 
     try {
+      setSavingQuiz(true);
       if (editingQuiz) {
         await api.put(`/quizzes/${editingQuiz._id}`, submitData);
         toast.success('Quiz updated successfully');
       } else {
         await api.post('/quizzes', submitData);
-        toast.success('Quiz created successfully');
+        toast.success('Draft saved. Publish it when ready.');
       }
       setModalOpen(false);
       fetchQuizzes();
@@ -279,16 +292,18 @@ const TeacherQuizzes = () => {
       console.error('Save Quiz Error:', error);
       const message = error.response?.data?.message || error.message || 'Failed to save quiz';
       toast.error(message);
+    } finally {
+      setSavingQuiz(false);
     }
   };
 
   const handleDelete = async (quiz: Quiz) => {
-    if (!confirm(`Delete quiz "${quiz.title}"?`)) return;
+    if (!confirm(quiz.lifecycle === 'draft' ? `Delete draft "${quiz.title}"?` : `Cancel "${quiz.title}" and notify assigned students under your saved settings?`)) return;
 
     try {
       await api.delete(`/quizzes/${quiz._id}`);
-      toast.success('Quiz deleted');
-      setQuizzes(quizzes.filter((q) => q._id !== quiz._id));
+      toast.success(quiz.lifecycle === 'draft' ? 'Draft deleted' : 'Quiz cancelled');
+      fetchQuizzes();
     } catch (error) {
       toast.error('Failed to delete quiz');
     }
@@ -310,6 +325,7 @@ const TeacherQuizzes = () => {
       render: (quiz: Quiz) => (
         <div>
           <p className="font-medium text-gray-900">{quiz.title}</p>
+          <span className="text-xs capitalize text-primary-700">{quiz.lifecycle || 'published'}</span>
           <p className="text-sm text-gray-500 line-clamp-1">{quiz.description}</p>
         </div>
       ),
@@ -359,7 +375,8 @@ const TeacherQuizzes = () => {
       render: (quiz: Quiz) => (
         quiz.scheduledStart ? (
           <span className="text-indigo-600 text-sm">
-            {new Date(quiz.scheduledStart).toLocaleString()}
+            {new Date(quiz.scheduledStart).toLocaleString('en-GB', { timeZone: quiz.timezone || 'Asia/Karachi' })}<br />{quiz.timezone || 'Asia/Karachi'}
+            {quiz.closesAt && <span className="block text-gray-500">Closes {new Date(quiz.closesAt).toLocaleString('en-GB', { timeZone: quiz.timezone || 'Asia/Karachi' })}</span>}
           </span>
         ) : (
           <span className="text-gray-400 text-sm">Anytime</span>
@@ -371,17 +388,23 @@ const TeacherQuizzes = () => {
       header: 'Actions',
       render: (quiz: Quiz) => (
         <div className="flex items-center gap-2">
+          {quiz.lifecycle === 'draft' && <button className="text-sm text-primary-700" onClick={async () => {
+            try { await api.post(`/quizzes/teacher/${quiz._id}/publish`); toast.success('Published. Notifications queued.'); fetchQuizzes(); }
+            catch (error: any) { toast.error(error.response?.data?.error?.message || 'Set a start and future closing time before publishing'); }
+          }}>Publish</button>}
           <button
             onClick={() => handleOpenModal(quiz)}
             className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
             title="Edit"
+            disabled={quiz.lifecycle === 'cancelled'}
           >
             <PencilIcon className="h-5 w-5" />
           </button>
           <button
             onClick={() => handleDelete(quiz)}
             className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-            title="Delete"
+            title={quiz.lifecycle === 'draft' ? 'Delete draft' : 'Cancel quiz'}
+            disabled={quiz.lifecycle === 'cancelled'}
           >
             <TrashIcon className="h-5 w-5" />
           </button>
@@ -471,6 +494,13 @@ const TeacherQuizzes = () => {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="rounded-xl bg-gray-50 p-4 space-y-4">
+                <p className="text-sm text-gray-600">{editingQuiz?.lifecycle === 'published' ? 'Schedule changes notify students under your saved settings.' : 'Saving creates a draft. Publication queues one announcement.'} The closing window is separate from each student’s attempt duration.</p>
+                <label className="block text-sm font-medium">Schedule timezone<input required className="mt-1 w-full rounded-lg border p-2" value={formData.timezone} onChange={e => setFormData({ ...formData, timezone: e.target.value })} placeholder="Asia/Karachi" /></label>
+                <label className="block text-sm font-medium">Closing time<input type="datetime-local" className="mt-1 w-full rounded-lg border p-2" value={formData.closesAt} onChange={e => setFormData({ ...formData, closesAt: e.target.value })} /></label>
+                <label className="flex gap-2 text-sm"><input type="checkbox" checked={formData.assignedStudentIds === null} onChange={e => setFormData({ ...formData, assignedStudentIds: e.target.checked ? null : [] })} />Assign to all enrolled students in this course</label>
+                {formData.assignedStudentIds !== null && <label className="block text-sm">Selected students<select multiple className="mt-1 w-full min-h-[100px] rounded-lg border p-2" value={formData.assignedStudentIds} onChange={e => setFormData({ ...formData, assignedStudentIds: Array.from(e.target.selectedOptions, o => o.value) })}>{students.map(s => <option key={s.id} value={s.id}>{s.name} ({s.email})</option>)}</select><span className="text-xs text-gray-500">Hold Ctrl or Command to select multiple students. An empty selection assigns nobody.</span></label>}
+              </div>
               {formMode === 'quiz' && (
                 <>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -489,6 +519,7 @@ const TeacherQuizzes = () => {
                       <label className="block text-sm font-medium text-gray-700 mb-1">Course</label>
                       <select
                         value={formData.courseId}
+                        disabled={Boolean(editingQuiz)}
                         onChange={(e) => setFormData({ ...formData, courseId: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         required
@@ -502,16 +533,15 @@ const TeacherQuizzes = () => {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Total Time (minutes)</label>
-                      <div className="w-full px-3 py-2 border border-gray-200 bg-gray-50 text-gray-500 rounded-lg">
-                        {formData.timeLimit} minutes (calculated from questions)
-                      </div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="attempt-duration">Attempt duration (minutes)</label>
+                      <input id="attempt-duration" type="number" min={1} max={600} required value={formData.timeLimit} onChange={e => setFormData({ ...formData, timeLimit: Number(e.target.value) })} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
+                      <p className="mt-1 text-xs text-gray-500">Each attempt ends at its duration or the closing time, whichever comes first.</p>
                     </div>
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Scheduled Start Time (Optional)
+                      Opening time (required to publish)
                     </label>
                     <input
                       type="datetime-local"
@@ -732,9 +762,10 @@ const TeacherQuizzes = () => {
                 </button>
                 <button
                   type="submit"
+                  disabled={savingQuiz}
                   className="px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700"
                 >
-                  {editingQuiz ? 'Update Quiz' : formMode === 'quiz' ? 'Create Quiz' : 'Create Question'}
+                  {savingQuiz ? 'Saving…' : editingQuiz ? 'Save changes' : 'Save draft'}
                 </button>
               </div>
             </form>

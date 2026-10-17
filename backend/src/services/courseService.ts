@@ -1,5 +1,4 @@
 import { supabase } from '../config/supabase';
-import { emailService } from './emailService';
 
 function isMissingColumnError(err: any, column: string): boolean {
   if (!err) return false;
@@ -106,13 +105,7 @@ export const courseService = {
       throw new Error(error.message);
     }
 
-    // Fetch user and course details for email
-    const { data: user } = await supabase.from('users').select('email, name').eq('id', userId).single();
-    const { data: course } = await supabase.from('courses').select('title').eq('id', courseId).single();
-
-    if (user && course) {
-      await emailService.sendCourseEnrollmentEmail(user.email, user.name, course.title);
-    }
+    // The enrolment trigger durably queues the optional welcome workflow.
 
     return { message: 'Enrolled successfully' };
   },
@@ -186,11 +179,7 @@ export const courseService = {
       throw new Error(error.message);
     }
 
-    // Send enrollment email
-    const { data: user } = await supabase.from('users').select('email, name').eq('id', userId).single();
-    if (user) {
-      await emailService.sendCourseEnrollmentEmail(user.email, user.name, course.title);
-    }
+    // Email is delivered only by the automation workflow, under saved preferences.
 
     return { message: 'Enrolled successfully', course: { _id: course.id, title: course.title } };
   },

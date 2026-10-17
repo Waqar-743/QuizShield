@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useAuthStore } from '../../store/authStore';
 import toast from 'react-hot-toast';
@@ -16,6 +16,8 @@ const MODEL_URL = `${import.meta.env.BASE_URL}models`;
 const LoginPage = () => {
   const { login, verifyFaceLogin, cancelFaceVerification, faceVerificationPending, isLoading } = useAuthStore();
   const navigate = useNavigate();
+  const location = useLocation();
+  const returnTo = typeof location.state?.returnTo === 'string' && /^\/quiz\/teacher-results\/[a-f0-9-]+$/i.test(location.state.returnTo) ? location.state.returnTo : '/dashboard';
   const { register, handleSubmit, formState: { errors } } = useForm();
 
   // Camera state
@@ -43,9 +45,9 @@ const LoginPage = () => {
   useEffect(() => {
     if (isAuthenticated) {
       toast.success('Logged in successfully!');
-      navigate('/dashboard');
+      navigate(returnTo, { replace: true });
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, returnTo]);
 
   // Load face-api models when entering face verification step
   useEffect(() => {

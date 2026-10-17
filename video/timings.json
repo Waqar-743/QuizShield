@@ -1,0 +1,49 @@
+{
+  "total": 83.057,
+  "scenes": [
+    {
+      "start": 0.5,
+      "dur": 10.604,
+      "speechAt": 1.05
+    },
+    {
+      "start": 11.104,
+      "dur": 7.0,
+      "speechAt": 11.654
+    },
+    {
+      "start": 18.104,
+      "dur": 9.925,
+      "speechAt": 18.654
+    },
+    {
+      "start": 28.029,
+      "dur": 20.206,
+      "speechAt": 28.579
+    },
+    {
+      "start": 48.235,
+      "dur": 13.592,
+      "speechAt": 48.785
+    },
+    {
+      "start": 61.827,
+      "dur": 10.0,
+      "speechAt": 62.377
+    },
+    {
+      "start": 71.827,
+      "dur": 7.83,
+      "speechAt": 72.377
+    }
+  ],
+  "cues": {
+    "match": 38.229,
+    "token": 41.129,
+    "tab": 51.235,
+    "focus": 53.435,
+    "face": 56.035,
+    "armed": 60.035,
+    "logo": 72.527
+  }
+}

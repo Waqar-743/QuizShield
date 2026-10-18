@@ -1,0 +1,249 @@
+.qs-art {
+  width: 100%;
+  height: 100%;
+  color: #047857;
+}
+.qs-art > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.qs-art .qs-label,
+.qs-art .qs-small-label,
+.qs-art .qs-caption,
+.qs-art .qs-file-label {
+  font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: -0.15px;
+}
+.qs-art text:not([fill]) {
+  fill: #3a5348;
+}
+.qs-art .qs-small-label {
+  font-size: 10px;
+}
+.qs-art .qs-caption {
+  font-size: 12px;
+  fill: #61796d;
+}
+.qs-art .qs-file-label {
+  font-family: ui-monospace, monospace;
+  font-size: 18px;
+  fill: #6d548c;
+}
+.qs-art--dark {
+  color: #a4f4d3;
+}
+.qs-focus {
+  background: #101b22;
+}
+.qs-float {
+  animation: qs-float 8s ease-in-out infinite;
+}
+.qs-float--late {
+  animation-delay: -4s;
+}
+.qs-flow {
+  animation: qs-flow 12s linear infinite;
+}
+.qs-trace {
+  stroke-dasharray: 8 92;
+  animation: qs-trace 14s linear infinite;
+}
+.qs-draw {
+  stroke-dasharray: 1;
+  animation: qs-draw 9s ease-in-out infinite;
+}
+.qs-event {
+  animation: qs-event 9s ease-in-out infinite;
+}
+.qs-event--1 {
+  animation-delay: -6s;
+}
+.qs-event--2 {
+  animation-delay: -3s;
+}
+.qs-key {
+  animation: qs-key 10s ease-in-out infinite;
+}
+.qs-key--late {
+  animation-delay: -5s;
+}
+.qs-art[data-in-view="false"] .qs-motion,
+.home-page[data-home-visible="false"] .qs-motion {
+  animation-play-state: paused;
+}
+.home-page[data-home-motion="paused"] *,
+.home-page[data-home-motion="paused"] *::before,
+.home-page[data-home-motion="paused"] *::after {
+  animation-play-state: paused !important;
+}
+.qs-journey-compact,
+.qs-activity-compact {
+  display: none;
+}
+.home-feature-art {
+  height: 11rem;
+}
+.home-feature-art--large {
+  min-height: 18rem;
+  flex: 1;
+}
+.home-motion-control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 2.75rem;
+  padding: 0.5rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  white-space: nowrap;
+  color: #3a5348;
+  background: #fff;
+  border: 1px solid #dce7e2;
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease;
+}
+.home-motion-control:hover {
+  background: #ecfef7;
+  border-color: #a4d5c0;
+}
+.home-motion-control:focus-visible {
+  outline: 2px solid #047857;
+  outline-offset: 4px;
+}
+.home-motion-control:disabled {
+  cursor: default;
+  color: #61796d;
+}
+.home-motion-control svg {
+  width: 0.85rem;
+  height: 0.85rem;
+}
+.home-art-caption {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+}
+.home-art-caption p {
+  font-size: 0.7rem;
+  line-height: 1.7;
+  color: #56606e;
+}
+.home-art-caption--dark p {
+  color: #a0b9ae;
+}
+.home-page section[id] {
+  scroll-margin-top: 7rem;
+}
+@keyframes qs-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+@keyframes qs-flow {
+  to {
+    stroke-dashoffset: -100;
+  }
+}
+@keyframes qs-trace {
+  to {
+    stroke-dashoffset: -100;
+  }
+}
+@keyframes qs-draw {
+  0%,
+  8% {
+    stroke-dashoffset: 1;
+  }
+  25%,
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes qs-event {
+  0%,
+  18%,
+  100% {
+    opacity: 0.7;
+  }
+  35%,
+  65% {
+    opacity: 1;
+  }
+}
+@keyframes qs-key {
+  0%,
+  10%,
+  30%,
+  100% {
+    transform: translateY(0);
+  }
+  18%,
+  23% {
+    transform: translateY(3px);
+  }
+}
+@media (max-width: 639px) {
+  .qs-journey,
+  .qs-activity-full {
+    display: none;
+  }
+  .qs-journey-compact,
+  .qs-activity-compact {
+    display: block;
+  }
+  .home-feature-art--large {
+    min-height: 13rem;
+  }
+  .home-feature-art .qs-label {
+    font-size: 18px;
+  }
+  .home-feature-art .qs-small-label {
+    font-size: 17px;
+  }
+  .home-feature-art .qs-activity-compact .qs-label {
+    font-size: 14px;
+  }
+  .qs-workflow .qs-label {
+    font-size: 16px;
+  }
+  .qs-private .qs-small-label {
+    font-size: 16px;
+  }
+  .home-art-caption {
+    justify-content: center;
+    text-align: center;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-page *,
+  .home-page *::before,
+  .home-page *::after {
+    animation: none !important;
+    scroll-behavior: auto !important;
+  }
+  .home-page .reveal {
+    opacity: 1;
+    filter: none;
+    transform: none;
+    transition: none;
+  }
+  .qs-draw {
+    stroke-dashoffset: 0;
+  }
+  .qs-trace {
+    stroke-dasharray: none;
+    opacity: 0.4;
+  }
+}

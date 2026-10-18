@@ -228,8 +228,8 @@ export const AssessmentJourney = memo(function AssessmentJourney() {
   const id = useId().replace(/:/g, "");
   return (
     <Illustration
-      title="From a quiz draft to privately reviewed results"
-      description="A quiz document passes through QuizShield's timing and assignment checks to teacher review. A locked result stays private until the teacher releases it. This is an illustration, not a live session."
+      title="From course questions to teacher-reviewed results"
+      description="A quiz document passes through QuizShield's enrolment and schedule checks to teacher review. Results are held until teacher review. This is an illustration, not a live session."
       viewBox="0 0 960 410"
       className="qs-journey"
     >
@@ -276,7 +276,7 @@ export const AssessmentJourney = memo(function AssessmentJourney() {
         <Paper x={100} y={96} width={160} height={210} />
         <rect x="118" y="256" width="124" height="30" rx="8" fill="#f0f5f2" />
         <text x="180" y="276" textAnchor="middle" className="qs-label">
-          Saved as draft
+          Course questions
         </text>
       </g>
       <circle
@@ -328,7 +328,7 @@ export const AssessmentJourney = memo(function AssessmentJourney() {
         />
         <circle cx="643" cy="51" r="4" fill="#10b981" />
         <text x="658" y="56" className="qs-label">
-          Timing &amp; assignment checks
+          Enrolment &amp; schedule checks
         </text>
       </g>
       <g>
@@ -343,7 +343,7 @@ export const AssessmentJourney = memo(function AssessmentJourney() {
         />
         <Lock x={143} y={338} size={20} />
         <text x="173" y="353" className="qs-label">
-          Private until you release
+          Teacher-reviewed results
         </text>
       </g>
       <text x="480" y="393" textAnchor="middle" className="qs-caption">
@@ -357,7 +357,7 @@ export const CompactJourney = memo(function CompactJourney() {
   return (
     <Illustration
       title="A teacher-led assessment workflow"
-      description="A draft quiz, QuizShield checks and a locked reviewed result. Results stay private until release."
+      description="Course questions, QuizShield checks and a teacher-reviewed result. Results are held until teacher review."
       viewBox="0 0 340 310"
       className="qs-journey-compact"
     >
@@ -386,7 +386,7 @@ export const CompactJourney = memo(function CompactJourney() {
       />
       <Lock x={91} y={263} size={18} />
       <text x="120" y="277" className="qs-label">
-        Private until release
+        Teacher-reviewed
       </text>
     </Illustration>
   );
@@ -635,7 +635,7 @@ export const CopyGuardGraphic = memo(function CopyGuardGraphic() {
 export const PracticeGraphic = memo(function PracticeGraphic() {
   return (
     <Illustration
-      title="Practice guidance follows released results"
+      title="Course learning and practice resources"
       description="A reviewed result connects to practice materials. The illustration represents the sequence, not a student's performance data."
       viewBox="0 0 360 210"
     >
@@ -677,7 +677,7 @@ export const PracticeGraphic = memo(function PracticeGraphic() {
         />
       </g>
       <text x="92" y="188" textAnchor="middle" className="qs-small-label">
-        Results released
+        Reviewed work
       </text>
       <text x="268" y="188" textAnchor="middle" className="qs-small-label">
         Practice next
@@ -749,8 +749,8 @@ export const CourseGraphic = memo(function CourseGraphic() {
 export const ExportGraphic = memo(function ExportGraphic() {
   return (
     <Illustration
-      title="Reviewed marks can be exported as CSV"
-      description="A reviewed assessment table connects to an export file. The table contains illustration marks rather than real or simulated statistics."
+      title="Assessment records and teacher feedback"
+      description="A reviewed assessment table connects to a results record. The table contains illustration marks rather than real or simulated statistics."
       viewBox="0 0 360 210"
     >
       <rect
@@ -792,7 +792,7 @@ export const ExportGraphic = memo(function ExportGraphic() {
         />
         <path d="M297 53v23a6 6 0 0 0 6 6h23" stroke="#bfb2d9" />
         <text x="285" y="121" textAnchor="middle" className="qs-file-label">
-          CSV
+          Notes
         </text>
         <path
           d="M273 139h25"
@@ -808,8 +808,8 @@ export const ExportGraphic = memo(function ExportGraphic() {
 export const WorkflowGraphic = memo(function WorkflowGraphic() {
   return (
     <Illustration
-      title="Draft, publish, review, release"
-      description="Four connected steps, with release controlled by the teacher."
+      title="Create, schedule, review, grade"
+      description="Four connected steps, from course questions to teacher feedback."
       viewBox="0 0 420 108"
       className="qs-workflow"
     >
@@ -821,7 +821,7 @@ export const WorkflowGraphic = memo(function WorkflowGraphic() {
         strokeDasharray="3 21"
         className="qs-flow qs-motion"
       />
-      {["Draft", "Publish", "Review", "Release"].map((label, i) => (
+      {["Create", "Schedule", "Review", "Grade"].map((label, i) => (
         <g key={label}>
           <circle
             cx={54 + i * 104}
@@ -857,8 +857,8 @@ export const PrivateResultsGraphic = memo(function PrivateResultsGraphic() {
   const id = useId().replace(/:/g, "");
   return (
     <Illustration
-      title="Reviewed results stay private until you release them"
-      description="A locked assessment sheet is held within the teacher's review space. Timing, assignment and browser-event records support a human review. The lock remains closed throughout the illustration."
+      title="Results are held until teacher review"
+      description="A locked assessment sheet is held within the teacher's review space. Enrolment, scheduling and browser-event records support a human review. The lock remains closed throughout the illustration."
       viewBox="0 0 480 460"
       className="qs-art--dark qs-private"
     >
@@ -935,7 +935,7 @@ export const PrivateResultsGraphic = memo(function PrivateResultsGraphic() {
         />
         <Lock x={306} y={297} size={19} />
         <text x="336" y="312" className="qs-small-label" fill="#a4f4d3">
-          Private grade
+          Teacher grade
         </text>
       </g>
       <path d="M120 381h240" stroke="#2a483e" />
@@ -967,7 +967,7 @@ export const PrivateResultsGraphic = memo(function PrivateResultsGraphic() {
         className="qs-small-label"
         fill="#a0b9ae"
       >
-        You release
+        Feedback
       </text>
     </Illustration>
   );

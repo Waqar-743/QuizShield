@@ -253,7 +253,7 @@ const Hero = ({ motionControl }: { motionControl: ReactNode }) => (
         </h1>
 
         <p className="reveal reveal-delay-2 mx-auto mt-8 max-w-2xl text-pretty text-lg leading-relaxed text-ink-500">
-          QuizShield secures every assessment with server-enforced timing,
+          QuizShield supports assessments with scheduled availability,
           tab-switch sentinels, and copy-paste guards — so educators measure
           what students actually know, not what they could borrow.
         </p>
@@ -274,7 +274,7 @@ const Hero = ({ motionControl }: { motionControl: ReactNode }) => (
         </div>
 
         <p className="reveal reveal-delay-4 mt-6 text-xs text-ink-400">
-          Create a teacher account · Draft, publish and review assessments
+          Create a teacher account · Create, schedule and review assessments
         </p>
       </div>
 
@@ -288,7 +288,7 @@ const Hero = ({ motionControl }: { motionControl: ReactNode }) => (
         <figcaption className="home-art-caption mt-4 px-2">
           <p>
             <span className="font-semibold text-ink-700">
-              Draft. Publish. Review. Release.
+              Create. Schedule. Review. Grade.
             </span>{" "}
             An illustrated workflow.
           </p>
@@ -375,9 +375,9 @@ const features: Feat[] = [
     visual: <CopyGuardGraphic />,
   },
   {
-    title: "Reviewed practice suggestions",
+    title: "Learning and practice",
     label: "Practice",
-    copy: "Students receive private practice guidance after reviewed results are released. Published assessments follow the teacher’s question set.",
+    copy: "Explore learning resources and practice guidance alongside your course work and reviewed results.",
     span: "md:col-span-4",
     visual: <PracticeGraphic />,
   },
@@ -390,9 +390,9 @@ const features: Feat[] = [
     visual: <CourseGraphic />,
   },
   {
-    title: "Assessment exports",
+    title: "Assessment records",
     label: "Reviewed marks",
-    copy: "Review student submissions and recorded events, then export marks as CSV.",
+    copy: "Review student submissions, teacher grades, feedback and recorded events in one place.",
     span: "md:col-span-4",
     accent: "violet",
     visual: <ExportGraphic />,
@@ -431,12 +431,12 @@ const HowItWorks = () => {
     {
       n: "01",
       t: "Author a quiz in minutes",
-      d: "Create multiple-choice and short-answer questions, save a draft, then publish when the assessment is ready.",
+      d: "Create multiple-choice and short-answer questions, choose a course, and set an assessment start time.",
     },
     {
       n: "02",
       t: "Distribute via secure code",
-      d: "Students enrol using a course code and enter a four-digit assessment code. The server checks assignments and availability.",
+      d: "Students enrol using a course code and enter a four-digit assessment code. The server checks enrolment and scheduled availability.",
     },
     {
       n: "03",
@@ -445,8 +445,8 @@ const HowItWorks = () => {
     },
     {
       n: "04",
-      t: "Review and release results",
-      d: "Save a private reviewed grade, explicitly release results, and export assessment marks.",
+      t: "Grade and give feedback",
+      d: "Review each submission, save a teacher grade and feedback, and let students view their reviewed results.",
     },
   ];
 
@@ -528,15 +528,15 @@ const IntegritySpotlight = ({
             <span className="text-primary-300">students.</span>
           </h2>
           <p className="reveal reveal-delay-2 mt-5 max-w-xl text-lg text-white/60 text-pretty">
-            Sign in with email and password. Assessment timing and assignments
+            Course enrolment and scheduled availability
             are checked by the server. Browser activity events provide context
             for teacher review.
           </p>
           <ul className="reveal reveal-delay-3 mt-10 space-y-4">
             {[
-              "Server-enforced assessment timing and assignment",
+              "Server-checked enrolment and scheduled availability",
               "Browser events alongside submitted answers",
-              "Private reviewed results until explicit release",
+              "Results held until teacher review",
               "Teacher judgment at the centre of review",
             ].map((line) => (
               <li key={line} className="flex items-start gap-3 text-white/80">
@@ -559,7 +559,7 @@ const IntegritySpotlight = ({
             </div>
           </div>
           <figcaption className="home-art-caption home-art-caption--dark mt-4 px-2">
-            <p>Illustration · Reviewed privately. Released by you.</p>
+            <p>Illustration · Submitted by students. Reviewed by you.</p>
             {motionControl}
           </figcaption>
         </figure>
@@ -571,10 +571,10 @@ const IntegritySpotlight = ({
 /* ───── METRICS strip ───── */
 const Metrics = () => {
   const items = [
-    { k: "Draft", l: "Save before publishing" },
-    { k: "Timed", l: "Server-enforced availability" },
+    { k: "Create", l: "Build course assessments" },
+    { k: "Schedule", l: "Choose the start time" },
     { k: "Review", l: "Teacher-approved grades" },
-    { k: "Release", l: "Share results when ready" },
+    { k: "Feedback", l: "Help students improve" },
   ];
   return (
     <section className="bg-white py-24">
@@ -601,21 +601,21 @@ const Metrics = () => {
 const Testimonials = () => {
   const quotes = [
     {
-      q: "Save assessments as drafts and choose which enrolled students receive them.",
-      a: "Draft and assign",
+      q: "Create course assessments and choose when students can start them.",
+      a: "Create and schedule",
       r: "Teacher controls",
       rot: "md:-rotate-2",
     },
     {
-      q: "Review answers and recorded events before releasing a saved grade.",
-      a: "Review and release",
+      q: "Review answers and recorded events before saving a teacher grade and feedback.",
+      a: "Review and grade",
       r: "Assessment workflow",
       rot: "md:rotate-1",
     },
     {
-      q: "Connect a verified teacher-owned Calendar and results Sheet through Fastn.",
-      a: "Connect your tools",
-      r: "Optional integrations",
+      q: "Organise topics, learning resources and enrolled students within each course.",
+      a: "Manage your courses",
+      r: "Course workspace",
       rot: "md:-rotate-1",
     },
   ];
@@ -626,7 +626,7 @@ const Testimonials = () => {
         <div className="reveal mx-auto max-w-3xl text-center">
           <span className="eyebrow eyebrow-light">Your workflow</span>
           <h2 className="mt-4 font-display text-4xl md:text-6xl tracking-tightest text-ink-900 text-balance">
-            A clear path from draft to released results.
+            A clear path from questions to reviewed results.
           </h2>
         </div>
 

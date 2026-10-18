@@ -6,7 +6,7 @@ The nine section-specific illustrations use inline SVG and CSS, so they do not r
 
 ## Scope
 
-- Assessment journey, activity review, focus, copy protection, practice, courses, exports, workflow, and private-results artwork.
+- Assessment journey, activity review, focus, copy protection, practice, courses, assessment records, workflow, and teacher-review artwork.
 - Compact artwork for small screens, accessible SVG descriptions, shared animation controls, reduced-motion support, and offscreen animation pausing.
 - Existing homepage palette, typefaces, navigation destinations, and frontend architecture.
 
@@ -14,7 +14,9 @@ The administrator implementation, teacher automation changes, authentication cha
 
 ## Publishing constraint
 
-The repository's `github-pages` deployment environment currently permits only `main`. Its Pages workflow runs on pushes to `main` or manual dispatch, but dispatching another branch does not override that environment restriction. The earlier instruction prohibits merging into `main` and deploying production. A specific approval to merge this homepage-only PR is therefore required before publishing. Do not merge the larger staging PR for this purpose, and do not weaken deployment protection rules.
+The repository's `github-pages` deployment environment permits only `main`. Its Pages workflow runs on pushes to `main` or manual dispatch, but dispatching another branch does not override that environment restriction. On 2026-10-18 the user specifically approved merging and publishing only this homepage update in PR #7. The larger staging PR #6 remains separate. Deployment protection rules remain unchanged.
+
+Production copy is adapted to the existing backend: teacher-reviewed results, scheduled availability, course enrolment and assessment records. It does not promise the staging-only draft/publication lifecycle, explicit results-release action, CSV exports or Google integrations.
 
 After approval, merge this PR and wait for **Deploy Frontend to GitHub Pages** to finish. Verify <https://waqar-743.github.io/QuizShield/> and its `/QuizShield/login` and `/QuizShield/register` links, section navigation, artwork, and pause/resume controls. Do not deploy the backend or run migrations for this release.
 
@@ -24,4 +26,10 @@ Revert this isolated homepage commit on `main` and let the existing Pages workfl
 
 ## Verification
 
-See the PR for the Pages-path production build and browser verification results. The same artwork was already reviewed on staging at <https://quizshield-automation-ui.vercel.app/>; source and screenshots are recorded in [the staging artwork guide](https://github.com/Waqar-743/QuizShield/blob/codex/fastn-email-staging/HOMEPAGE-ILLUSTRATIONS.md).
+- Local production build with `VITE_API_URL=https://quiz-shield.vercel.app/api` and `--base=/QuizShield/`: passed. The existing non-blocking large-chunk and Browserslist age warnings remain.
+- Scoped ESLint checks on the edited TSX components: passed with zero warnings.
+- Real browser checks against the production build at `http://127.0.0.1:4176/QuizShield/`: homepage loaded; all three pause controls changed together from running to paused and back; sign-in and registration links stayed under `/QuizShield/` and rendered their existing pages. No account or API mutation was performed.
+- GitHub CI on the initial isolated commit `9b556b0`: backend and frontend jobs passed. Final-head CI and the Pages deployment are recorded in the PR.
+- Mobile compact illustrations were reviewed previously on staging. This release reuses their layout and changes production-specific wording; physical devices and OS reduced-motion emulation were not retested.
+
+The same artwork was already reviewed on staging at <https://quizshield-automation-ui.vercel.app/>; source and screenshots are recorded in [the staging artwork guide](https://github.com/Waqar-743/QuizShield/blob/codex/fastn-email-staging/HOMEPAGE-ILLUSTRATIONS.md). This homepage release does not claim that staging's account-management, automation or camera-removal regression coverage applies to the existing production application.

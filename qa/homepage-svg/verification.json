@@ -1,0 +1,87 @@
+{
+  "verifiedAt": "2026-10-18T17:57:44.692Z",
+  "sourceCommit": "9409c443d2d33616e409b251c2924ea02431b940",
+  "branch": "codex/fastn-email-staging",
+  "stagingUrl": "https://quizshield-automation-ui.vercel.app/",
+  "immutableStagingUrl": "https://quizshield-automation-bf4g6pcpm-waqars-projects-f3b5ee41.vercel.app",
+  "deploymentId": "dpl_CL2PBP2AKBAS9Huj5aJ6uLG83xnU",
+  "runtimeFingerprint": {
+    "algorithm": "sha256 of sorted file paths and contents",
+    "hash": "a87e5ea3551e2de840306bce962f234ee305d0c3b42ae1f9db7c5eee5bc5222f",
+    "files": [
+      "frontend/src/components/landing/Illustrations.tsx",
+      "frontend/src/components/landing/illustrations.css",
+      "frontend/src/pages/LandingPage.tsx"
+    ]
+  },
+  "bundles": {
+    "entry": "/assets/index-DmQUuMdV.js",
+    "landingPage": "assets/LandingPage-BMvfTh8M.js",
+    "landingJsGzipKB": 11.23,
+    "landingCssGzipKB": 1.2
+  },
+  "checks": {
+    "frontendLint": "passed",
+    "frontendTypes": "passed",
+    "stagingProductionBuild": "passed",
+    "noNewDependencies": true,
+    "backendUnchanged": true,
+    "cameraPolicyRetained": true,
+    "temporaryResponsiveFixtureRemoved": true,
+    "mainUnchanged": "b268807cfb7effa5e66aeb68595c87696b7122d6",
+    "userImages": [
+      {
+        "path": "ChatGPT Image Oct 18, 2026, 11_23_16 AM.png",
+        "unchanged": true
+      },
+      {
+        "path": "ChatGPT Image Oct 18, 2026, 11_25_59 AM.png",
+        "unchanged": true
+      }
+    ]
+  },
+  "browser": {
+    "localDesktop": "Hero, first feature group, privacy artwork, all three pause controls changing together and resuming",
+    "embeddedResponsive": "Actual application in 375px and 320px CSS-width iframe viewports; compact hero and compact activity; menu open, anchor selection and close",
+    "physicalDevice": "not tested",
+    "operatingSystemReducedMotion": "not changed or emulated; static CSS and preference subscription reviewed",
+    "hostedStaging": {
+      "allNineScenes": "visually verified in the deployed page",
+      "navigation": "Features, How it works and Integrity anchors verified",
+      "pageWideControls": {
+        "paused": 3,
+        "resumed": 3,
+        "passed": true
+      },
+      "screenshotCaptureWidth": 1265
+    }
+  },
+  "ci": {
+    "url": "https://github.com/Waqar-743/QuizShield/actions/runs/39151804436",
+    "sourceCommit": "9409c443d2d33616e409b251c2924ea02431b940",
+    "conclusion": "success",
+    "jobs": [
+      {
+        "name": "backend-build",
+        "conclusion": "success",
+        "url": "https://github.com/Waqar-743/QuizShield/actions/runs/39151804436/job/117746805236"
+      },
+      {
+        "name": "frontend-build",
+        "conclusion": "success",
+        "url": "https://github.com/Waqar-743/QuizShield/actions/runs/39151804436/job/117746805442"
+      }
+    ]
+  },
+  "productionChanged": false,
+  "screenshots": [
+    "before.png",
+    "mobile-features-320.png",
+    "mobile-hero-375.png",
+    "staging-feature-details.png",
+    "staging-features.png",
+    "staging-hero.png",
+    "staging-integrity.png",
+    "staging-workflow.png"
+  ]
+}

@@ -1,7 +1,20 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Brand } from '../components/shared';
-import { useReveal } from '../hooks/useReveal';
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { Link } from "react-router-dom";
+import { Brand } from "../components/shared";
+import { useReveal } from "../hooks/useReveal";
+import {
+  AssessmentJourney,
+  CompactJourney,
+  ActivityReviewGraphic,
+  CompactActivityGraphic,
+  FocusGraphic,
+  CopyGuardGraphic,
+  PracticeGraphic,
+  CourseGraphic,
+  ExportGraphic,
+  WorkflowGraphic,
+  PrivateResultsGraphic,
+} from "../components/landing/Illustrations";
 
 /* ──────────────────────────────────────────────────────────────────────────
    Vibe: Ethereal Glass · Layout: Asymmetrical Bento + Editorial Split
@@ -11,7 +24,7 @@ import { useReveal } from '../hooks/useReveal';
 const Stroke = ({
   d,
   size = 18,
-  className = '',
+  className = "",
 }: {
   d: string;
   size?: number;
@@ -33,26 +46,41 @@ const Stroke = ({
   </svg>
 );
 
-const Arrow = ({ size = 14, className = '' }: { size?: number; className?: string }) => (
-  <Stroke d="M5 19 19 5 M9 5h10v10" size={size} className={className} />
-);
+const Arrow = ({
+  size = 14,
+  className = "",
+}: {
+  size?: number;
+  className?: string;
+}) => <Stroke d="M5 19 19 5 M9 5h10v10" size={size} className={className} />;
 
 /* ───── Floating Glass Island Nav (with morphing hamburger) ───── */
 const NavIsland = () => {
   const [open, setOpen] = useState(false);
+  useEffect(() => {
+    if (!open) return;
+    const close = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setOpen(false);
+        document.getElementById("mobile-menu-toggle")?.focus();
+      }
+    };
+    document.addEventListener("keydown", close);
+    return () => document.removeEventListener("keydown", close);
+  }, [open]);
 
   useEffect(() => {
-    document.documentElement.style.overflow = open ? 'hidden' : '';
+    document.documentElement.style.overflow = open ? "hidden" : "";
     return () => {
-      document.documentElement.style.overflow = '';
+      document.documentElement.style.overflow = "";
     };
   }, [open]);
 
   const links = [
-    { href: '#features', label: 'Features' },
-    { href: '#how', label: 'How it works' },
-    { href: '#integrity', label: 'AI Integrity' },
-    { href: '#trust', label: 'Trust' },
+    { href: "#features", label: "Features" },
+    { href: "#how", label: "How it works" },
+    { href: "#integrity", label: "Integrity" },
+    { href: "#trust", label: "Trust" },
   ];
 
   return (
@@ -60,22 +88,22 @@ const NavIsland = () => {
       <header className="fixed inset-x-0 top-0 z-40 flex justify-center px-4 pt-6">
         <div
           className="
-            flex w-full max-w-3xl items-center gap-2 rounded-full p-1.5
+            flex w-full max-w-4xl items-center gap-2 rounded-full p-1.5
             bg-white/70 backdrop-blur-2xl ring-1 ring-ink-900/5
             shadow-[0_20px_60px_-30px_rgba(5,7,11,0.25)]
           "
         >
-          <div className="pl-3 pr-2">
+          <div className="shrink-0 pl-3 pr-2">
             <Brand to="/" />
           </div>
 
-          <nav className="hidden md:flex items-center gap-1 px-2">
+          <nav className="hidden lg:flex items-center gap-1 px-2">
             {links.map((l) => (
               <a
                 key={l.href}
                 href={l.href}
                 className="
-                  rounded-full px-3.5 py-2 text-sm font-medium text-ink-600
+                  rounded-full px-3.5 py-2 whitespace-nowrap text-sm font-medium text-ink-600
                   transition-all duration-500 ease-spring
                   hover:text-ink-900 hover:bg-ink-900/[0.04]
                 "
@@ -89,13 +117,16 @@ const NavIsland = () => {
             <Link
               to="/login"
               className="
-                hidden sm:inline-flex rounded-full px-4 py-2 text-sm font-medium text-ink-700
+                hidden shrink-0 whitespace-nowrap sm:inline-flex rounded-full px-4 py-2 text-sm font-medium text-ink-700
                 transition-all duration-500 ease-spring hover:text-ink-900 hover:bg-ink-900/[0.04]
               "
             >
               Sign in
             </Link>
-            <Link to="/register" className="btn-island-primary">
+            <Link
+              to="/register"
+              className="btn-island-primary hidden shrink-0 whitespace-nowrap sm:inline-flex"
+            >
               <span className="pr-1">Get started</span>
               <span className="btn-icon bg-white/15">
                 <Arrow />
@@ -107,19 +138,22 @@ const NavIsland = () => {
               type="button"
               onClick={() => setOpen((o) => !o)}
               aria-label="Menu"
+              id="mobile-menu-toggle"
+              aria-expanded={open}
+              aria-controls="mobile-navigation"
               className="
-                md:hidden relative ml-1 flex h-10 w-10 items-center justify-center
+                lg:hidden relative ml-1 flex h-10 w-10 items-center justify-center
                 rounded-full bg-ink-900/[0.04] ring-1 ring-ink-900/5
               "
             >
               <span
                 className={`absolute h-[1.5px] w-4 bg-ink-900 transition-all duration-500 ease-spring ${
-                  open ? 'rotate-45 translate-y-0' : '-translate-y-1.5'
+                  open ? "rotate-45 translate-y-0" : "-translate-y-1.5"
                 }`}
               />
               <span
                 className={`absolute h-[1.5px] w-4 bg-ink-900 transition-all duration-500 ease-spring ${
-                  open ? '-rotate-45 translate-y-0' : 'translate-y-1.5'
+                  open ? "-rotate-45 translate-y-0" : "translate-y-1.5"
                 }`}
               />
             </button>
@@ -129,10 +163,13 @@ const NavIsland = () => {
 
       {/* Mobile screen-filling glass overlay */}
       <div
+        id="mobile-navigation"
+        aria-hidden={!open}
+        style={{ visibility: open ? "visible" : "hidden" }}
         className={`
-          fixed inset-0 z-30 md:hidden
+          fixed inset-0 z-30 lg:hidden
           transition-all duration-700 ease-spring
-          ${open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}
+          ${open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}
           backdrop-blur-3xl bg-white/80
         `}
       >
@@ -145,7 +182,7 @@ const NavIsland = () => {
               className={`
                 block py-4 font-display text-5xl tracking-tightest text-ink-900
                 transition-all duration-700 ease-spring
-                ${open ? 'translate-y-0 opacity-100 blur-0' : 'translate-y-12 opacity-0 blur-md'}
+                ${open ? "translate-y-0 opacity-100 blur-0" : "translate-y-12 opacity-0 blur-md"}
               `}
               style={{ transitionDelay: `${100 + i * 60}ms` }}
             >
@@ -178,13 +215,10 @@ const NavIsland = () => {
 };
 
 /* ───── HERO ───── */
-const Hero = () => (
+const Hero = ({ motionControl }: { motionControl: ReactNode }) => (
   <section className="relative overflow-hidden pt-40 md:pt-48 pb-24 md:pb-32">
     {/* Mesh background */}
-    <div
-      aria-hidden
-      className="absolute inset-0 -z-10 bg-mesh-emerald"
-    />
+    <div aria-hidden className="absolute inset-0 -z-10 bg-mesh-emerald" />
     <div
       aria-hidden
       className="absolute inset-x-0 top-0 -z-10 h-[60vh] bg-grid-faint [background-size:48px_48px] [mask-image:radial-gradient(ellipse_at_top,black_30%,transparent_70%)]"
@@ -199,17 +233,17 @@ const Hero = () => (
       <div className="mx-auto max-w-4xl text-center">
         <span className="eyebrow eyebrow-light reveal">
           <span className="h-1.5 w-1.5 rounded-full bg-primary-500 animate-pulse" />
-          Now with AI face-presence proctoring
+          Assessment scheduling and review
         </span>
 
         <h1 className="reveal reveal-delay-1 mt-6 font-display text-[44px] sm:text-6xl md:text-7xl lg:text-[88px] leading-[0.95] tracking-tightest text-balance text-ink-900">
-          The integrity engine for{' '}
+          The integrity engine for{" "}
           <span className="relative inline-block">
             <span
               className="bg-clip-text text-transparent"
               style={{
                 backgroundImage:
-                  'linear-gradient(135deg, #047857 0%, #10B981 40%, #06B6D4 100%)',
+                  "linear-gradient(135deg, #047857 0%, #10B981 40%, #06B6D4 100%)",
               }}
             >
               modern classrooms
@@ -219,14 +253,14 @@ const Hero = () => (
         </h1>
 
         <p className="reveal reveal-delay-2 mx-auto mt-8 max-w-2xl text-pretty text-lg leading-relaxed text-ink-500">
-          QuizShield secures every assessment with face-presence detection,
-          tab-switch sentinels, and copy-paste guards — so educators measure what
-          students actually know, not what they could borrow.
+          QuizShield supports assessments with scheduled availability,
+          tab-switch sentinels, and copy-paste guards — so educators measure
+          what students actually know, not what they could borrow.
         </p>
 
         <div className="reveal reveal-delay-3 mt-10 flex flex-wrap items-center justify-center gap-3">
           <Link to="/register" className="btn-island-primary">
-            <span className="pr-1">Start free trial</span>
+            <span className="pr-1">Create an account</span>
             <span className="btn-icon bg-white/15">
               <Arrow />
             </span>
@@ -240,185 +274,67 @@ const Hero = () => (
         </div>
 
         <p className="reveal reveal-delay-4 mt-6 text-xs text-ink-400">
-          No credit card · Set up in under 5 minutes · Trusted by 200+ institutions
+          Create a teacher account · Create, schedule and review assessments
         </p>
       </div>
 
-      {/* Hero showcase — Double-bezel display panel */}
-      <div className="reveal reveal-delay-5 mt-20">
-        <div className="bezel mx-auto max-w-5xl">
-          <div className="bezel-core relative overflow-hidden">
-            {/* Faux app chrome */}
-            <div className="flex items-center gap-2 border-b border-ink-900/5 px-5 py-3">
-              <span className="h-2.5 w-2.5 rounded-full bg-ink-200" />
-              <span className="h-2.5 w-2.5 rounded-full bg-ink-200" />
-              <span className="h-2.5 w-2.5 rounded-full bg-ink-200" />
-              <span className="ml-4 text-[11px] font-medium text-ink-400">
-                quizshield.io / live-session / CS-401-Final
-              </span>
-              <span className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-primary-50 px-2.5 py-1 text-[10px] font-semibold text-primary-700 ring-1 ring-primary-200">
-                <span className="h-1.5 w-1.5 rounded-full bg-primary-500 animate-pulse" />
-                MONITORING · 24 STUDENTS
-              </span>
-            </div>
-
-            <div className="grid gap-px bg-ink-900/5 md:grid-cols-[260px_1fr_220px]">
-              {/* Sidebar */}
-              <div className="bg-white p-5">
-                <p className="text-[10px] font-semibold uppercase tracking-eyebrow text-ink-400">
-                  Sections
-                </p>
-                <ul className="mt-3 space-y-1 text-sm text-ink-700">
-                  {['Algorithms', 'Data Structures', 'Complexity', 'Recursion'].map((s, i) => (
-                    <li
-                      key={s}
-                      className={`flex items-center justify-between rounded-xl px-3 py-2 ${
-                        i === 0 ? 'bg-ink-900 text-white' : 'hover:bg-ink-50'
-                      }`}
-                    >
-                      <span>{s}</span>
-                      <span className={`text-[10px] ${i === 0 ? 'text-white/60' : 'text-ink-400'}`}>
-                        {12 - i * 2}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              {/* Main quiz */}
-              <div className="bg-white p-6">
-                <p className="text-[10px] font-semibold uppercase tracking-eyebrow text-ink-400">
-                  Question 04 / 20
-                </p>
-                <p className="mt-2 font-display text-2xl tracking-tightest text-ink-900">
-                  What is the worst-case time complexity of inserting into a balanced BST?
-                </p>
-                <div className="mt-5 grid gap-2.5">
-                  {['O(1)', 'O(log n)', 'O(n)', 'O(n log n)'].map((opt, i) => (
-                    <div
-                      key={opt}
-                      className={`flex items-center gap-3 rounded-2xl px-4 py-3 text-sm ring-1 transition-all duration-500 ease-spring ${
-                        i === 1
-                          ? 'bg-primary-50 ring-primary-200 text-primary-800'
-                          : 'bg-white ring-ink-900/5 text-ink-700'
-                      }`}
-                    >
-                      <span
-                        className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold ${
-                          i === 1 ? 'bg-primary-500 text-white' : 'bg-ink-900/[0.06] text-ink-500'
-                        }`}
-                      >
-                        {String.fromCharCode(65 + i)}
-                      </span>
-                      <span>{opt}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              {/* Live monitor */}
-              <div className="bg-white p-5">
-                <p className="text-[10px] font-semibold uppercase tracking-eyebrow text-ink-400">
-                  Live presence
-                </p>
-                <div className="mt-3 grid grid-cols-3 gap-1.5">
-                  {Array.from({ length: 12 }).map((_, i) => (
-                    <div
-                      key={i}
-                      className={`aspect-square rounded-lg ring-1 ${
-                        i === 5
-                          ? 'bg-rose-100 ring-rose-300'
-                          : 'bg-primary-50 ring-primary-200'
-                      }`}
-                    />
-                  ))}
-                </div>
-                <div className="mt-4 rounded-2xl bg-rose-50 p-3 ring-1 ring-rose-200">
-                  <p className="text-[10px] font-semibold uppercase tracking-eyebrow text-rose-700">
-                    Flagged
-                  </p>
-                  <p className="mt-1 text-xs text-rose-900">
-                    Seat 06 — face absent 4.2s
-                  </p>
-                </div>
-              </div>
-            </div>
+      <figure className="reveal reveal-delay-5 mx-auto mt-16 max-w-5xl">
+        <div className="bezel">
+          <div className="bezel-core overflow-hidden bg-[#f7faf8]">
+            <AssessmentJourney />
+            <CompactJourney />
           </div>
         </div>
-      </div>
+        <figcaption className="home-art-caption mt-4 px-2">
+          <p>
+            <span className="font-semibold text-ink-700">
+              Create. Schedule. Review. Grade.
+            </span>{" "}
+            An illustrated workflow.
+          </p>
+          {motionControl}
+        </figcaption>
+      </figure>
     </div>
   </section>
 );
 
 /* ───── SOCIAL PROOF marquee ───── */
-const TrustStrip = () => (
-  <section className="border-y border-ink-900/5 bg-white py-10">
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <p className="text-center text-[10px] font-semibold uppercase tracking-eyebrow text-ink-400">
-        Trusted by faculty, security teams, and academic boards worldwide
-      </p>
-      <div className="relative mt-6 overflow-hidden [mask-image:linear-gradient(90deg,transparent,black_15%,black_85%,transparent)]">
-        <div className="flex w-max animate-marquee gap-12 whitespace-nowrap py-2">
-          {[
-            'NUTECH',
-            'COMSATS',
-            'STANFORD ED',
-            'BUITEMS',
-            'IBA',
-            'NUST',
-            'OXFORD ONLINE',
-            'CAMBRIDGE EDU',
-            'MIT OPEN',
-            'UoP',
-          ]
-            .concat([
-              'NUTECH',
-              'COMSATS',
-              'STANFORD ED',
-              'BUITEMS',
-              'IBA',
-              'NUST',
-              'OXFORD ONLINE',
-              'CAMBRIDGE EDU',
-              'MIT OPEN',
-              'UoP',
-            ])
-            .map((n, i) => (
-              <span
-                key={i}
-                className="font-display text-2xl font-medium tracking-tightest text-ink-300"
-              >
-                {n}
-              </span>
-            ))}
-        </div>
-      </div>
-    </div>
-  </section>
-);
 
 /* ───── FEATURE BENTO (Asymmetrical) ───── */
 type Feat = {
   title: string;
+  label: string;
   copy: string;
   span: string;
   visual: React.ReactNode;
-  accent?: 'emerald' | 'cyan' | 'violet';
+  accent?: "emerald" | "cyan" | "violet";
 };
 
-const FeatureCard = ({ title, copy, span, visual, accent = 'emerald' }: Feat) => {
+const FeatureCard = ({
+  title,
+  label,
+  copy,
+  span,
+  visual,
+  accent = "emerald",
+}: Feat) => {
   const tag =
-    accent === 'cyan'
-      ? 'text-accent-700 bg-accent-50 ring-accent-200'
-      : accent === 'violet'
-      ? 'text-secondary-700 bg-secondary-50 ring-secondary-200'
-      : 'text-primary-700 bg-primary-50 ring-primary-200';
+    accent === "cyan"
+      ? "text-accent-700 bg-accent-50 ring-accent-200"
+      : accent === "violet"
+        ? "text-secondary-700 bg-secondary-50 ring-secondary-200"
+        : "text-primary-700 bg-primary-50 ring-primary-200";
   return (
     <div className={`reveal bezel ${span}`}>
       <div className="bezel-core flex h-full flex-col justify-between gap-6 p-7">
-        <div className="relative h-44 overflow-hidden rounded-[1.25rem] bg-ink-50 ring-1 ring-ink-900/5">
+        <div
+          className={`home-feature-art ${span.includes("row-span-2") ? "home-feature-art--large" : ""} relative overflow-hidden rounded-[1.25rem] bg-ink-50 ring-1 ring-ink-900/5`}
+        >
           {visual}
         </div>
         <div>
-          <span className={`eyebrow ring-1 ${tag}`}>{accent}</span>
+          <span className={`eyebrow ring-1 ${tag}`}>{label}</span>
           <h3 className="mt-3 font-display text-2xl tracking-tightest text-ink-900">
             {title}
           </h3>
@@ -429,8 +345,62 @@ const FeatureCard = ({ title, copy, span, visual, accent = 'emerald' }: Feat) =>
   );
 };
 
-const FeaturesBento = () => (
-  <section id="features" className="relative py-32">
+const features: Feat[] = [
+  {
+    title: "Assessment activity review",
+    label: "Event review",
+    copy: "Records tab and focus events for teacher review alongside submitted answers.",
+    span: "md:col-span-7 md:row-span-2",
+    visual: (
+      <>
+        <ActivityReviewGraphic />
+        <CompactActivityGraphic />
+      </>
+    ),
+  },
+  {
+    title: "Tab-switch sentinel",
+    label: "Browser focus",
+    copy: "Records supported tab visibility and focus changes during an attempt for teacher review.",
+    span: "md:col-span-5",
+    accent: "cyan",
+    visual: <FocusGraphic />,
+  },
+  {
+    title: "Copy-paste guard",
+    label: "Attempt controls",
+    copy: "Guards supported copy, paste, context-menu and developer-tool shortcuts during an assessment.",
+    span: "md:col-span-5",
+    accent: "violet",
+    visual: <CopyGuardGraphic />,
+  },
+  {
+    title: "Learning and practice",
+    label: "Practice",
+    copy: "Explore learning resources and practice guidance alongside your course work and reviewed results.",
+    span: "md:col-span-4",
+    visual: <PracticeGraphic />,
+  },
+  {
+    title: "Course performance",
+    label: "Courses",
+    copy: "Educators review course performance, submissions and reported browser events from their dashboard.",
+    span: "md:col-span-4",
+    accent: "cyan",
+    visual: <CourseGraphic />,
+  },
+  {
+    title: "Assessment records",
+    label: "Reviewed marks",
+    copy: "Review student submissions, teacher grades, feedback and recorded events in one place.",
+    span: "md:col-span-4",
+    accent: "violet",
+    visual: <ExportGraphic />,
+  },
+];
+
+const FeaturesBento = ({ motionControl }: { motionControl: ReactNode }) => (
+  <section id="features" className="relative py-24 md:py-32">
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div className="reveal mx-auto max-w-3xl text-center">
         <span className="eyebrow eyebrow-light">Capabilities</span>
@@ -438,139 +408,18 @@ const FeaturesBento = () => (
           Every layer of integrity, in one platform.
         </h2>
         <p className="mt-5 text-lg text-ink-500 text-pretty">
-          From the moment a student joins a session to the final analytics
-          breakdown, QuizShield enforces fairness without disrupting flow.
+          From assessment entry to reviewed results, keep the work and its
+          context together.
         </p>
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+          <span className="text-xs text-ink-500">Workflow illustrations</span>
+          {motionControl}
+        </div>
       </div>
-
-      <div className="mt-16 grid grid-cols-1 gap-5 md:grid-cols-12 md:auto-rows-[minmax(280px,auto)]">
-        <FeatureCard
-          span="md:col-span-7 md:row-span-2"
-          title="AI Face-Presence Proctoring"
-          copy="Continuously verifies the student is present, alone, and focused — using an on-device face-detection pipeline. Zero footage uploaded."
-          accent="emerald"
-          visual={
-            <div className="relative flex h-full items-center justify-center">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary-100/60 via-transparent to-accent-100/40" />
-              <div className="relative h-32 w-32 rounded-full bg-white ring-1 ring-ink-900/5 shadow-soft" />
-              <div
-                className="absolute h-44 w-44 rounded-full border-2 border-dashed border-primary-400/60 animate-orbit-slow"
-                style={{ animationDuration: '20s' }}
-              />
-              <span className="absolute right-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-[10px] font-semibold text-primary-700 ring-1 ring-primary-200">
-                <span className="h-1.5 w-1.5 rounded-full bg-primary-500 animate-pulse" />
-                FACE OK
-              </span>
-            </div>
-          }
-        />
-        <FeatureCard
-          span="md:col-span-5"
-          title="Tab-Switch Sentinel"
-          copy="Detects every blur, alt-tab, and split-screen attempt. Counts toward a configurable strike system."
-          accent="cyan"
-          visual={
-            <div className="relative flex h-full items-center justify-center bg-ink-900">
-              <div className="absolute inset-0 bg-grid-faint [background-size:24px_24px] opacity-30" />
-              <div className="relative grid grid-cols-3 gap-2">
-                {[0, 1, 2, 3, 4, 5].map((i) => (
-                  <div
-                    key={i}
-                    className={`h-10 w-14 rounded-md ring-1 ${
-                      i === 4
-                        ? 'bg-rose-500/20 ring-rose-400/60'
-                        : 'bg-white/5 ring-white/10'
-                    }`}
-                  />
-                ))}
-              </div>
-            </div>
-          }
-        />
-        <FeatureCard
-          span="md:col-span-5"
-          title="Copy-Paste Guard"
-          copy="Disables copy, paste, right-click, and DevTools shortcuts inside live sessions."
-          accent="violet"
-          visual={
-            <div className="relative flex h-full items-center justify-center">
-              <div className="font-mono text-[11px] text-ink-300 select-none">
-                <p>Ctrl + C ✗</p>
-                <p>Ctrl + V ✗</p>
-                <p>Right-click ✗</p>
-                <p>DevTools ✗</p>
-              </div>
-            </div>
-          }
-        />
-        <FeatureCard
-          span="md:col-span-4"
-          title="Adaptive Question Flow"
-          copy="Difficulty self-tunes to each student's signal — keeping the cohort in challenge state."
-          accent="emerald"
-          visual={
-            <div className="relative flex h-full items-end justify-around p-4">
-              {[40, 65, 50, 80, 60, 90, 75].map((h, i) => (
-                <div
-                  key={i}
-                  className="w-3 rounded-t-md bg-gradient-to-t from-primary-200 to-primary-500"
-                  style={{ height: `${h}%` }}
-                />
-              ))}
-            </div>
-          }
-        />
-        <FeatureCard
-          span="md:col-span-4"
-          title="Live Cohort Heatmap"
-          copy="Educators see attention, accuracy, and risk in a single ambient grid."
-          accent="cyan"
-          visual={
-            <div className="grid h-full grid-cols-6 gap-1 p-3">
-              {Array.from({ length: 30 }).map((_, i) => {
-                const intensity = (Math.sin(i * 1.7) + 1) / 2;
-                return (
-                  <div
-                    key={i}
-                    className="rounded-md"
-                    style={{
-                      background: `rgba(16,185,129,${0.15 + intensity * 0.7})`,
-                    }}
-                  />
-                );
-              })}
-            </div>
-          }
-        />
-        <FeatureCard
-          span="md:col-span-4"
-          title="Forensic Analytics"
-          copy="Per-student timelines, violation receipts, and exportable academic reports."
-          accent="violet"
-          visual={
-            <div className="relative h-full p-4">
-              <svg viewBox="0 0 200 100" className="h-full w-full">
-                <path
-                  d="M0 80 C 30 60, 60 30, 90 50 S 150 90, 200 30"
-                  fill="none"
-                  stroke="#7C3AED"
-                  strokeWidth="1.5"
-                />
-                <path
-                  d="M0 80 C 30 60, 60 30, 90 50 S 150 90, 200 30 L 200 100 L 0 100 Z"
-                  fill="url(#g1)"
-                  opacity="0.3"
-                />
-                <defs>
-                  <linearGradient id="g1" x1="0" x2="0" y1="0" y2="1">
-                    <stop offset="0%" stopColor="#A78BFA" />
-                    <stop offset="100%" stopColor="#A78BFA" stopOpacity="0" />
-                  </linearGradient>
-                </defs>
-              </svg>
-            </div>
-          }
-        />
+      <div className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-12 md:auto-rows-[minmax(280px,auto)]">
+        {features.map((feature) => (
+          <FeatureCard key={feature.title} {...feature} />
+        ))}
       </div>
     </div>
   </section>
@@ -580,24 +429,24 @@ const FeaturesBento = () => (
 const HowItWorks = () => {
   const steps = [
     {
-      n: '01',
-      t: 'Author a quiz in minutes',
-      d: 'Build with rich question types — multiple-choice, code blocks, free response. Versioned, branchable, instantly publishable.',
+      n: "01",
+      t: "Author a quiz in minutes",
+      d: "Create multiple-choice and short-answer questions, choose a course, and set an assessment start time.",
     },
     {
-      n: '02',
-      t: 'Distribute via secure code',
-      d: 'Students enter a 6-digit join code. We verify identity, request camera permission, and lock the testing window.',
+      n: "02",
+      t: "Distribute via secure code",
+      d: "Students enrol using a course code and enter a four-digit assessment code. The server checks enrolment and scheduled availability.",
     },
     {
-      n: '03',
-      t: 'Monitor in real time',
-      d: 'A live heatmap surfaces presence anomalies, tab switches, and pace outliers. Intervene with one click.',
+      n: "03",
+      t: "Review assessment activity",
+      d: "Review submitted answers and recorded tab and focus events before assigning a grade.",
     },
     {
-      n: '04',
-      t: 'Analyze & defend grades',
-      d: 'Per-student forensic timelines and exportable reports give you the receipts to defend every score.',
+      n: "04",
+      t: "Grade and give feedback",
+      d: "Review each submission, save a teacher grade and feedback, and let students view their reviewed results.",
     },
   ];
 
@@ -614,12 +463,18 @@ const HowItWorks = () => {
               Four deliberate steps — engineered so educators spend more time
               teaching, less time policing.
             </p>
-            <Link to="/register" className="reveal reveal-delay-3 mt-8 btn-island-primary">
+            <Link
+              to="/register"
+              className="reveal reveal-delay-3 mt-8 btn-island-primary"
+            >
               <span className="pr-1">Try the workflow</span>
               <span className="btn-icon bg-white/15">
                 <Arrow />
               </span>
             </Link>
+            <div className="reveal mt-10 max-w-sm">
+              <WorkflowGraphic />
+            </div>
           </div>
 
           <div className="relative lg:col-span-7">
@@ -653,112 +508,61 @@ const HowItWorks = () => {
 };
 
 /* ───── INTEGRITY SPOTLIGHT (dark editorial split) ───── */
-const IntegritySpotlight = () => (
+const IntegritySpotlight = ({
+  motionControl,
+}: {
+  motionControl: ReactNode;
+}) => (
   <section
     id="integrity"
-    className="relative overflow-hidden bg-ink-950 py-32 text-white"
+    className="relative overflow-hidden bg-ink-950 py-24 text-white md:py-32"
   >
-    <div
-      aria-hidden
-      className="absolute inset-0 -z-10 bg-mesh-emerald opacity-60"
-    />
-    <div
-      aria-hidden
-      className="absolute inset-x-0 top-0 -z-10 h-full bg-grid-faint [background-size:48px_48px] opacity-[0.04]"
-    />
-
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div className="grid items-center gap-16 lg:grid-cols-2">
+      <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
         <div>
-          <span className="eyebrow eyebrow-dark reveal">AI Integrity</span>
+          <span className="eyebrow eyebrow-dark reveal">
+            Assessment integrity
+          </span>
           <h2 className="reveal reveal-delay-1 mt-4 font-display text-4xl md:text-6xl tracking-tightest text-white text-balance">
-            Proctoring that respects{' '}
-            <span
-              className="bg-clip-text text-transparent"
-              style={{
-                backgroundImage:
-                  'linear-gradient(135deg, #6CE8B7 0%, #22D3EE 100%)',
-              }}
-            >
-              students.
-            </span>
+            Assessment protection that respects{" "}
+            <span className="text-primary-300">students.</span>
           </h2>
           <p className="reveal reveal-delay-2 mt-5 max-w-xl text-lg text-white/60 text-pretty">
-            All face-presence inference happens on-device using face-api.js.
-            We store anomaly events, never video. Reviewable. Explainable.
-            FERPA-aligned.
+            Course enrolment and scheduled availability
+            are checked by the server. Browser activity events provide context
+            for teacher review.
           </p>
-
           <ul className="reveal reveal-delay-3 mt-10 space-y-4">
             {[
-              'On-device inference — no biometric uploads',
-              'Event-only logs with timestamped rationale',
-              'Configurable strike thresholds per quiz',
-              'Auditable trail for every flagged moment',
+              "Server-checked enrolment and scheduled availability",
+              "Browser events alongside submitted answers",
+              "Results held until teacher review",
+              "Teacher judgment at the centre of review",
             ].map((line) => (
               <li key={line} className="flex items-start gap-3 text-white/80">
-                <span className="mt-1.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary-500/20 ring-1 ring-primary-400/40">
-                  <Stroke d="M5 13l4 4L19 7" size={12} className="text-primary-300" />
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary-500/20 ring-1 ring-primary-400/40">
+                  <Stroke
+                    d="M5 13l4 4L19 7"
+                    size={12}
+                    className="text-primary-300"
+                  />
                 </span>
                 <span className="text-sm leading-relaxed">{line}</span>
               </li>
             ))}
           </ul>
         </div>
-
-        {/* Visual — Camera ring + telemetry */}
-        <div className="reveal reveal-delay-2 relative">
+        <figure className="reveal reveal-delay-2 min-w-0">
           <div className="bezel-dark">
-            <div className="bezel-core-dark relative aspect-[4/5] overflow-hidden p-8">
-              <div
-                aria-hidden
-                className="absolute inset-0 bg-gradient-to-br from-primary-500/10 via-transparent to-accent-500/10"
-              />
-
-              <div className="relative flex h-full flex-col">
-                <div className="flex items-center justify-between">
-                  <span className="inline-flex items-center gap-2 rounded-full bg-white/5 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-eyebrow text-white/70 ring-1 ring-white/10">
-                    <span className="h-1.5 w-1.5 rounded-full bg-rose-400 animate-pulse" />
-                    REC · 00:14:32
-                  </span>
-                  <span className="font-mono text-[10px] text-white/40">
-                    QS · v4.2
-                  </span>
-                </div>
-
-                <div className="relative mx-auto my-auto flex h-56 w-56 items-center justify-center">
-                  <div className="absolute inset-0 rounded-full border border-white/10" />
-                  <div className="absolute inset-2 rounded-full border border-primary-400/40 animate-orbit-slow" />
-                  <div className="absolute inset-6 rounded-full border-2 border-dashed border-accent-400/40 [animation:orbit_18s_linear_infinite_reverse]" />
-                  <div
-                    className="relative h-32 w-32 rounded-full bg-gradient-to-br from-primary-400/30 to-accent-400/30 backdrop-blur-xl ring-1 ring-white/20"
-                    style={{
-                      boxShadow: '0 0 80px rgba(16,185,129,0.45)',
-                    }}
-                  />
-                </div>
-
-                <div className="grid grid-cols-3 gap-2 text-center">
-                  {[
-                    { l: 'Confidence', v: '99.4%' },
-                    { l: 'Latency', v: '12ms' },
-                    { l: 'Anomalies', v: '0' },
-                  ].map((m) => (
-                    <div
-                      key={m.l}
-                      className="rounded-2xl bg-white/[0.04] p-3 ring-1 ring-white/10"
-                    >
-                      <p className="font-display text-xl text-white">{m.v}</p>
-                      <p className="mt-0.5 text-[9px] uppercase tracking-eyebrow text-white/40">
-                        {m.l}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
+            <div className="bezel-core-dark overflow-hidden">
+              <PrivateResultsGraphic />
             </div>
           </div>
-        </div>
+          <figcaption className="home-art-caption home-art-caption--dark mt-4 px-2">
+            <p>Illustration · Submitted by students. Reviewed by you.</p>
+            {motionControl}
+          </figcaption>
+        </figure>
       </div>
     </div>
   </section>
@@ -767,10 +571,10 @@ const IntegritySpotlight = () => (
 /* ───── METRICS strip ───── */
 const Metrics = () => {
   const items = [
-    { k: '2.4M+', l: 'Sessions secured' },
-    { k: '99.97%', l: 'Uptime SLA' },
-    { k: '<14ms', l: 'Detection latency' },
-    { k: '0', l: 'Biometric uploads' },
+    { k: "Create", l: "Build course assessments" },
+    { k: "Schedule", l: "Choose the start time" },
+    { k: "Review", l: "Teacher-approved grades" },
+    { k: "Feedback", l: "Help students improve" },
   ];
   return (
     <section className="bg-white py-24">
@@ -797,22 +601,22 @@ const Metrics = () => {
 const Testimonials = () => {
   const quotes = [
     {
-      q: 'QuizShield killed our cheating problem in a single semester. Faculty actually trust online assessments again.',
-      a: 'Dr. Hira Khan',
-      r: 'Dean of Computing, NUTECH',
-      rot: 'md:-rotate-2',
+      q: "Create course assessments and choose when students can start them.",
+      a: "Create and schedule",
+      r: "Teacher controls",
+      rot: "md:-rotate-2",
     },
     {
-      q: 'The forensic timeline is what sold us. When a student disputes a grade, we have the receipts.',
-      a: 'Prof. Daniyal Ahmad',
-      r: 'Department Head, COMSATS',
-      rot: 'md:rotate-1',
+      q: "Review answers and recorded events before saving a teacher grade and feedback.",
+      a: "Review and grade",
+      r: "Assessment workflow",
+      rot: "md:rotate-1",
     },
     {
-      q: 'On-device proctoring with no video upload — finally an integrity tool our DPO actually approves.',
-      a: 'Sara Iqbal',
-      r: 'Privacy Officer, IBA',
-      rot: 'md:-rotate-1',
+      q: "Organise topics, learning resources and enrolled students within each course.",
+      a: "Manage your courses",
+      r: "Course workspace",
+      rot: "md:-rotate-1",
     },
   ];
 
@@ -820,9 +624,9 @@ const Testimonials = () => {
     <section id="trust" className="relative bg-ink-50 py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="reveal mx-auto max-w-3xl text-center">
-          <span className="eyebrow eyebrow-light">Voices</span>
+          <span className="eyebrow eyebrow-light">Your workflow</span>
           <h2 className="mt-4 font-display text-4xl md:text-6xl tracking-tightest text-ink-900 text-balance">
-            Educators who got their classrooms back.
+            A clear path from questions to reviewed results.
           </h2>
         </div>
 
@@ -843,7 +647,7 @@ const Testimonials = () => {
                 </p>
                 <figcaption className="mt-auto flex items-center gap-3 border-t border-ink-900/5 pt-4">
                   <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary-400 to-accent-400 font-display text-white">
-                    {qq.a.split(' ').slice(-1)[0][0]}
+                    {qq.a.split(" ").slice(-1)[0][0]}
                   </span>
                   <div>
                     <p className="text-sm font-semibold text-ink-900">{qq.a}</p>
@@ -871,30 +675,30 @@ const FinalCTA = () => (
           />
           <span className="eyebrow eyebrow-dark">Ready when you are</span>
           <h2 className="mt-5 font-display text-5xl md:text-7xl tracking-tightest text-white text-balance">
-            Bring integrity back to{' '}
+            Bring integrity back to{" "}
             <span
               className="bg-clip-text text-transparent"
               style={{
                 backgroundImage:
-                  'linear-gradient(135deg, #6CE8B7 0%, #22D3EE 100%)',
+                  "linear-gradient(135deg, #6CE8B7 0%, #22D3EE 100%)",
               }}
             >
               every assessment.
             </span>
           </h2>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-white/60 text-pretty">
-            Join the institutions running fairer, faster, more defensible exams
-            with QuizShield.
+            Manage courses, scheduled assessments and reviewed results with
+            QuizShield.
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
             <Link to="/register" className="btn-island-emerald">
-              <span className="pr-1">Start free trial</span>
+              <span className="pr-1">Create an account</span>
               <span className="btn-icon-dark">
                 <Arrow />
               </span>
             </Link>
             <Link to="/contact" className="btn-island-ghost-dark">
-              <span className="pr-1">Talk to sales</span>
+              <span className="pr-1">Get support</span>
               <span className="btn-icon">
                 <Arrow />
               </span>
@@ -920,28 +724,28 @@ const Footer = () => (
         </div>
         {[
           {
-            h: 'Platform',
+            h: "Platform",
             l: [
-              ['Features', '#features'],
-              ['Workflow', '#how'],
-              ['AI Integrity', '#integrity'],
-              ['Trust', '#trust'],
+              ["Features", "#features"],
+              ["Workflow", "#how"],
+              ["Integrity", "#integrity"],
+              ["Trust", "#trust"],
             ],
           },
           {
-            h: 'Account',
+            h: "Account",
             l: [
-              ['Sign in', '/login'],
-              ['Create account', '/register'],
-              ['Profile', '/profile'],
+              ["Sign in", "/login"],
+              ["Create account", "/register"],
+              ["Profile", "/profile"],
             ],
           },
           {
-            h: 'Company',
+            h: "Company",
             l: [
-              ['Contact', '/contact'],
-              ['Privacy', '/privacy'],
-              ['Terms', '/terms'],
+              ["Contact", "/contact"],
+              ["Privacy", "/privacy"],
+              ["Terms", "/terms"],
             ],
           },
         ].map((col) => (
@@ -977,16 +781,82 @@ const Footer = () => (
 /* ───── PAGE ROOT ───── */
 const LandingPage = () => {
   useReveal();
+  const page = useRef<HTMLDivElement>(null);
+  const [paused, setPaused] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+  );
+  useEffect(() => {
+    const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const updatePreference = () => setReducedMotion(preference.matches);
+    const updateVisibility = () => {
+      if (page.current)
+        page.current.dataset.homeVisible = String(!document.hidden);
+    };
+    preference.addEventListener("change", updatePreference);
+    document.addEventListener("visibilitychange", updateVisibility);
+    updateVisibility();
+    return () => {
+      preference.removeEventListener("change", updatePreference);
+      document.removeEventListener("visibilitychange", updateVisibility);
+    };
+  }, []);
+  const stopped = paused || reducedMotion;
+  const motionControl = (
+    <button
+      type="button"
+      className="home-motion-control"
+      aria-pressed={stopped}
+      disabled={reducedMotion}
+      onClick={() => setPaused((value) => !value)}
+      title={
+        reducedMotion
+          ? "Your device has requested reduced motion."
+          : "Control animations across this page."
+      }
+    >
+      <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        {stopped ? (
+          <path
+            d="m5 3 7 5-7 5V3Z"
+            stroke="currentColor"
+            strokeWidth="1.4"
+            strokeLinejoin="round"
+          />
+        ) : (
+          <path
+            d="M5 3v10M11 3v10"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+          />
+        )}
+      </svg>
+      {reducedMotion
+        ? "Reduced motion on"
+        : stopped
+          ? "Play animations"
+          : "Pause animations"}
+    </button>
+  );
 
   return (
-    <div data-reveal-root className="min-h-[100dvh] bg-ink-50 text-ink-900 grain-fixed">
+    <div
+      ref={page}
+      data-reveal-root
+      data-home-motion={stopped ? "paused" : "running"}
+      data-home-visible="true"
+      className="home-page min-h-[100dvh] bg-ink-50 text-ink-900 grain-fixed"
+    >
       <NavIsland />
       <main>
-        <Hero />
-        <TrustStrip />
-        <FeaturesBento />
+        <Hero motionControl={motionControl} />
+
+        <FeaturesBento motionControl={motionControl} />
         <HowItWorks />
-        <IntegritySpotlight />
+        <IntegritySpotlight motionControl={motionControl} />
         <Metrics />
         <Testimonials />
         <FinalCTA />

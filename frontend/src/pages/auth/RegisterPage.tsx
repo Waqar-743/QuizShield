@@ -2,17 +2,23 @@ import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { useAuthStore } from "../../store/authStore";
 import toast from "react-hot-toast";
+
+type RegistrationFields = {
+  name: string;
+  email: string;
+  password: string;
+  role: "student" | "teacher";
+};
+
 const RegisterPage = () => {
   const { register: registerUser, isLoading, error } = useAuthStore();
   const navigate = useNavigate();
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors },
-  } = useForm();
-  const password = watch("password");
-  const onSubmit = async (data: any) => {
+  } = useForm<RegistrationFields>({ defaultValues: { role: "student" } });
+  const onSubmit = async (data: RegistrationFields) => {
     try {
       await registerUser({
         name: data.name,
@@ -154,33 +160,6 @@ const RegisterPage = () => {
               {errors.password && (
                 <p className="mt-1 text-sm text-red-600">
                   {errors.password.message as string}
-                </p>
-              )}
-            </div>
-          </div>
-
-          <div>
-            <label
-              htmlFor="confirmPassword"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Confirm Password
-            </label>
-            <div className="mt-1">
-              <input
-                id="confirmPassword"
-                type="password"
-                autoComplete="new-password"
-                className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-                {...register("confirmPassword", {
-                  required: "Please confirm your password",
-                  validate: (value) =>
-                    value === password || "Passwords do not match",
-                })}
-              />
-              {errors.confirmPassword && (
-                <p className="mt-1 text-sm text-red-600">
-                  {errors.confirmPassword.message as string}
                 </p>
               )}
             </div>

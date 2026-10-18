@@ -6,6 +6,8 @@ Verdict: **PASS WITH BLOCKERS for staging review; production release is not appr
 
 The feature branch is `codex/fastn-email-staging`, with [pull request 6](https://github.com/Waqar-743/QuizShield/pull/6). Use the [staging administrator sign-in](https://quizshield-automation-ui.vercel.app/admin/login) and [staging API](https://quizshield-automation-staging.vercel.app). Operator setup, account management, teacher instructions, migration and rollback procedures are in [ADMINISTRATION.md](ADMINISTRATION.md).
 
+Runtime source commit: `5f71fc0f6d7ea90c373f5d595eb93682520a249a`. The following evidence-only commit changes documentation and acceptance records, not deployed runtime code. [Final deployment state](qa/admin-release-state.json) records both immutable staging URLs, deployment IDs, runtime fingerprint, current recipient restriction and scheduler status, unchanged main commit and the original production backend deployment.
+
 The implementation adds current-account authorization, session revocation, an operator-only first-administrator command, database protection for the last active administrator, account and course management, audit history, automation grants and operational views. It extends the existing outbox, Fastn workflows and hosted scheduler. Camera and face requirements, components, endpoints, dependencies and model assets have been removed from active application paths.
 
 The prior working tree was backed up before editing at `.git/quizshield-before-admin-20261018`. Existing QA fixes, migration 009 and historical evidence were retained. The two user-owned root PNG files were checked against that backup and remain unchanged and uncommitted. Migrations 001–008 were not rewritten. See [deployment comparison](qa/admin-deployment-comparison.json) for the original branch, Pages and staging differences. Pages deploys `main`; its old bundle does not contain the teacher automation page. The feature branch's Vercel staging does.
@@ -20,6 +22,8 @@ The prior working tree was backed up before editing at `.git/quizshield-before-a
 | Frontend lint, TypeScript and Vite build | Passed | Static validation and production bundle |
 
 Regression coverage includes role/status/session changes, last-administrator concurrency, privileged endpoint denial, safe DTOs, account changes and job invalidation, ownership transfer, grants, teacher isolation, setup-link scoping, retired endpoints, quiz access/timing, private results and existing delivery deduplication. Mocked provider results are not presented as live connection success. CI now also requires frontend lint/types and the workflow adapter tests.
+
+The fresh [GitHub CI run 39147735203](https://github.com/Waqar-743/QuizShield/actions/runs/39147735203) passed both jobs on the runtime source commit: all 113 Jest tests, all 24 adapters, backend build and frontend lint/types/build. A parallel Windows repeat encountered a native Node memory limit. A repeat with one recyclable worker recovered from a worker memory failure and finished with 113/113 tests in nine suites, exit code 0; the hosted CI run completed cleanly. The local test repeat and CI are distinct evidence sources. See [validation summary](qa/admin-validation-summary.json).
 
 ## Hosted application and database checks
 
@@ -58,6 +62,8 @@ Browser tests used the hosted staging application, not a local preview:
 - Narrow layouts were inspected at 304px and approximately 665px CSS width. No full-width desktop or physical mobile-device run is claimed.
 
 Screenshots: [administrator mobile navigation](qa/admin-evidence/admin-mobile.png), [automation operations](qa/admin-evidence/automation-operations.png), [account impact](qa/admin-evidence/account-impact.png), [teacher menu](qa/admin-evidence/teacher-menu.png), [teacher automation](qa/admin-evidence/teacher-automation.png), [student submission](qa/admin-evidence/student-submission.png).
+
+The captures precede the final account-picker search refinement. That refinement passed lint/types/build and API checks; browser interactions were not repeated after returning browser control to the user.
 
 Static checks found no active camera calls/face hooks, all seven model assets and the face dependency were removed, the result page contained no video element, and the deployed UI returned `camera=(), microphone=()`. No browser network recording was captured, so this is not a request-by-request network trace. Full browser registration, inbox setup/reset-link consumption, full-width desktop, physical-device mobile and network-failure recovery still need acceptance coverage. API and automated coverage for related validation/recovery paths does not substitute for those browser checks.
 

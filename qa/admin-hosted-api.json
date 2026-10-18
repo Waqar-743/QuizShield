@@ -1,5 +1,5 @@
 {
-  "verifiedAt": "2026-10-18T15:38:47.470Z",
+  "verifiedAt": "2026-10-18T17:01:11.440Z",
   "environment": "hosted staging",
   "productionChanged": false,
   "restrictedRecipients": true,
@@ -45,10 +45,10 @@
       "pass": true,
       "counts": {
         "teachers": 6,
-        "students": 3,
+        "students": 4,
         "courses": 7,
-        "quizzes": 23,
-        "submissions": 12
+        "quizzes": 24,
+        "submissions": 13
       }
     },
     {

@@ -1,18 +1,36 @@
 import { supabase } from '../config/supabase';
 
+const accessError = () => Object.assign(new Error('You are not authorized to access this attempt'), { statusCode: 403 });
+async function teacherOwnsAttempt(attempt: any, teacherId: string) {
+  if (attempt.quiz_id) {
+    const {data}=await supabase.from('teacher_quizzes').select('teacher_id').eq('id',attempt.quiz_id).single();
+    return data?.teacher_id===teacherId;
+  }
+  if (attempt.topic_id) {
+    const {data:topic}=await supabase.from('topics').select('course_id').eq('id',attempt.topic_id).single();
+    if (!topic) return false;
+    const {data:course}=await supabase.from('courses').select('created_by').eq('id',topic.course_id).single();
+    return course?.created_by===teacherId;
+  }
+  return false;
+}
+async function assertTeacherOwnership(attemptId: string, teacherId: string) {
+  const {data:attempt}=await supabase.from('quiz_attempts').select('quiz_id,topic_id,results_released_at').eq('id',attemptId).single();
+  if (!attempt || !await teacherOwnsAttempt(attempt,teacherId)) throw accessError();
+  return attempt;
+}
+
 export type ViolationType =
   | 'tab_change'
+  | 'focus_loss'
   | 'copy_attempt'
   | 'right_click'
   | 'screenshot_attempt'
   | 'keyboard_shortcut'
-  | 'face_away'
-  | 'no_face'
   | 'TAB_SWITCH'
   | 'SYSTEM_FOCUS_LOST'
   | 'RESTRICTED_KEY'
-  | 'FACE_AWAY'
-  | 'NO_FACE';
+  ;
 export type Severity = 'low' | 'medium' | 'high';
 
 interface ViolationInput {
@@ -69,17 +87,12 @@ export const cheatingViolationService = {
     const currentCount = count || 1;
 
     // Update the quiz_attempts table with violation count
-    // Auto-submit if violations exceed 100
+    // Flags are evidence for instructor review, never an automatic grading decision.
     const updateData: any = { 
       violation_count: currentCount 
     };
 
-    if (currentCount > 100) {
-      updateData.status = 'completed';
-      updateData.completed_at = new Date().toISOString();
-      updateData.auto_submitted = true;
-      updateData.submission_reason = 'excessive_violations';
-    }
+    if (currentCount > 100) updateData.is_flagged = true;
 
     await supabase
       .from('quiz_attempts')
@@ -89,7 +102,7 @@ export const cheatingViolationService = {
     return {
       violationId: violation.id,
       violationCount: currentCount,
-      autoSubmitted: currentCount > 100
+      autoSubmitted: false
     };
   },
 
@@ -98,7 +111,7 @@ export const cheatingViolationService = {
     // First get the attempt to verify access
     const { data: attempt } = await supabase
       .from('quiz_attempts')
-      .select('user_id, topic_id')
+      .select('user_id, topic_id, quiz_id')
       .eq('id', attemptId)
       .single();
 
@@ -106,11 +119,9 @@ export const cheatingViolationService = {
       throw new Error('Quiz attempt not found');
     }
 
-    // Check authorization - student can view their own, teacher can view their students'
-    // For now, allow if requester is the student or a teacher
-    if (requesterRole === 'student' && attempt.user_id !== requesterId) {
-      throw new Error('You are not authorized to view these violations');
-    }
+    const ownStudent=requesterRole==='student' && attempt.user_id===requesterId;
+    const ownTeacher=['teacher','admin'].includes(requesterRole) && await teacherOwnsAttempt(attempt,requesterId);
+    if (!ownStudent && !ownTeacher) throw accessError();
 
     // Get violations
     const { data: violations, error } = await supabase
@@ -184,6 +195,7 @@ export const cheatingViolationService = {
 
   // Flag an attempt as suspicious
   async flagAttempt(attemptId: string, teacherId: string) {
+    await assertTeacherOwnership(attemptId,teacherId);
     const { data, error } = await supabase
       .from('quiz_attempts')
       .update({ is_flagged: true })
@@ -197,6 +209,8 @@ export const cheatingViolationService = {
 
   // Invalidate an attempt
   async invalidateAttempt(attemptId: string, teacherId: string) {
+    const attempt=await assertTeacherOwnership(attemptId,teacherId);
+    if (attempt.results_released_at) throw Object.assign(new Error('Released results cannot be invalidated'), {statusCode:409});
     const { data, error } = await supabase
       .from('quiz_attempts')
       .update({ 
@@ -204,6 +218,7 @@ export const cheatingViolationService = {
         is_flagged: true
       })
       .eq('id', attemptId)
+      .is('results_released_at', null)
       .select()
       .single();
 

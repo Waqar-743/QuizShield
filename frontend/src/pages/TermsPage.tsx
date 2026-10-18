@@ -10,7 +10,7 @@ const termsPoints = [
   {
     title: 'Academic integrity',
     description:
-      'Students must follow the exam rules shown by their instructor, including webcam verification and proctoring checks.',
+      'Students must follow the exam rules shown by their instructor, including timing, assignment and browser activity rules.',
   },
   {
     title: 'Service availability',

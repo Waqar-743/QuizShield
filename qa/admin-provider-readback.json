@@ -1,0 +1,32 @@
+{
+  "environment": "hosted staging",
+  "calendar": {
+    "probeId": "probe_90da6bab-c48c-4e4c-beb6-11729781ac56",
+    "eventId": "b0e4f8a240b77cbd19f9d16aa5bc6d9aba0a417e83eb0cfd964ea5a996d99352",
+    "status": "confirmed",
+    "summary": "Administrator hosted acceptance 2026-10-18T15:12:50.128Z",
+    "timezone": "Asia/Karachi",
+    "revision": 2,
+    "defaultReminders": false
+  },
+  "cancellation": {
+    "probeId": "probe_f8602f88-7bfb-47d5-b25b-792394318559",
+    "eventId": "b0e4f8a240b77cbd19f9d16aa5bc6d9aba0a417e83eb0cfd964ea5a996d99352",
+    "status": "cancelled"
+  },
+  "sheets": {
+    "probeId": "probe_8097421c-a280-4394-9c10-0a89fb5e73db",
+    "range": "Sheet1!A7:F7",
+    "attemptId": "adccd8cd-115a-4037-860a-31445f7b937e",
+    "grade": 86,
+    "releasedAt": "2026-10-18T15:39:47.014+00:00",
+    "fieldCount": 6,
+    "recipientRestricted": true
+  },
+  "setupLink": {
+    "liveProviderGeneration": true,
+    "responseContract": ["setupId", "setupUrl", "status", "expiresAt", "endOrgId", "metadata"],
+    "newTeacherConsentCompleted": false,
+    "setupSecretOmitted": true
+  }
+}

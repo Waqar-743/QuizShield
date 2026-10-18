@@ -1,0 +1,132 @@
+{
+  "verifiedAt": "2026-10-18T08:03:44.607Z",
+  "environment": "hosted-staging",
+  "syntheticFaceApiOnly": true,
+  "externalDeliveryDuringTest": false,
+  "fixtures": {
+    "course": "a5b39b30-0af0-4fda-bbe3-474fe16b710d",
+    "quiz": "b9bb0e79-07fa-4707-8483-5a669f6a0f24",
+    "attempt": "bab73612-d1d5-42d0-9388-ac7db09d1f07",
+    "otherTeacher": "30587958-3dd9-4863-ad2f-377b3eb90825"
+  },
+  "results": [
+    {
+      "id": "COURSE-CREATE",
+      "pass": true,
+      "status": 201
+    },
+    {
+      "id": "COURSE-CODE",
+      "pass": true,
+      "length": 6
+    },
+    {
+      "id": "CATALOG-PRIVACY",
+      "pass": true,
+      "status": 200
+    },
+    {
+      "id": "COURSE-ENROL-REPLAY",
+      "pass": true,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "id": "DRAFT-SILENCE",
+      "pass": true,
+      "jobs": 0
+    },
+    {
+      "id": "DRAFT-ACCESS",
+      "pass": true,
+      "status": 400
+    },
+    {
+      "id": "PUBLISH-ONCE",
+      "pass": true,
+      "statuses": [
+        200,
+        200
+      ],
+      "emailJobs": 1
+    },
+    {
+      "id": "EARLY-START",
+      "pass": true,
+      "status": 403
+    },
+    {
+      "id": "CONCURRENT-START",
+      "pass": true,
+      "statuses": [
+        200,
+        200
+      ],
+      "uniqueAttemptIds": 1
+    },
+    {
+      "id": "DUPLICATE-ANSWERS",
+      "pass": true,
+      "status": 400
+    },
+    {
+      "id": "SUBMIT-IMMUTABLE",
+      "pass": true,
+      "status": 409,
+      "persistedScore": 1
+    },
+    {
+      "id": "PRIVATE-REVIEW",
+      "pass": true,
+      "status": 200,
+      "gradeVisible": false
+    },
+    {
+      "id": "RELEASE-ONCE",
+      "pass": true,
+      "statuses": [
+        200,
+        200
+      ],
+      "releasedGrade": 82
+    },
+    {
+      "id": "RELEASE-IMMUTABLE",
+      "pass": true,
+      "status": 409
+    },
+    {
+      "id": "ROLE-ESCALATION",
+      "pass": true,
+      "status": 403
+    },
+    {
+      "id": "ROSTER-OWNERSHIP",
+      "pass": true,
+      "status": 404,
+      "existenceConcealed": true
+    },
+    {
+      "id": "GRADE-OWNERSHIP",
+      "pass": true,
+      "status": 403
+    },
+    {
+      "id": "RESULT-OWNERSHIP",
+      "pass": true,
+      "status": 403
+    },
+    {
+      "id": "CANCELLATION",
+      "pass": true,
+      "status": 200
+    },
+    {
+      "id": "CANCELLED-START",
+      "pass": true,
+      "status": 403
+    }
+  ]
+}

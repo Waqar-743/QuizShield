@@ -1,5 +1,7 @@
 # QuizShield — Senior QA & Backend Review Report
 
+> Historical review, 4 May 2026. The current full application review, staging evidence, fixes and remaining blockers are in [QA_REVIEW_2026-10-18.md](QA_REVIEW_2026-10-18.md). The counts and readiness statements below apply only to the historical review.
+
 **Reviewer:** Elite Senior QA Engineer & Backend Systems Analyst persona
 **Scope:** `backend/` — Express + Supabase API powering an exam-proctoring platform for an educational institute
 **Date:** 2026-05-04

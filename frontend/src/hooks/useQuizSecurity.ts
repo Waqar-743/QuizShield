@@ -55,7 +55,7 @@ export const useQuizSecurity = (options: UseQuizSecurityOptions) => {
 
       onViolation?.(type, count);
     } catch (error) {
-      console.error('Failed to report violation:', error);
+      console.error('Failed to report violation:');
     }
   }, [quizAttemptId, quizId, teacherId, violations.length, onViolation]);
 

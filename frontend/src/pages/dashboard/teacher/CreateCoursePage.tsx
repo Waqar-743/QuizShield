@@ -57,14 +57,12 @@ const CreateCoursePage = () => {
       toast.success('Course created successfully!');
       navigate('/dashboard/teacher/courses');
     } catch (error: any) {
-      console.error('Create course error:', error);
+      console.error('Create course error:');
       const errorData = error.response?.data;
       const status = error.response?.status;
       const message = errorData?.message || errorData?.error?.message || errorData?.error || 'Failed to create course';
       
-      // Show detailed error
-      alert(`Error ${status}: ${message}\n\nFull error: ${JSON.stringify(errorData, null, 2)}`);
-      toast.error(message);
+      toast.error(status >= 500 ? 'Course could not be saved. Please try again or contact your administrator.' : message);
     } finally {
       setLoading(false);
     }
@@ -92,6 +90,9 @@ const CreateCoursePage = () => {
             Course Title <span className="text-red-500">*</span>
           </label>
           <input
+            id="course-title"
+            aria-label="Course title"
+            maxLength={200}
             type="text"
             value={formData.title}
             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
@@ -108,6 +109,8 @@ const CreateCoursePage = () => {
             Description
           </label>
           <textarea
+            aria-label="Course description"
+            maxLength={2000}
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             rows={3}
@@ -122,7 +125,7 @@ const CreateCoursePage = () => {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Category
             </label>
-            <select
+            <select aria-label="Course category"
               value={formData.category}
               onChange={(e) => setFormData({ ...formData, category: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
@@ -138,7 +141,7 @@ const CreateCoursePage = () => {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Difficulty
             </label>
-            <select
+            <select aria-label="Course difficulty"
               value={formData.difficulty}
               onChange={(e) => setFormData({ ...formData, difficulty: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
@@ -156,6 +159,7 @@ const CreateCoursePage = () => {
             Max Students <span className="text-gray-400 font-normal">(optional — blank = unlimited)</span>
           </label>
           <input
+            aria-label="Maximum students"
             type="number"
             min="1"
             value={formData.maxStudents}

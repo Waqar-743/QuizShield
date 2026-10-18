@@ -1,0 +1,33 @@
+{
+  "verifiedAt": "2026-10-18T11:36:25.219Z",
+  "environment": "hosted-staging",
+  "fixtureAttempt": "10870544-70b8-4093-844a-0a0f3eea921f",
+  "results": [
+    {
+      "id": "FOREIGN-VIOLATIONS",
+      "httpStatus": 403,
+      "pass": true
+    },
+    {
+      "id": "FOREIGN-FLAG",
+      "httpStatus": 403,
+      "pass": true
+    },
+    {
+      "id": "FOREIGN-INVALIDATE",
+      "httpStatus": 403,
+      "pass": true
+    },
+    {
+      "id": "OWNER-VIOLATIONS",
+      "httpStatus": 200,
+      "pass": true
+    },
+    {
+      "id": "RELEASED-INVALIDATION-BLOCKED",
+      "httpStatus": 409,
+      "pass": true
+    }
+  ],
+  "cleanup": "Original attempt flag/status restored"
+}

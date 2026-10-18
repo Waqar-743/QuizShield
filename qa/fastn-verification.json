@@ -1,0 +1,855 @@
+{
+  "verifiedAt": "2026-10-18T11:42:10.600Z",
+  "environment": "isolated hosted staging",
+  "verdict": "PASS for the controlled verified teacher; broader rollout blocked",
+  "mocked": false,
+  "suites": [
+    {
+      "id": "wf_6128a556c8d8",
+      "publishedVersion": "wv_a3e87176bbd9",
+      "deployment": "wdep_93e2748673db",
+      "mode": "live",
+      "results": [
+        {
+          "id": "EMAIL-RECEIPT",
+          "status": "pass",
+          "evidence": {
+            "mode": "saved live workflow",
+            "result": {
+              "delivered": true,
+              "providerId": "01a14e19-a803-75f2-b282-79a51d4c150d"
+            },
+            "summary": {
+              "totalSteps": 3,
+              "succeeded": 3,
+              "failed": 0,
+              "slowestMs": 5833,
+              "slowestStep": "fetch"
+            },
+            "error": null
+          }
+        },
+        {
+          "id": "EMAIL-INELIGIBLE",
+          "status": "pass",
+          "evidence": {
+            "mode": "saved live workflow",
+            "result": {
+              "skipped": true
+            },
+            "summary": {
+              "totalSteps": 2,
+              "succeeded": 2,
+              "failed": 0,
+              "slowestMs": 4400,
+              "slowestStep": "fetch"
+            },
+            "error": null
+          }
+        },
+        {
+          "id": "EMAIL-REPLAY",
+          "status": "pass",
+          "evidence": {
+            "mode": "saved live workflow",
+            "result": {
+              "skipped": true
+            },
+            "summary": {
+              "totalSteps": 2,
+              "succeeded": 2,
+              "failed": 0,
+              "slowestMs": 449,
+              "slowestStep": "fetch"
+            },
+            "error": null
+          }
+        },
+        {
+          "id": "EMAIL-HOSTILE-URL",
+          "status": "pass",
+          "evidence": {
+            "mode": "saved live workflow",
+            "result": null,
+            "summary": null,
+            "error": "Invalid callback URL"
+          }
+        },
+        {
+          "id": "EMAIL-GOOGLE-REJECT",
+          "status": "pass",
+          "evidence": {
+            "mode": "saved live workflow",
+            "result": null,
+            "summary": null,
+            "error": "Email-only workflow"
+          }
+        },
+        {
+          "id": "EMAIL-TOKEN-MISSING",
+          "status": "pass",
+          "evidence": {
+            "mode": "saved live workflow",
+            "result": null,
+            "summary": null,
+            "error": "Missing delivery token"
+          }
+        },
+        {
+          "id": "EMAIL-HTTP-FAILURE",
+          "status": "pass",
+          "evidence": {
+            "mode": "saved live workflow",
+            "result": null,
+            "summary": null,
+            "error": "QuizShield callback HTTP 401"
+          }
+        },
+        {
+          "id": "EMAIL-TRIGGER",
+          "status": "pass",
+          "evidence": {
+            "mode": "hosted cron -> authenticated webhook -> exact deliveryId payload filter",
+            "correlations": [
+              {
+                "case": "email-announcement",
+                "deliveryId": "7ce9de51-1252-49d7-bc43-3cdc12e27f7a:1",
+                "workflowId": "wf_6128a556c8d8",
+                "matches": [
+                  {
+                    "id": "exec_5a05355cf68b",
+                    "status": "completed",
+                    "createdAt": "2026-10-18T08:28:07.312Z",
+                    "startedAt": "2026-10-18T08:29:37.192Z",
+                    "completedAt": "2026-10-18T08:29:46.313Z",
+                    "endOrgId": "personal_c57bd6b1e156ddbaeec1",
+                    "installationId": null
+                  }
+                ]
+              },
+              {
+                "case": "email-reminder",
+                "deliveryId": "084c57c0-550e-423e-bd60-946f8e353e3e:1",
+                "workflowId": "wf_6128a556c8d8",
+                "matches": [
+                  {
+                    "id": "exec_97f7f8464189",
+                    "status": "completed",
+                    "createdAt": "2026-10-18T08:29:05.151Z",
+                    "startedAt": "2026-10-18T08:31:17.181Z",
+                    "completedAt": "2026-10-18T08:31:26.590Z",
+                    "endOrgId": "personal_c57bd6b1e156ddbaeec1",
+                    "installationId": null
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "wf_85ec71f0f969",
+      "publishedVersion": "wv_bb6373c66c8a",
+      "deployment": "wdep_1bdcd52121e1",
+      "mode": "live",
+      "results": [
+        {
+          "id": "GOOGLE-CREATE",
+          "status": "pass",
+          "evidence": {
+            "mode": "saved live workflow",
+            "result": {
+              "success": true,
+              "providerId": "12873da75836ed7cb5107ad14a8543488ce6d813a75459c7edb26e259d40f81b"
+            },
+            "summary": {
+              "totalSteps": 7,
+              "succeeded": 6,
+              "failed": 1,
+              "slowestMs": 2869,
+              "slowestStep": "fetch"
+            },
+            "error": null
+          }
+        },
+        {
+          "id": "GOOGLE-UPDATE",
+          "status": "pass",
+          "evidence": {
+            "mode": "saved live workflow",
+            "result": {
+              "success": true,
+              "providerId": "12873da75836ed7cb5107ad14a8543488ce6d813a75459c7edb26e259d40f81b"
+            },
+            "summary": {
+              "totalSteps": 7,
+              "succeeded": 7,
+              "failed": 0,
+              "slowestMs": 3163,
+              "slowestStep": "fetch"
+            },
+            "error": null
+          }
+        },
+        {
+          "id": "GOOGLE-CANCEL",
+          "status": "pass",
+          "evidence": {
+            "mode": "saved live workflow",
+            "result": {
+              "success": true,
+              "providerId": "12873da75836ed7cb5107ad14a8543488ce6d813a75459c7edb26e259d40f81b"
+            },
+            "summary": {
+              "totalSteps": 7,
+              "succeeded": 7,
+              "failed": 0,
+              "slowestMs": 3606,
+              "slowestStep": "fetch"
+            },
+            "error": null
+          }
+        },
+        {
+          "id": "GOOGLE-SHEETS",
+          "status": "pass",
+          "evidence": {
+            "mode": "saved live workflow",
+            "result": {
+              "success": true,
+              "providerId": "1NMfl6P1F0ppqtBt_Lcs4BTFN2sG4yhhx3GLOy7wYD2Y:Sheet1!A5:F5"
+            },
+            "summary": {
+              "totalSteps": 6,
+              "succeeded": 6,
+              "failed": 0,
+              "slowestMs": 4664,
+              "slowestStep": "fetch"
+            },
+            "error": null
+          }
+        },
+        {
+          "id": "GOOGLE-REPLAY",
+          "status": "pass",
+          "evidence": {
+            "mode": "saved live workflow",
+            "result": {
+              "skipped": true
+            },
+            "summary": {
+              "totalSteps": 2,
+              "succeeded": 2,
+              "failed": 0,
+              "slowestMs": 423,
+              "slowestStep": "fetch"
+            },
+            "error": null
+          }
+        },
+        {
+          "id": "GOOGLE-STALE",
+          "status": "pass",
+          "evidence": {
+            "mode": "saved live workflow",
+            "result": {
+              "skipped": true
+            },
+            "summary": {
+              "totalSteps": 2,
+              "succeeded": 2,
+              "failed": 0,
+              "slowestMs": 843,
+              "slowestStep": "fetch"
+            },
+            "error": null
+          }
+        },
+        {
+          "id": "GOOGLE-NO-CONTEXT",
+          "status": "pass",
+          "evidence": {
+            "mode": "saved live workflow",
+            "result": null,
+            "summary": null,
+            "error": "Teacher connection context is missing or mismatched"
+          }
+        },
+        {
+          "id": "GOOGLE-WRONG-CONTEXT",
+          "status": "pass",
+          "evidence": {
+            "mode": "saved live workflow",
+            "result": null,
+            "summary": null,
+            "error": "Teacher connection context is missing or mismatched"
+          }
+        },
+        {
+          "id": "GOOGLE-HOSTILE-URL",
+          "status": "pass",
+          "evidence": {
+            "mode": "saved live workflow",
+            "result": null,
+            "summary": null,
+            "error": "Invalid callback URL"
+          }
+        },
+        {
+          "id": "GOOGLE-HTTP-FAILURE",
+          "status": "pass",
+          "evidence": {
+            "mode": "saved live workflow",
+            "result": null,
+            "summary": null,
+            "error": "QuizShield callback HTTP 401"
+          }
+        },
+        {
+          "id": "GOOGLE-TRIGGER",
+          "status": "pass",
+          "evidence": {
+            "mode": "hosted cron -> authenticated webhook -> exact deliveryId payload filter",
+            "correlations": [
+              {
+                "case": "google-create",
+                "deliveryId": "836d95a4-a71f-46f7-b2da-ad1d87f66e19:1",
+                "workflowId": "wf_85ec71f0f969",
+                "matches": [
+                  {
+                    "id": "exec_5b675840205f",
+                    "status": "completed",
+                    "createdAt": "2026-10-18T11:25:05.072Z",
+                    "startedAt": "2026-10-18T11:26:19.706Z",
+                    "completedAt": "2026-10-18T11:26:28.262Z",
+                    "endOrgId": "176c89cb-8a1d-4ca7-82ef-59791f590100",
+                    "installationId": "inst_e162c34cd402"
+                  }
+                ]
+              },
+              {
+                "case": "google-update",
+                "deliveryId": "3e4db289-404c-4d0a-a378-062dfa4264ab:1",
+                "workflowId": "wf_85ec71f0f969",
+                "matches": [
+                  {
+                    "id": "exec_f899ba96126d",
+                    "status": "completed",
+                    "createdAt": "2026-10-18T11:28:20.242Z",
+                    "startedAt": "2026-10-18T11:31:18.646Z",
+                    "completedAt": "2026-10-18T11:31:26.839Z",
+                    "endOrgId": "176c89cb-8a1d-4ca7-82ef-59791f590100",
+                    "installationId": "inst_e162c34cd402"
+                  }
+                ]
+              },
+              {
+                "case": "google-sheets",
+                "deliveryId": "21065421-2a3e-4834-bede-c629033e2bd6:1",
+                "workflowId": "wf_85ec71f0f969",
+                "matches": [
+                  {
+                    "id": "exec_5194669349ea",
+                    "status": "completed",
+                    "createdAt": "2026-10-18T11:28:10.104Z",
+                    "startedAt": "2026-10-18T11:29:39.667Z",
+                    "completedAt": "2026-10-18T11:29:50.888Z",
+                    "endOrgId": "176c89cb-8a1d-4ca7-82ef-59791f590100",
+                    "installationId": "inst_e162c34cd402"
+                  }
+                ]
+              },
+              {
+                "case": "google-cancel",
+                "deliveryId": "075852d0-fab0-4218-b1c9-246f36523425:1",
+                "workflowId": "wf_85ec71f0f969",
+                "matches": [
+                  {
+                    "id": "exec_3c9b41d2d720",
+                    "status": "completed",
+                    "createdAt": "2026-10-18T11:33:04.528Z",
+                    "startedAt": "2026-10-18T11:34:39.585Z",
+                    "completedAt": "2026-10-18T11:34:47.604Z",
+                    "endOrgId": "176c89cb-8a1d-4ca7-82ef-59791f590100",
+                    "installationId": "inst_e162c34cd402"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "hostedCorrelations": [
+    {
+      "case": "email-announcement",
+      "deliveryId": "7ce9de51-1252-49d7-bc43-3cdc12e27f7a:1",
+      "workflowId": "wf_6128a556c8d8",
+      "matches": [
+        {
+          "id": "exec_5a05355cf68b",
+          "status": "completed",
+          "createdAt": "2026-10-18T08:28:07.312Z",
+          "startedAt": "2026-10-18T08:29:37.192Z",
+          "completedAt": "2026-10-18T08:29:46.313Z",
+          "endOrgId": "personal_c57bd6b1e156ddbaeec1",
+          "installationId": null
+        }
+      ]
+    },
+    {
+      "case": "email-reminder",
+      "deliveryId": "084c57c0-550e-423e-bd60-946f8e353e3e:1",
+      "workflowId": "wf_6128a556c8d8",
+      "matches": [
+        {
+          "id": "exec_97f7f8464189",
+          "status": "completed",
+          "createdAt": "2026-10-18T08:29:05.151Z",
+          "startedAt": "2026-10-18T08:31:17.181Z",
+          "completedAt": "2026-10-18T08:31:26.590Z",
+          "endOrgId": "personal_c57bd6b1e156ddbaeec1",
+          "installationId": null
+        }
+      ]
+    },
+    {
+      "case": "google-create",
+      "deliveryId": "836d95a4-a71f-46f7-b2da-ad1d87f66e19:1",
+      "workflowId": "wf_85ec71f0f969",
+      "matches": [
+        {
+          "id": "exec_5b675840205f",
+          "status": "completed",
+          "createdAt": "2026-10-18T11:25:05.072Z",
+          "startedAt": "2026-10-18T11:26:19.706Z",
+          "completedAt": "2026-10-18T11:26:28.262Z",
+          "endOrgId": "176c89cb-8a1d-4ca7-82ef-59791f590100",
+          "installationId": "inst_e162c34cd402"
+        }
+      ]
+    },
+    {
+      "case": "google-update",
+      "deliveryId": "3e4db289-404c-4d0a-a378-062dfa4264ab:1",
+      "workflowId": "wf_85ec71f0f969",
+      "matches": [
+        {
+          "id": "exec_f899ba96126d",
+          "status": "completed",
+          "createdAt": "2026-10-18T11:28:20.242Z",
+          "startedAt": "2026-10-18T11:31:18.646Z",
+          "completedAt": "2026-10-18T11:31:26.839Z",
+          "endOrgId": "176c89cb-8a1d-4ca7-82ef-59791f590100",
+          "installationId": "inst_e162c34cd402"
+        }
+      ]
+    },
+    {
+      "case": "google-sheets",
+      "deliveryId": "21065421-2a3e-4834-bede-c629033e2bd6:1",
+      "workflowId": "wf_85ec71f0f969",
+      "matches": [
+        {
+          "id": "exec_5194669349ea",
+          "status": "completed",
+          "createdAt": "2026-10-18T11:28:10.104Z",
+          "startedAt": "2026-10-18T11:29:39.667Z",
+          "completedAt": "2026-10-18T11:29:50.888Z",
+          "endOrgId": "176c89cb-8a1d-4ca7-82ef-59791f590100",
+          "installationId": "inst_e162c34cd402"
+        }
+      ]
+    },
+    {
+      "case": "google-cancel",
+      "deliveryId": "075852d0-fab0-4218-b1c9-246f36523425:1",
+      "workflowId": "wf_85ec71f0f969",
+      "matches": [
+        {
+          "id": "exec_3c9b41d2d720",
+          "status": "completed",
+          "createdAt": "2026-10-18T11:33:04.528Z",
+          "startedAt": "2026-10-18T11:34:39.585Z",
+          "completedAt": "2026-10-18T11:34:47.604Z",
+          "endOrgId": "176c89cb-8a1d-4ca7-82ef-59791f590100",
+          "installationId": "inst_e162c34cd402"
+        }
+      ]
+    }
+  ],
+  "correlationMethod": "Exact whole deliveryId search against stored execution payload; all six returned one completed execution.",
+  "scheduler": {
+    "cron": {
+      "active": true,
+      "jobId": 1,
+      "schedule": "* * * * *"
+    },
+    "http": [
+      {
+        "id": 881,
+        "status_code": 200,
+        "timed_out": false
+      },
+      {
+        "id": 882,
+        "status_code": 200,
+        "timed_out": false
+      },
+      {
+        "id": 883,
+        "status_code": 200,
+        "timed_out": false
+      },
+      {
+        "id": 884,
+        "status_code": 200,
+        "timed_out": false
+      },
+      {
+        "id": 885,
+        "status_code": 200,
+        "timed_out": false
+      },
+      {
+        "id": 1058,
+        "status_code": 200,
+        "timed_out": false
+      },
+      {
+        "id": 1059,
+        "status_code": 200,
+        "timed_out": false
+      },
+      {
+        "id": 1060,
+        "status_code": 200,
+        "timed_out": false
+      },
+      {
+        "id": 1061,
+        "status_code": 200,
+        "timed_out": false
+      },
+      {
+        "id": 1062,
+        "status_code": 200,
+        "timed_out": false
+      },
+      {
+        "id": 1063,
+        "status_code": 200,
+        "timed_out": false
+      },
+      {
+        "id": 1064,
+        "status_code": 200,
+        "timed_out": false
+      },
+      {
+        "id": 1065,
+        "status_code": 200,
+        "timed_out": false
+      },
+      {
+        "id": 1066,
+        "status_code": 200,
+        "timed_out": false
+      },
+      {
+        "id": 1067,
+        "status_code": 200,
+        "timed_out": false
+      },
+      {
+        "id": 1068,
+        "status_code": 200,
+        "timed_out": false
+      }
+    ],
+    "runs": [
+      {
+        "runid": 881,
+        "start_time": "2026-10-18T08:28:00.093432+00:00",
+        "status": "succeeded"
+      },
+      {
+        "runid": 882,
+        "start_time": "2026-10-18T08:29:00.035096+00:00",
+        "status": "succeeded"
+      },
+      {
+        "runid": 883,
+        "start_time": "2026-10-18T08:30:00.015979+00:00",
+        "status": "succeeded"
+      },
+      {
+        "runid": 884,
+        "start_time": "2026-10-18T08:31:00.030252+00:00",
+        "status": "succeeded"
+      },
+      {
+        "runid": 885,
+        "start_time": "2026-10-18T08:32:00.018588+00:00",
+        "status": "succeeded"
+      },
+      {
+        "runid": 1058,
+        "start_time": "2026-10-18T11:25:00.08284+00:00",
+        "status": "succeeded"
+      },
+      {
+        "runid": 1059,
+        "start_time": "2026-10-18T11:26:00.019115+00:00",
+        "status": "succeeded"
+      },
+      {
+        "runid": 1060,
+        "start_time": "2026-10-18T11:27:00.056797+00:00",
+        "status": "succeeded"
+      },
+      {
+        "runid": 1061,
+        "start_time": "2026-10-18T11:28:00.017111+00:00",
+        "status": "succeeded"
+      },
+      {
+        "runid": 1062,
+        "start_time": "2026-10-18T11:29:00.060856+00:00",
+        "status": "succeeded"
+      },
+      {
+        "runid": 1063,
+        "start_time": "2026-10-18T11:30:00.014804+00:00",
+        "status": "succeeded"
+      },
+      {
+        "runid": 1064,
+        "start_time": "2026-10-18T11:31:00.021115+00:00",
+        "status": "succeeded"
+      },
+      {
+        "runid": 1065,
+        "start_time": "2026-10-18T11:32:00.020092+00:00",
+        "status": "succeeded"
+      },
+      {
+        "runid": 1066,
+        "start_time": "2026-10-18T11:33:00.018802+00:00",
+        "status": "succeeded"
+      },
+      {
+        "runid": 1067,
+        "start_time": "2026-10-18T11:34:00.030596+00:00",
+        "status": "succeeded"
+      },
+      {
+        "runid": 1068,
+        "start_time": "2026-10-18T11:35:00.430467+00:00",
+        "status": "succeeded"
+      }
+    ]
+  },
+  "independence": {
+    "localApplicationServersStopped": true,
+    "managedQaTabsClosedBeforeQueueing": true,
+    "noLocalWorkerCalled": true,
+    "conditionConfirmedAt": "2026-10-18T08:27:04.673Z",
+    "limitation": "No claim that every unrelated browser process was inventoried."
+  },
+  "google": {
+    "calendarCreateReadback": {
+      "executionId": "ecff5af1-e415-4867-aa38-104fe4a0ef75",
+      "httpStatus": 200
+    },
+    "calendarUpdateReadback": {
+      "executionId": "0c940f7e-f455-4a3a-8efc-469706476aba",
+      "httpStatus": 200
+    },
+    "calendarCancelReadback": {
+      "executionId": "5a5e380f-724d-44f2-b415-ce234ddf64b1",
+      "httpStatus": 200,
+      "status": "cancelled"
+    },
+    "sheetReadback": {
+      "executionId": "d0e6e9cb-547c-49b3-a003-5de9ad1bfb87",
+      "httpStatus": 200
+    },
+    "parity": {
+      "calendar": {
+        "eventId": true,
+        "title": true,
+        "start": true,
+        "end": true,
+        "timezone": true,
+        "revision": true,
+        "noAttendees": true,
+        "noDefaultReminders": true
+      },
+      "sheets": {
+        "oneRow": true,
+        "fields": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ]
+      }
+    },
+    "sheetAttempt": "aa63ea60-f4c5-475c-8731-b13a925ac74b",
+    "sheetRange": "Sheet1!A6:F6",
+    "manualCalendarParity": {
+      "id": true,
+      "title": true,
+      "start": true,
+      "end": true,
+      "timezone": true,
+      "revision": true,
+      "attendees": true,
+      "reminders": true
+    },
+    "manualSheetsParity": {
+      "matches": 1,
+      "fieldsExact": 6,
+      "fields": 6,
+      "readExecution": "bce7adcf-7d07-4b35-b674-ed7bd65ef17b"
+    }
+  },
+  "resources": {
+    "widget": {
+      "id": "wgt_2eed06caa23c",
+      "status": "active",
+      "enabled": true,
+      "workflowIds": [
+        "wf_6128a556c8d8",
+        "wf_85ec71f0f969"
+      ],
+      "triggerIds": [
+        "56be579f-f536-48cd-83a1-5c3cf6f80559",
+        "b6db412e-3eb6-442d-accf-9816fa4053bb"
+      ]
+    },
+    "installation": {
+      "id": "inst_e162c34cd402",
+      "status": "active",
+      "healthStatus": "healthy"
+    },
+    "connections": [
+      {
+        "id": "ucl:personal_c57bd6b1e156ddbaeec1:176c89cb-8a1d-4ca7-82ef-59791f590100:c557ffdb-1192-4819-99e4-c5b60cc718dd:default",
+        "status": "ACTIVE",
+        "connectorId": "c557ffdb-1192-4819-99e4-c5b60cc718dd"
+      },
+      {
+        "id": "ucl:personal_c57bd6b1e156ddbaeec1:176c89cb-8a1d-4ca7-82ef-59791f590100:38d254e2-b92e-44f4-81cd-8251fd9373d9:default",
+        "status": "ACTIVE",
+        "connectorId": "38d254e2-b92e-44f4-81cd-8251fd9373d9"
+      }
+    ]
+  },
+  "triggers": [
+    {
+      "id": "56be579f-f536-48cd-83a1-5c3cf6f80559",
+      "status": "ACTIVE",
+      "auth": "API_KEY",
+      "executionMode": "sequential",
+      "deduplicationField": "deliveryId",
+      "routes": [
+        {
+          "env": "live",
+          "headers": {},
+          "payload": {},
+          "routeId": "wf_6128a556c8d8",
+          "routeType": "API"
+        }
+      ],
+      "health": "healthy",
+      "routeStats": [
+        {
+          "routeId": "wf_6128a556c8d8",
+          "stats": {
+            "pending": 0,
+            "processed": 5,
+            "failed": 0,
+            "retried": 0,
+            "missing": 0,
+            "deadLettered": 0
+          },
+          "circuitBreaker": {
+            "state": "closed",
+            "failures": 0,
+            "openedAt": null,
+            "lastActivityAt": null
+          }
+        }
+      ],
+      "dlqSummary": {
+        "pending": 0,
+        "retrying": 0,
+        "failed": 0,
+        "dead": 0,
+        "total": 0
+      }
+    },
+    {
+      "id": "b6db412e-3eb6-442d-accf-9816fa4053bb",
+      "status": "ACTIVE",
+      "auth": "API_KEY",
+      "executionMode": "sequential",
+      "deduplicationField": "deliveryId",
+      "routes": [
+        {
+          "env": "live",
+          "headers": {
+            "x-end-org-id": "176c89cb-8a1d-4ca7-82ef-59791f590100",
+            "x-installation-id": "inst_e162c34cd402"
+          },
+          "payload": {},
+          "routeId": "wf_85ec71f0f969",
+          "routeType": "API",
+          "installationId": "inst_e162c34cd402"
+        }
+      ],
+      "health": "healthy",
+      "routeStats": [
+        {
+          "routeId": "wf_85ec71f0f969",
+          "stats": {
+            "pending": 0,
+            "processed": 9,
+            "failed": 0,
+            "retried": 0,
+            "missing": 0,
+            "deadLettered": 0
+          },
+          "circuitBreaker": {
+            "state": "closed",
+            "failures": 0,
+            "openedAt": null,
+            "lastActivityAt": "2026-10-18T11:33:04.600Z"
+          }
+        }
+      ],
+      "dlqSummary": {
+        "pending": 0,
+        "retrying": 0,
+        "failed": 0,
+        "dead": 0,
+        "total": 0
+      }
+    }
+  ],
+  "cleanup": "See qa/cleanup.json. Original teacher preferences restored, no outstanding jobs, synthetic workflow defaults restored and temporary callback inputs removed.",
+  "limitations": [
+    "Successful physical camera enrolment and liveness not verified.",
+    "Second-teacher installation auto-fanout remains blocked; staging Google route explicitly tenant/installation pinned.",
+    "Generic executeWorkflow tool does not carry Google tenant headers; actual tenant-bound webhook executions verified instead.",
+    "Widget tenant metrics omit org-scoped email and some aggregations are degraded.",
+    "No induced provider outage or large-scale load test.",
+    "Original production unchanged; unrestricted email disabled."
+  ]
+}

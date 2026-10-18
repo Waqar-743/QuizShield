@@ -29,6 +29,7 @@ interface QuizHistoryItem {
 const StudentQuizHistory = () => {
   const [attempts, setAttempts] = useState<QuizHistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [filter, setFilter] = useState<'all' | 'passed' | 'failed'>('all');
 
   useEffect(() => {
@@ -37,56 +38,19 @@ const StudentQuizHistory = () => {
 
   const fetchQuizHistory = async () => {
     setLoading(true);
+    setLoadError(false);
     try {
       const response = await api.get('/quizzes/history');
       setAttempts(response.data.data || []);
     } catch (error) {
-      // Mock data for development
-      setAttempts([
-        {
-          _id: '1',
-          quizId: 'q1',
-          score: 85,
-          totalQuestions: 10,
-          correctAnswers: 8,
-          timeTaken: 600,
-          isCompleted: true,
-          attemptedAt: new Date(Date.now() - 86400000).toISOString(),
-          quizTitle: 'JavaScript Basics',
-          topicTitle: 'Variables & Types',
-          courseTitle: 'Web Development',
-        },
-        {
-          _id: '2',
-          quizId: 'q2',
-          score: 60,
-          totalQuestions: 10,
-          correctAnswers: 6,
-          timeTaken: 480,
-          isCompleted: true,
-          attemptedAt: new Date(Date.now() - 172800000).toISOString(),
-          quizTitle: 'React Fundamentals',
-          topicTitle: 'Components',
-          courseTitle: 'Web Development',
-        },
-        {
-          _id: '3',
-          quizId: 'q3',
-          score: 90,
-          totalQuestions: 15,
-          correctAnswers: 14,
-          timeTaken: 720,
-          isCompleted: true,
-          attemptedAt: new Date(Date.now() - 259200000).toISOString(),
-          quizTitle: 'Python Data Structures',
-          topicTitle: 'Lists & Dictionaries',
-          courseTitle: 'Python Programming',
-        },
-      ]);
+      setAttempts([]);
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
   };
+
+  if (loadError) return <div role="alert" className="rounded-xl border border-red-200 p-6"><p>Quiz history could not be loaded.</p><button className="mt-3 underline" onClick={fetchQuizHistory}>Try again</button></div>;
 
   const filteredAttempts = attempts.filter((attempt) => {
     const finalGrade = attempt.teacherGrade;

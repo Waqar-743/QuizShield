@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 import { ClockIcon, CheckCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
-import FaceDetectionCamera from '../../components/shared/FaceDetectionCamera';
 
 interface Question {
   _id: string;
@@ -17,18 +16,18 @@ interface Question {
 
 interface QuizData {
   attemptId: string;
+  deadlineAt?: string;
   quiz: {
     _id: string;
     title: string;
     description: string;
     timeLimit: number;
-    cameraMonitoring?: boolean;
     questions: Question[];
   };
   code: string;
 }
 
-type ViolationType = 'TAB_SWITCH' | 'SYSTEM_FOCUS_LOST' | 'RESTRICTED_KEY' | 'FACE_AWAY' | 'NO_FACE';
+type ViolationType = 'TAB_SWITCH' | 'SYSTEM_FOCUS_LOST' | 'RESTRICTED_KEY';
 
 interface ViolationPayload {
   violation_type: ViolationType;
@@ -54,6 +53,7 @@ const QuizTakePage = () => {
   const [submitting,           setSubmitting]           = useState(false);
   const [showWarning,          setShowWarning]          = useState(false);
   const [warningMessage,       setWarningMessage]       = useState('');
+  const [attemptSeconds, setAttemptSeconds] = useState<number | null>(null);
 
   // Anti-cheating state
   const violations             = useRef<ViolationPayload[]>([]);
@@ -108,8 +108,6 @@ const QuizTakePage = () => {
     const backendViolationType =
       payload.violation_type === 'TAB_SWITCH'       ? 'tab_change'        :
       payload.violation_type === 'SYSTEM_FOCUS_LOST' ? 'focus_loss'        :
-      payload.violation_type === 'FACE_AWAY'         ? 'face_away'         :
-      payload.violation_type === 'NO_FACE'           ? 'no_face'           :
       'keyboard_shortcut';
 
     try {
@@ -120,10 +118,7 @@ const QuizTakePage = () => {
         event_timestamp: payload.event_timestamp,
         duration_seconds: payload.duration_seconds,
         meta_data: payload.meta_data,
-        detectionMethod:
-          payload.violation_type === 'FACE_AWAY' || payload.violation_type === 'NO_FACE'
-            ? 'camera_face_detection'
-            : 'browser_event',
+        detectionMethod: 'browser_event',
         quizId: quizData?.quiz._id,
       });
 
@@ -135,35 +130,6 @@ const QuizTakePage = () => {
       // Non-critical — violation not saved, but student stays in exam
     }
   }, [attemptId, navigate, quizData]);
-
-  // -----------------------------------------------------------------------
-  // Face detection callbacks
-  // -----------------------------------------------------------------------
-  const handleFaceViolation = useCallback((kind: 'face_away' | 'no_face') => {
-    reportViolation(createViolationPayload(
-      kind === 'face_away' ? 'FACE_AWAY' : 'NO_FACE',
-      kind === 'face_away' ? 'Face Away Violation' : 'No Face Detected Violation',
-    ));
-  }, [createViolationPayload, reportViolation]);
-
-  const handleFaceAutoSubmit = useCallback(async () => {
-    toast.error('Quiz auto-submitted: You looked away for more than 60 seconds.', { duration: 5000 });
-    const answers = quizData?.quiz.questions.map((q, index) => ({
-      questionId: q._id,
-      selectedAnswer: selectedAnswers[index] ?? (q.questionType === 'shortAnswer' || !q.options?.length ? '' : -1),
-    })) || [];
-    try {
-      await api.post(`/quizzes/${attemptId}/submit-all`, {
-        answers,
-        violations: violations.current.length > 0 ? violations.current : undefined,
-        autoSubmitReason: 'face_away_too_long',
-      });
-    } catch {
-      // Even if submit fails, navigate to results — attempt is flagged in-progress
-    }
-    sessionStorage.removeItem('currentQuiz');
-    navigate(`/quiz/results/${attemptId}`);
-  }, [attemptId, navigate, quizData, selectedAnswers]);
 
   // -----------------------------------------------------------------------
   // Browser anti-cheat event listeners
@@ -247,9 +213,10 @@ const QuizTakePage = () => {
     if (storedData) {
       try {
         const data = JSON.parse(storedData) as QuizData;
-        setQuizData(data);
-        setTimeLeft(data.quiz.questions[0]?.timeLimit || 60);
-        return;
+        if (data.attemptId === attemptId) {
+          setQuizData(data);
+          setTimeLeft(data.quiz.questions[0]?.timeLimit || 60);
+        }
       } catch {
         sessionStorage.removeItem('currentQuiz');
       }
@@ -267,6 +234,7 @@ const QuizTakePage = () => {
         if (attempt?.status === 'in-progress' && attempt?.quiz?.questions?.length) {
           const recovered: QuizData = {
             attemptId: attemptId!,
+            deadlineAt: attempt.deadlineAt,
             quiz: attempt.quiz,
             code: '',
           };
@@ -283,6 +251,14 @@ const QuizTakePage = () => {
         navigate('/dashboard/student');
       });
   }, [attemptId, navigate]);
+
+  useEffect(() => {
+    if (!quizData?.deadlineAt) return;
+    const tick = () => setAttemptSeconds(Math.max(0, Math.floor((Date.parse(quizData.deadlineAt!) - Date.now()) / 1000)));
+    tick();
+    const timer = setInterval(tick, 1000);
+    return () => clearInterval(timer);
+  }, [quizData?.deadlineAt]);
 
   // Set timer when question changes
   useEffect(() => {
@@ -368,6 +344,7 @@ const QuizTakePage = () => {
 
   const handleSubmitQuiz = async () => {
     if (!quizData) return;
+    if (attemptSeconds === 0) { toast.error('The server deadline has passed. Please contact your teacher.'); return; }
 
     const missingShortAnswer = quizData.quiz.questions.some((q, idx) =>
       isShortAnswerQuestion(q) && String(selectedAnswers[idx] ?? '').trim().length === 0,
@@ -421,12 +398,6 @@ const QuizTakePage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 select-none">
-      {/* Face Detection Camera — only when the teacher enabled monitoring for this quiz */}
-      <FaceDetectionCamera
-        enabled={!!quizData && quizData.quiz.cameraMonitoring !== false}
-        onViolation={handleFaceViolation}
-        onAutoSubmit={handleFaceAutoSubmit}
-      />
 
       {/* Violation Warning Banner */}
       {showWarning && (
@@ -452,6 +423,7 @@ const QuizTakePage = () => {
               <ClockIcon className="h-5 w-5" />
               <span className="font-mono font-bold text-lg">{formatTime(timeLeft)}</span>
             </div>
+            {attemptSeconds !== null && <div className="text-right text-xs text-gray-500" aria-live="off">Attempt remaining<br /><span className="font-mono text-sm text-gray-900">{formatTime(attemptSeconds)}</span>{attemptSeconds === 0 && <p role="alert" className="text-red-600">Server deadline passed</p>}</div>}
           </div>
 
           {/* Progress bar */}

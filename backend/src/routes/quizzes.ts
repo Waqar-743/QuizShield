@@ -11,11 +11,24 @@ import {
 import {
   reportViolation, getViolations, getViolationSummary, flagAttempt, invalidateAttempt
 } from '../controllers/cheatingViolationController';
-import { protect } from '../middleware/auth';
+import { protect, authorize } from '../middleware/auth';
+import { asyncHandler } from '../middleware/errorHandler';
+import { quizService } from '../services/quizService';
 
 const router = express.Router();
 
 router.use(protect);
+router.use('/teacher', authorize('teacher','admin'));
+router.use('/submissions', authorize('teacher','admin'));
+router.post('/teacher/:quizId/publish', asyncHandler(async (req, res) => {
+  res.json({ success: true, data: await quizService.setQuizLifecycle(req.params.quizId, req.user!._id, 'published') });
+}));
+router.post('/teacher/:quizId/cancel', asyncHandler(async (req, res) => {
+  res.json({ success: true, data: await quizService.setQuizLifecycle(req.params.quizId, req.user!._id, 'cancelled') });
+}));
+router.post('/submissions/:submissionId/release', asyncHandler(async (req, res) => {
+  res.json({ success: true, data: await quizService.releaseResults(req.params.submissionId, req.user!._id) });
+}));
 
 // Get quiz history for user
 router.get('/history', getQuizHistory);
@@ -31,30 +44,30 @@ router.get('/student/analytics', getStudentAnalytics);
 router.put('/submissions/:submissionId/grade', gradeSubmission);
 
 // Adaptive quiz routes for students
-router.post('/generate', getQuizForTopic);
+router.post('/generate', authorize('student'), getQuizForTopic);
 
-router.post('/', createQuiz);
-router.put('/:quizId', updateQuiz);
-router.delete('/:quizId', deleteQuiz);
+router.post('/', authorize('teacher','admin'), createQuiz);
+router.put('/:quizId', authorize('teacher','admin'), updateQuiz);
+router.delete('/:quizId', authorize('teacher','admin'), deleteQuiz);
 
 // Quiz Code routes
 router.get('/access-by-code/:code', accessQuizByCode);
-router.post('/start-by-code/:code', startQuizByCode);
-router.post('/:attemptId/submit-all', submitAllAnswers);
-router.post('/:quizId/generate-code', generateQuizCode);
-router.get('/:quizId/codes', getQuizCodes);
-router.put('/codes/:code/toggle', toggleQuizCode);
-router.delete('/codes/:code', deleteQuizCode);
+router.post('/start-by-code/:code', authorize('student'), startQuizByCode);
+router.post('/:attemptId/submit-all', authorize('student'), submitAllAnswers);
+router.post('/:quizId/generate-code', authorize('teacher','admin'), generateQuizCode);
+router.get('/:quizId/codes', authorize('teacher','admin'), getQuizCodes);
+router.put('/codes/:code/toggle', authorize('teacher','admin'), toggleQuizCode);
+router.delete('/codes/:code', authorize('teacher','admin'), deleteQuizCode);
 
 // Anti-cheating routes
-router.post('/attempts/:attemptId/report-violation', reportViolation);
+router.post('/attempts/:attemptId/report-violation', authorize('student'), reportViolation);
 router.get('/attempts/:attemptId/violations', getViolations);
-router.get('/violations/summary', getViolationSummary);
+router.get('/violations/summary', authorize('teacher','admin'), getViolationSummary);
 router.post('/attempts/:attemptId/flag', flagAttempt);
 router.post('/attempts/:attemptId/invalidate', invalidateAttempt);
 
 // Get quiz for a topic (starts a session essentially)
-router.get('/topic/:topicId', getQuizForTopic);
+router.get('/topic/:topicId', authorize('student'), getQuizForTopic);
 
 // Submit single answer
 router.post('/:attemptId/question/:questionId/submit', submitAnswer);

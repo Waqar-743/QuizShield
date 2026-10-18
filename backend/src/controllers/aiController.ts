@@ -1,8 +1,10 @@
 import { Request, Response } from 'express';
 import { aiService } from '../services/aiService';
 import { asyncHandler } from '../middleware/errorHandler';
+import { config } from '../config/environment';
 
 export const generateQuestions = asyncHandler(async (req: Request, res: Response) => {
+  if(!config.geminiApiKey) throw Object.assign(new Error('AI question generation is not configured. Your teacher can add questions manually.'),{statusCode:503});
   const { topicId, difficulty, count, questionType } = req.body;
   
   // Validate required fields
@@ -30,98 +32,36 @@ export const generateQuestions = asyncHandler(async (req: Request, res: Response
       data: questions,
     });
   } catch (error: any) {
-    console.error(`[AI Controller] Error:`, error.message);
+    console.error('AI question generation failed');
     
     res.status(500).json({
       success: false,
       error: {
-        message: error.message || 'Failed to generate questions',
+        message: 'AI question generation is temporarily unavailable. Please try again later.',
         code: 'AI_GENERATION_ERROR'
       }
     });
   }
 });
 
-export const getHint = asyncHandler(async (req: Request, res: Response) => {
-  // Placeholder
-  res.status(200).json({
-    success: true,
-    data: { hint: "AI Hint generation not implemented yet." },
-  });
+export const getHint = asyncHandler(async (_req: Request, res: Response) => {
+  res.status(501).json({success:false,error:{message:'AI hints are not available in this deployment.'}});
 });
 
-export const explainConcept = asyncHandler(async (req: Request, res: Response) => {
-  const { concept } = req.body;
-  // Placeholder
-  res.status(200).json({
-    success: true,
-    data: { explanation: `Explanation for ${concept} coming soon.` },
-  });
+export const explainConcept = asyncHandler(async (_req: Request, res: Response) => {
+  res.status(501).json({success:false,error:{message:'Concept explanations are not available in this deployment.'}});
 });
 
-export const getRecommendations = asyncHandler(async (req: Request, res: Response) => {
-  // Return mock recommendations for now
-  res.status(200).json({
-    success: true,
-    data: [
-      {
-        id: '1',
-        type: 'topic',
-        title: 'Review JavaScript Closures',
-        description: 'Based on your quiz performance, we recommend reviewing closures.',
-        priority: 'high',
-        topicId: 'js-closures-1',
-      },
-      {
-        id: '2',
-        type: 'practice',
-        title: 'Practice Array Methods',
-        description: 'You scored 65% on array methods. More practice recommended.',
-        priority: 'medium',
-        topicId: 'js-arrays-1',
-      },
-      {
-        id: '3',
-        type: 'course',
-        title: 'Explore React Hooks',
-        description: 'Based on your interests, you might enjoy learning React Hooks.',
-        priority: 'low',
-        courseId: 'react-hooks-1',
-      },
-    ],
-  });
+export const getRecommendations = asyncHandler(async (_req: Request, res: Response) => {
+  res.json({success:true,data:[],dataAvailable:false});
 });
 
-export const getInsights = asyncHandler(async (req: Request, res: Response) => {
-  // Return mock insights for the student dashboard
-  res.status(200).json({
-    success: true,
-    data: {
-      strengths: [
-        { topic: 'JavaScript Basics', score: 92 },
-        { topic: 'HTML & CSS', score: 88 },
-        { topic: 'Git Fundamentals', score: 85 },
-      ],
-      weaknesses: [
-        { topic: 'Advanced React', score: 45, suggestion: 'Review component lifecycle and hooks' },
-        { topic: 'Data Structures', score: 52, suggestion: 'Practice with trees and graphs' },
-        { topic: 'Algorithms', score: 58, suggestion: 'Focus on sorting and searching algorithms' },
-      ],
-      studyPlan: [
-        { day: 'Monday', topic: 'React Hooks Review', duration: '45 min' },
-        { day: 'Tuesday', topic: 'Data Structures Practice', duration: '60 min' },
-        { day: 'Wednesday', topic: 'Algorithm Challenges', duration: '45 min' },
-        { day: 'Thursday', topic: 'Project Work', duration: '90 min' },
-        { day: 'Friday', topic: 'Quiz Practice', duration: '30 min' },
-      ],
-      overallProgress: 68,
-      weeklyGoal: 5,
-      weeklyCompleted: 3,
-    },
-  });
+export const getInsights = asyncHandler(async (_req: Request, res: Response) => {
+  res.json({success:true,data:{strengths:[],weaknesses:[],studyPlan:[],overallProgress:null,weeklyGoal:null,weeklyCompleted:null},dataAvailable:false});
 });
 
 export const chatAssistant = asyncHandler(async (req: Request, res: Response) => {
+  if(!config.geminiApiKey) throw Object.assign(new Error('The AI assistant is not configured in this deployment.'),{statusCode:503});
   const { messages } = req.body as { messages?: { role: string; content: string }[] };
 
   if (!Array.isArray(messages) || messages.length === 0) {
@@ -159,12 +99,12 @@ export const chatAssistant = asyncHandler(async (req: Request, res: Response) =>
       data: { reply }
     });
   } catch (error: any) {
-    console.error('[AI Controller] chatAssistant error:', error.message);
+    console.error('AI assistant request failed');
 
     res.status(500).json({
       success: false,
       error: {
-        message: error.message || 'Failed to get AI response',
+        message: 'The AI assistant is temporarily unavailable. Please try again later.',
         code: 'AI_ASSISTANT_ERROR'
       }
     });

@@ -114,6 +114,11 @@ describe('Rate limiting headers present', () => {
 
 // ---------------------------------------------------------------------------
 describe('404 handling', () => {
+  it('rejects an unrelated GitLab Pages origin instead of allowing every GitLab tenant',async()=>{
+    const res=await request(app).get('/').set('Origin','https://unrelated-qa-tenant.gitlab.io');
+    expect(res.status).toBe(403);
+    expect(res.headers['access-control-allow-origin']).toBeUndefined();
+  });
   it('Unknown route returns 404 JSON', async () => {
     const res = await request(app).get('/api/does-not-exist');
     expect(res.status).toBe(404);

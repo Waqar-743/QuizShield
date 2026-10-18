@@ -1,0 +1,72 @@
+{
+  "verifiedAt": "2026-10-18T17:05:19.889Z",
+  "branch": "codex/fastn-email-staging",
+  "runtimeSourceCommit": "5f71fc0f6d7ea90c373f5d595eb93682520a249a",
+  "runtimeManifest": {
+    "algorithm": "sha256 of sorted runtime file paths and content",
+    "files": 116,
+    "hash": "654953ee573808ea003dc514c5b915521a196f5b85a781723f29820a98f7d1b7",
+    "excludes": "Tests, scripts, docs, evidence and deleted files"
+  },
+  "pullRequest": "https://github.com/Waqar-743/QuizShield/pull/6",
+  "staging": {
+    "frontend": {
+      "project": "quizshield-automation-ui",
+      "deploymentId": "dpl_8eLePZv88U3nRr1DwGrNAKJf4NgE",
+      "url": "https://quizshield-automation-ui.vercel.app",
+      "immutableUrl": "https://quizshield-automation-j80h4y9sy-waqars-projects-f3b5ee41.vercel.app"
+    },
+    "backend": {
+      "project": "quizshield-automation-staging",
+      "deploymentId": "dpl_DdgzLDrkMCwHic9EvgbRRZvV3Qzu",
+      "url": "https://quizshield-automation-staging.vercel.app",
+      "immutableUrl": "https://quizshield-automation-staging-625ri8hiz.vercel.app"
+    },
+    "counts": {
+      "teachers": 6,
+      "students": 5,
+      "courses": 7,
+      "quizzes": 24,
+      "submissions": 13
+    },
+    "health": {
+      "scheduler": "recent_success",
+      "heartbeat": {
+        "last_started_at": "2026-10-18T17:05:00.185+00:00",
+        "last_completed_at": "2026-10-18T17:05:01.609+00:00",
+        "processed": 0,
+        "last_error": null
+      },
+      "emailConfigured": true,
+      "fastnConfigured": true,
+      "googleEnabled": true,
+      "deliveryEnabled": true,
+      "controlledRecipients": true,
+      "instructions": "Hosted Supabase cron calls the existing worker every minute. If no successful heartbeat within five minutes, inspect cron.job_run_details and net._http_response, then verify the backend URL and worker secret in Vault."
+    }
+  },
+  "production": {
+    "main": "b268807cfb7effa5e66aeb68595c87696b7122d6",
+    "backendDeploymentId": "dpl_Ac14wGAAWcUWZxXYrdcFXk3K8CV9",
+    "backendCreatedAt": "2026-07-18T11:03:33.016Z",
+    "changed": false,
+    "reason": "Original backend deployment predates this work; main and Pages bundle unchanged. Feature push may create a GitHub-connected preview, which was not used for acceptance."
+  },
+  "bundles": [
+    {
+      "url": "https://waqar-743.github.io/QuizShield/",
+      "asset": "/QuizShield/assets/index-CDR8I6dQ.js",
+      "teacherAutomation": false,
+      "adminDashboard": false,
+      "permissionsPolicy": null
+    },
+    {
+      "url": "https://quizshield-automation-ui.vercel.app",
+      "asset": "/assets/index-EuBlJnL7.js",
+      "teacherAutomation": true,
+      "adminDashboard": true,
+      "permissionsPolicy": "camera=(), microphone=()"
+    }
+  ],
+  "newTeacherGoogleProvisioning": "blocked pending dedicated server setup settings, tenant-scoped Google installation route, destination verification and independent teacher consent"
+}

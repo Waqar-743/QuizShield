@@ -8,6 +8,7 @@ const normalizeApiBaseUrl = (value?: string) => {
 
 // Create axios instance
 const api = axios.create({
+  timeout: 20000,
   // In dev we proxy /api -> http://localhost:5000 via vite.config.ts.
   // In prod, we strictly use the Vercel backend.
   baseURL: normalizeApiBaseUrl(import.meta.env.VITE_API_URL)
@@ -36,7 +37,9 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     // Handle 401 Unauthorized (token expired or invalid)
-    if (error.response && error.response.status === 401) {
+    const isSessionRequest = Boolean(error.config?.headers?.Authorization);
+    const isSignInRequest = /\/auth\/(login)$/.test(error.config?.url || '');
+    if (error.response?.status === 401 && isSessionRequest && !isSignInRequest) {
       localStorage.removeItem('token');
       window.location.href = `${import.meta.env.BASE_URL}login`;
     }

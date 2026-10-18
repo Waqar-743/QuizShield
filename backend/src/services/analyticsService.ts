@@ -33,6 +33,7 @@ export const analyticsService = {
         .from('quiz_attempts')
         .select('score, max_score')
         .eq('user_id', userId)
+        .or('results_released_at.not.is.null,topic_id.not.is.null')
         .eq('status', 'completed');
 
       if (attempts && attempts.length > 0) {
@@ -60,32 +61,28 @@ export const analyticsService = {
 
     try {
       // Fetch courses, topics, and enrollments in parallel
-      const [coursesResult, quizzesResult] = await Promise.all([
+      const [coursesResult, quizzesResult, questionsResult] = await Promise.all([
         supabase.from('courses').select('id', { count: 'exact' }).eq('created_by', teacherId),
         supabase.from('teacher_quizzes').select('id').eq('teacher_id', teacherId),
+        supabase.from('questions').select('*', {count:'exact',head:true}).eq('created_by',teacherId),
       ]);
+      if(coursesResult.error || quizzesResult.error || questionsResult.error) throw new Error('Teacher statistics could not be loaded');
 
       totalCourses = coursesResult.count || 0;
+      totalQuestions = questionsResult.count || 0;
       const courseIds = (coursesResult.data || []).map((c: any) => c.id);
 
       if (courseIds.length > 0) {
         const [enrollResult, topicResult] = await Promise.all([
-          supabase.from('enrollments').select('*', { count: 'exact', head: true }).in('course_id', courseIds),
+          supabase.from('enrollments').select('user_id', { count: 'exact' }).in('course_id', courseIds),
           supabase.from('topics').select('id', { count: 'exact' }).in('course_id', courseIds),
         ]);
 
-        totalStudents = enrollResult.count || 0;
+        if(enrollResult.error || topicResult.error) throw new Error('Teacher statistics could not be loaded');
+        totalStudents = new Set((enrollResult.data || []).map(e=>e.user_id)).size;
         activeEnrollments = enrollResult.count || 0;
         totalTopics = topicResult.count || 0;
 
-        const topicIds = (topicResult.data || []).map((t: any) => t.id);
-        if (topicIds.length > 0) {
-          const { count: qCount } = await supabase
-            .from('questions')
-            .select('*', { count: 'exact', head: true })
-            .in('topic_id', topicIds);
-          totalQuestions = qCount || 0;
-        }
       }
 
       // Calculate avg score from teacher_quizzes attempts
@@ -105,6 +102,7 @@ export const analyticsService = {
       }
     } catch (e) {
       console.error('Error fetching teacher stats:', e);
+      throw new Error('Teacher statistics could not be loaded');
     }
 
     return { totalCourses, totalStudents, totalQuestions, totalTopics, avgStudentScore, activeEnrollments };

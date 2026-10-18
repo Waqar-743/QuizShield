@@ -7,8 +7,10 @@
     "start": "node dist/src/index.js",
     "dev": "nodemon src/index.ts",
     "build": "tsc",
-    "test": "jest --forceExit",
-    "test:coverage": "jest --coverage --forceExit"
+    "test:fastn": "node --test fastn/*.test.mjs",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --forceExit",
+    "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage --forceExit",
+    "admin:bootstrap": "ts-node src/scripts/bootstrapAdmin.ts"
   },
   "jest": {
     "preset": "ts-jest",
@@ -53,6 +55,7 @@
     "resend": "^6.6.0"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.10",
     "@types/bcryptjs": "^2.4.6",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",

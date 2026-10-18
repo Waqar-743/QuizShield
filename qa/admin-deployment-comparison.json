@@ -1,0 +1,21 @@
+{
+  "checkedAt": "2026-10-18T15:01:57.069Z",
+  "main": "b268807cfb7effa5e66aeb68595c87696b7122d6",
+  "feature": "18c36e7e23990b2854dfd128e23d1704766823b6",
+  "pagesSource": "main (.github/workflows/pages.yml)",
+  "workingTree": "Prior QA changes and current administrator implementation are additional local changes",
+  "deployments": [
+    {
+      "url": "https://waqar-743.github.io/QuizShield/",
+      "asset": "/QuizShield/assets/index-CDR8I6dQ.js",
+      "automationPageBundle": false,
+      "adminPageBundle": false
+    },
+    {
+      "url": "https://quizshield-automation-ui.vercel.app",
+      "asset": "/assets/index-BORMJECQ.js",
+      "automationPageBundle": true,
+      "adminPageBundle": false
+    }
+  ]
+}

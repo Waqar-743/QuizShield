@@ -9,13 +9,10 @@ export const reportViolation = asyncHandler(async (req: Request, res: Response) 
   const {
     violationType,
     violation_type,
-    detectionMethod,
     event_timestamp,
     alert_message,
     duration_seconds,
     meta_data,
-    quizId,
-    teacherId,
   } = req.body;
   const userId = req.user?._id || (req as any).user?.id;
 
@@ -32,7 +29,7 @@ export const reportViolation = asyncHandler(async (req: Request, res: Response) 
   // Verify the attempt belongs to the requesting student
   const { data: attempt } = await supabase
     .from('quiz_attempts')
-    .select('user_id')
+    .select('user_id,quiz_id,status')
     .eq('id', attemptId)
     .single();
 
@@ -43,15 +40,20 @@ export const reportViolation = asyncHandler(async (req: Request, res: Response) 
     });
     return;
   }
+  if(attempt.status!=='in-progress') throw Object.assign(new Error('This attempt is no longer accepting events'),{statusCode:409});
+  const allowedTypes=['tab_change','focus_loss','copy_attempt','right_click','screenshot_attempt','keyboard_shortcut','TAB_SWITCH','SYSTEM_FOCUS_LOST','RESTRICTED_KEY'];
+  if(!allowedTypes.includes(normalizedViolationType)) throw Object.assign(new Error('Invalid violation type'),{statusCode:400});
+  const {data:quiz}=await supabase.from('teacher_quizzes').select('teacher_id').eq('id',attempt.quiz_id).single();
+  if(!quiz) throw Object.assign(new Error('Assessment not found'),{statusCode:404});
 
   try {
     const result = await cheatingViolationService.reportViolation({
       quizAttemptId: attemptId,
       studentId: userId,
-      quizId: quizId || '',
-      teacherId,
+      quizId: attempt.quiz_id,
+      teacherId: quiz.teacher_id,
       violationType: normalizedViolationType as ViolationType,
-      detectionMethod: detectionMethod || 'browser_event',
+      detectionMethod: 'browser_event',
       details: {
         userAgent: req.headers['user-agent'],
         ipAddress: req.ip,
@@ -64,7 +66,7 @@ export const reportViolation = asyncHandler(async (req: Request, res: Response) 
 
     res.status(200).json({ success: true, data: result });
   } catch (error: any) {
-    res.status(500).json({ success: false, error: { message: error.message } });
+    throw error;
   }
 });
 
@@ -82,8 +84,7 @@ export const getViolations = asyncHandler(async (req: Request, res: Response) =>
     );
     res.status(200).json({ success: true, data: result });
   } catch (error: any) {
-    const status = error.message.includes('authorized') ? 403 : 500;
-    res.status(status).json({ success: false, error: { message: error.message } });
+    throw error;
   }
 });
 
@@ -99,7 +100,7 @@ export const getViolationSummary = asyncHandler(async (req: Request, res: Respon
     );
     res.status(200).json({ success: true, data: result });
   } catch (error: any) {
-    res.status(500).json({ success: false, error: { message: error.message } });
+    throw error;
   }
 });
 
@@ -118,7 +119,7 @@ export const flagAttempt = asyncHandler(async (req: Request, res: Response) => {
     const result = await cheatingViolationService.flagAttempt(attemptId, userId);
     res.status(200).json({ success: true, data: result });
   } catch (error: any) {
-    res.status(500).json({ success: false, error: { message: error.message } });
+    throw error;
   }
 });
 
@@ -137,6 +138,6 @@ export const invalidateAttempt = asyncHandler(async (req: Request, res: Response
     const result = await cheatingViolationService.invalidateAttempt(attemptId, userId);
     res.status(200).json({ success: true, data: result, message: 'Attempt has been invalidated' });
   } catch (error: any) {
-    res.status(500).json({ success: false, error: { message: error.message } });
+    throw error;
   }
 });

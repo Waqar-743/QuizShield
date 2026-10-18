@@ -4,7 +4,7 @@ import { asyncHandler } from '../middleware/errorHandler';
 
 // Teacher endpoints
 export const createQuiz = asyncHandler(async (req: Request, res: Response) => {
-  const { title, description, timeLimit, scheduledStart, questions, courseId } = req.body;
+  const { title, description, timeLimit, scheduledStart, closesAt, timezone, assignedStudentIds, questions, courseId } = req.body;
   const teacherId = req.user!._id.toString();
 
   const quiz = await quizService.createQuiz(teacherId, {
@@ -12,6 +12,7 @@ export const createQuiz = asyncHandler(async (req: Request, res: Response) => {
     description,
     timeLimit,
     scheduledStart,
+    closesAt, timezone, assignedStudentIds,
     courseId,
     questions,
   });
@@ -34,10 +35,11 @@ export const getTeacherQuizzes = asyncHandler(async (req: Request, res: Response
 
 export const updateQuiz = asyncHandler(async (req: Request, res: Response) => {
   const { quizId } = req.params;
-  const { title, description, timeLimit, questions } = req.body;
+  const { title, description, timeLimit, scheduledStart, closesAt, timezone, assignedStudentIds, questions } = req.body;
   const teacherId = req.user!._id.toString();
 
   const quiz = await quizService.updateQuiz(quizId, teacherId, {
+    scheduledStart, closesAt, timezone, assignedStudentIds,
     title,
     description,
     timeLimit,
@@ -156,8 +158,9 @@ export const getStudentAnalytics = asyncHandler(async (req: Request, res: Respon
 });
 
 export const getQuizForTopic = asyncHandler(async (req: Request, res: Response) => {
-  const { topicId } = req.params;
-  const { difficulty } = req.query;
+  const topicId = req.params.topicId || req.body.topicId;
+  const difficulty = req.query.difficulty || req.body.difficulty;
+  if (typeof topicId !== 'string' || !/^[a-f0-9-]{36}$/i.test(topicId)) throw Object.assign(new Error('A valid topic is required'),{statusCode:400});
   
   const result = await quizService.getQuizForTopic(
     topicId,
@@ -178,7 +181,8 @@ export const submitAnswer = asyncHandler(async (req: Request, res: Response) => 
   const result = await quizService.submitAnswer(
     attemptId,
     questionId,
-    answer
+    answer,
+    req.user!._id
   );
   
   res.status(200).json({

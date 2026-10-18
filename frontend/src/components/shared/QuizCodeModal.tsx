@@ -32,7 +32,7 @@ const QuizCodeModal = ({ isOpen, onClose, quizId, courseId, quizTitle }: QuizCod
       const response = await api.get(`/quizzes/${quizId}/codes`);
       setCodes(response.data.data || []);
     } catch (error) {
-      console.error('Failed to fetch codes:', error);
+      console.error('Failed to fetch codes:');
     } finally {
       setLoading(false);
     }

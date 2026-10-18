@@ -5,7 +5,7 @@ import { Topic } from '../../types';
 import { CheckCircleIcon } from '@heroicons/react/24/outline';
 
 const TopicPage: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+  const { courseId, topicId } = useParams<{ courseId: string; topicId: string }>();
   const [topic, setTopic] = useState<Topic | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -13,19 +13,23 @@ const TopicPage: React.FC = () => {
   useEffect(() => {
     const fetchTopic = async () => {
       try {
-        const response = await api.get(`/topics/${id}`);
-        setTopic(response.data.data);
+        const response = await api.get(`/courses/${courseId}/topics`);
+        const found=(response.data.data || []).find((item:Topic & {id?:string})=>item._id===topicId || item.id===topicId);
+        if(!found) throw new Error('Topic not found');
+        setTopic(found);
       } catch (err: any) {
-        setError(err.response?.data?.error?.message || 'Failed to fetch topic');
+        setError(err.response?.data?.error?.message || err.message || 'Failed to fetch topic');
       } finally {
         setLoading(false);
       }
     };
 
-    if (id) {
+    if (courseId && topicId) {
       fetchTopic();
+    } else {
+      setError('Topic not found'); setLoading(false);
     }
-  }, [id]);
+  }, [courseId, topicId]);
 
   if (loading) {
     return (
@@ -62,17 +66,17 @@ const TopicPage: React.FC = () => {
         
         <div className="px-4 py-5 sm:px-6 prose prose-indigo max-w-none">
           <div className="text-gray-700 whitespace-pre-wrap">
-            {topic.content}
+            {topic.content || topic.description || 'Ask your teacher for learning material for this topic.'}
           </div>
         </div>
 
         <div className="px-4 py-5 sm:px-6 bg-gray-50 border-t border-gray-200 flex justify-end">
           <Link
-            to={`/quiz/start/${topic._id}`}
+            to="/dashboard/student/join-quiz"
             className="inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
           >
             <CheckCircleIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
-            Take Quiz for this Topic
+            Join a scheduled assessment
           </Link>
         </div>
       </div>

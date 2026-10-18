@@ -36,7 +36,9 @@ export const config = {
   })(),
   supabaseUrl: requireEnv('SUPABASE_URL'),
   supabaseKey: requireEnv('SUPABASE_KEY'),
-  supabaseServiceKey: process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_KEY || '',
+  supabaseServiceKey: process.env.NODE_ENV === 'production'
+    ? requireEnv('SUPABASE_SERVICE_KEY')
+    : process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_KEY || '',
   jwtSecret: (() => {
     const secret = process.env.JWT_SECRET;
     if (!secret || secret.length < 32) {
@@ -46,4 +48,13 @@ export const config = {
   })(),
   resendApiKey: process.env.RESEND_API_KEY || '',
   geminiApiKey: process.env.GEMINI_API_KEY || '',
+  automationLive: process.env.AUTOMATION_LIVE === 'true',
+  automationGoogleEnabled: process.env.AUTOMATION_GOOGLE_ENABLED === 'true',
+  automationAllowAll: process.env.AUTOMATION_ALLOW_ALL_RECIPIENTS === 'true',
+  automationRecipients: (process.env.AUTOMATION_TEST_RECIPIENTS || '').split(',').map(s => s.trim().toLowerCase()).filter(Boolean),
+  automationWorkerSecret: process.env.AUTOMATION_WORKER_SECRET || '',
+  fastnWebhookUrl: process.env.FASTN_WEBHOOK_URL || '',
+  fastnAccessKey: process.env.FASTN_ACCESS_KEY || '',
+  backendPublicUrl: (process.env.BACKEND_PUBLIC_URL || '').replace(/\/$/, ''),
+  emailFrom: process.env.EMAIL_FROM || 'QuizShield <onboarding@resend.dev>',
 };

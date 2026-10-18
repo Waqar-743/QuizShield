@@ -13,13 +13,13 @@ const Sidebar = ({ isOpen, closeSidebar }: SidebarProps) => {
   const location = useLocation();
   const { user } = useAuthStore();
 
-  const isTeacher = user?.role === 'teacher' || user?.role === 'admin';
-  const dashboardBase = isTeacher ? '/dashboard/teacher' : '/dashboard/student';
+  const isTeacher = user?.role === 'teacher';
+  const dashboardBase = user?.role === 'admin' ? '/dashboard/admin' : isTeacher ? '/dashboard/teacher' : '/dashboard/student';
 
   const navigation = [
     { name: 'Dashboard', href: dashboardBase, icon: FiHome },
     { name: 'Courses', href: `${dashboardBase}/courses`, icon: FiBook },
-    { name: 'Analytics', href: isTeacher ? `${dashboardBase}/analytics` : '/analytics', icon: FiBarChart2 },
+    { name: user?.role==='admin'?'Automation operations':'Analytics', href: user?.role==='admin'?'/dashboard/admin/automations':isTeacher ? `${dashboardBase}/analytics` : '/analytics', icon: FiBarChart2 },
     { name: 'Profile', href: '/profile', icon: FiUser },
   ];
 

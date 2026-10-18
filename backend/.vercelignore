@@ -1,0 +1,13 @@
+.env*
+.vercel
+node_modules
+dist
+coverage
+fixtures
+deploy
+fastn
+migrations
+supabase
+api
+src/__tests__
+src/scripts

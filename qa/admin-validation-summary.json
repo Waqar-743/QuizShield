@@ -1,0 +1,37 @@
+{
+  "runtimeSourceCommit": "5f71fc0f6d7ea90c373f5d595eb93682520a249a",
+  "ci": {
+    "url": "https://github.com/Waqar-743/QuizShield/actions/runs/39147735203",
+    "conclusion": "success",
+    "backendTests": { "passed": 113, "suites": 9 },
+    "workflowAdapterTests": { "passed": 24, "providers": "mocked" },
+    "backendBuild": "passed",
+    "frontendLintTypesBuild": "passed"
+  },
+  "local": {
+    "backendTests": { "passed": 113, "suites": 9, "exitCode": 0, "durationSeconds": 500.573 },
+    "resourceLimit": "The parallel repeat hit a native Node memory limit. The single recyclable worker repeat recovered from a worker memory failure and passed all tests. CI completed without that resource failure.",
+    "workflowAdapterTests": { "passed": 24, "providers": "mocked" },
+    "backendBuild": "passed",
+    "frontendLintTypesBuild": "passed"
+  },
+  "hosted": {
+    "administratorApi": { "passed": 37, "total": 37, "rerunAfterFinalBackendDeploy": true },
+    "advancedAdministratorApi": { "passed": 12, "total": 12 },
+    "assessmentLifecycle": { "passed": 21, "total": 21 },
+    "anonymousDatabaseDenials": 4,
+    "correlatedExternalExecutions": 4,
+    "biometricCleanup": "trial passed and rolled back; no destructive cleanup committed"
+  },
+  "browser": {
+    "realHostedRoles": ["admin", "teacher", "student"],
+    "completedAssessmentVerifiedInDatabase": true,
+    "cameraPromptObserved": false,
+    "fullWidthDesktop": "not tested",
+    "physicalMobileDevice": "not tested",
+    "networkRecording": "not captured",
+    "setupResetInboxConsumption": "not tested",
+    "finalAccountPickerRefinement": "static/API checked; browser not repeated after handoff"
+  },
+  "currentFullLiveProviderSuite": "Not rerun in full; retained 19-case results are historical. Four new exact provider executions and readbacks verified."
+}

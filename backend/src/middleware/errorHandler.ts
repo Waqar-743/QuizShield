@@ -13,19 +13,24 @@ const SAFE_400_MESSAGES = new Set<string>([
 ]);
 
 export const notFoundHandler = (req: Request, res: Response, next: NextFunction) => {
-  console.warn(`[404] Route not found: ${req.method} ${req.originalUrl}`);
-  const error: any = new Error(`Not Found - ${req.originalUrl}`);
+  console.warn(`[404] Route not found: ${req.method} ${req.path}`);
+  const error: any = new Error(`Not Found - ${req.path}`);
   error.statusCode = 404;
   next(error);
 };
 
 export const errorHandler = (err: any, req: Request, _res: Response, _next: NextFunction) => {
   // Always log the full error server-side
-  console.error(`[Error] ${req.method} ${req.originalUrl}:`, err?.message || err);
+  console.error(`[Error] ${req.method} ${req.path}:`, err?.message || err);
   if (err?.stack && !isProd) console.error(err.stack);
 
   let statusCode: number = err.statusCode || 0;
   let message: string = err.message || 'Server error';
+
+  if (err.code === 'LIMIT_FILE_SIZE') {
+    statusCode = 413;
+    message = 'Image is too large. Maximum size is 3MB.';
+  }
 
   // Map common auth/registration messages to canonical HTTP codes
   if (!statusCode) {
@@ -63,6 +68,6 @@ export const errorHandler = (err: any, req: Request, _res: Response, _next: Next
   });
 };
 
-export const asyncHandler = (fn: Function) => (req: Request, res: Response, next: NextFunction) => {
+export const asyncHandler = (fn: (req: Request, res: Response, next: NextFunction) => any) => (req: Request, res: Response, next: NextFunction) => {
   Promise.resolve(fn(req, res, next)).catch(next);
 };

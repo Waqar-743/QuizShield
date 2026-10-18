@@ -1,0 +1,109 @@
+{
+  "verifiedAt": "2026-10-18T11:23:33.418Z",
+  "environment": "staging-direct-client",
+  "zeroRowsRequested": true,
+  "results": [
+    {
+      "table": "users",
+      "httpStatus": 401,
+      "errorCode": "42501",
+      "pass": true
+    },
+    {
+      "table": "courses",
+      "httpStatus": 401,
+      "errorCode": "42501",
+      "pass": true
+    },
+    {
+      "table": "topics",
+      "httpStatus": 401,
+      "errorCode": "42501",
+      "pass": true
+    },
+    {
+      "table": "questions",
+      "httpStatus": 401,
+      "errorCode": "42501",
+      "pass": true
+    },
+    {
+      "table": "enrollments",
+      "httpStatus": 401,
+      "errorCode": "42501",
+      "pass": true
+    },
+    {
+      "table": "quizzes",
+      "httpStatus": 401,
+      "errorCode": "42501",
+      "pass": true
+    },
+    {
+      "table": "quiz_attempts",
+      "httpStatus": 401,
+      "errorCode": "42501",
+      "pass": true
+    },
+    {
+      "table": "teacher_quizzes",
+      "httpStatus": 401,
+      "errorCode": "42501",
+      "pass": true
+    },
+    {
+      "table": "cheating_violations",
+      "httpStatus": 401,
+      "errorCode": "42501",
+      "pass": true
+    },
+    {
+      "table": "notifications",
+      "httpStatus": 401,
+      "errorCode": "42501",
+      "pass": true
+    },
+    {
+      "table": "quiz_codes",
+      "httpStatus": 401,
+      "errorCode": "42501",
+      "pass": true
+    },
+    {
+      "table": "quiz_questions",
+      "httpStatus": 401,
+      "errorCode": "42501",
+      "pass": true
+    },
+    {
+      "table": "automation_settings",
+      "httpStatus": 401,
+      "errorCode": "42501",
+      "pass": true
+    },
+    {
+      "table": "automation_connections",
+      "httpStatus": 401,
+      "errorCode": "42501",
+      "pass": true
+    },
+    {
+      "table": "automation_jobs",
+      "httpStatus": 401,
+      "errorCode": "42501",
+      "pass": true
+    },
+    {
+      "table": "learning_followups",
+      "httpStatus": 401,
+      "errorCode": "42501",
+      "pass": true
+    },
+    {
+      "table": "automation_records",
+      "httpStatus": 401,
+      "errorCode": "42501",
+      "pass": true
+    }
+  ]
+}

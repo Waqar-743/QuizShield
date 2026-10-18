@@ -1,0 +1,40 @@
+{
+  "verifiedAt": "2026-10-18T11:28:18.307Z",
+  "environment": "hosted-staging",
+  "results": [
+    {
+      "id": "PHOTO-PRIVATE",
+      "pass": true,
+      "bucketPublic": false,
+      "publicHttp": 400,
+      "signedHttp": 200,
+      "signedLifetimeSeconds": 3600,
+      "generatedNonBiometricImage": true
+    },
+    {
+      "id": "PHOTO-PROFILE-RELOAD",
+      "pass": true,
+      "profileHttp": 200,
+      "signedLinkReturned": true,
+      "privateFieldsAbsent": true
+    },
+    {
+      "id": "PHOTO-AUTH",
+      "pass": true,
+      "httpStatus": 401
+    },
+    {
+      "id": "PHOTO-TYPE",
+      "pass": true,
+      "httpStatus": 400,
+      "message": "Only JPG and PNG images are allowed"
+    },
+    {
+      "id": "PHOTO-SIZE",
+      "pass": true,
+      "httpStatus": 413,
+      "message": "Image is too large. Maximum size is 3MB."
+    }
+  ],
+  "cleanup": "Original profile metadata restored; generated private object removed"
+}

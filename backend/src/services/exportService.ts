@@ -70,7 +70,9 @@ export const exportService = {
     ];
 
     const escapeCsvField = (field: string | number) => {
-      const str = String(field);
+      // Spreadsheet applications execute formula-shaped text even in CSV cells.
+      const raw = String(field);
+      const str = /^[\s\u0000-\u001f]*[=+@-]/.test(raw) ? `'${raw}` : raw;
       if (str.includes(',') || str.includes('"') || str.includes('\n')) {
         return `"${str.replace(/"/g, '""')}"`;
       }

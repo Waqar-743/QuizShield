@@ -1,0 +1,48 @@
+{
+  "verifiedAt": "2026-10-18T15:49:27.070Z",
+  "bootstrapAudit": [
+    {
+      "id": "f61e7323-a2df-42b9-970d-00d9f7f92b59",
+      "action": "first_admin_bootstrap",
+      "target_id": "40e1f628-6b46-456e-98e0-9f01c12b5bf4",
+      "created_at": "2026-10-18T15:06:05.46162+00:00",
+      "details": {
+        "method": "operator service-role command"
+      }
+    }
+  ],
+  "browserAssessment": {
+    "id": "fdc9668f-1650-4b6f-b490-51a1f16eba97",
+    "status": "completed",
+    "score": 1,
+    "teacher_grade": null,
+    "results_released_at": null,
+    "started_at": "2026-10-18T15:43:11.656785+00:00",
+    "completed_at": "2026-10-18T15:44:13.314+00:00",
+    "auto_submitted": false
+  },
+  "anonymousTableDenial": [
+    {
+      "table": "admin_audit",
+      "status": 401,
+      "code": "42501"
+    },
+    {
+      "table": "automation_grants",
+      "status": 401,
+      "code": "42501"
+    },
+    {
+      "table": "google_setup_requests",
+      "status": 401,
+      "code": "42501"
+    },
+    {
+      "table": "automation_health",
+      "status": 401,
+      "code": "42501"
+    }
+  ],
+  "permissionsPolicy": "camera=(), microphone=()",
+  "productionChanged": false
+}

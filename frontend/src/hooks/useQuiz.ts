@@ -111,7 +111,7 @@ export const useQuiz = () => {
         // return response.data.hint;
         return "Think about the core concepts discussed in the topic.";
     } catch (error) {
-        console.error(error);
+        console.error('Request failed');
         return "No hint available.";
     }
   }, []);

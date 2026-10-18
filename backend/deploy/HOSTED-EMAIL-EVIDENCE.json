@@ -1,0 +1,23 @@
+{
+  "phase": "assert-hosted",
+  "verifiedAt": "2026-10-18T11:22:59.739Z",
+  "quizId": "b1affd8b-75b7-48de-a7dc-d978c538c4aa",
+  "providerRecords": 2,
+  "approvedRecipientCount": 1,
+  "stagingMessageLinks": true,
+  "receipts": [
+    {
+      "jobId": "084c57c0-550e-423e-bd60-946f8e353e3e",
+      "kind": "reminder",
+      "providerId": "01a14e23-1b3f-7505-89e4-6f7a52f7a304",
+      "event": "delivered"
+    },
+    {
+      "jobId": "7ce9de51-1252-49d7-bc43-3cdc12e27f7a",
+      "kind": "announcement",
+      "providerId": "01a14e21-9396-7221-8694-1d82b22f0987",
+      "event": "delivered"
+    }
+  ],
+  "passed": true
+}

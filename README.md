@@ -1,5 +1,7 @@
 # QuizShield
 
+Current feature status: [administrator implementation and verification](ADMINISTRATION.md). Develop and test on the separate staging projects. Production and GitHub Pages remain unchanged.
+
 > Our ICAT project by **Waqar** — built out of frustration, shipped as a real platform.
 
 ---
@@ -18,25 +20,23 @@ That question became QuizShield.
 
 QuizShield is a full-stack proctored quiz platform where honesty is enforced at the system level, not by someone watching a grid of 30 faces.
 
-- **Face-verified login** — password is step one. Webcam match is step two. If your face doesn't match your enrolled encoding, you don't get in. First-time login enrolls you automatically.
-- **Live proctoring** — tab switches, focus loss, and face absence are logged as violations in real time during the quiz.
+- **Email/password sign-in** — all three roles use the existing authentication system. Current account status, role and session version are checked on every protected API request.
+- **Administrator dashboard** — account access, course transfers, automation assignments, execution investigation and audit history at `/dashboard/admin`.
+- **Live proctoring** — tab switches and focus loss are logged as violations in real time during the quiz.
 - **Teacher dashboard** — create courses, build quizzes, review submissions, and see a per-student violation report before you grade.
-- **AI question generation** — stuck writing questions? Gemini drafts them. Students also get a study assistant.
+- **Optional AI question generation** — Gemini can draft questions when a valid backend key is configured. Staging currently reports AI as unavailable; it does not fabricate responses.
 - **4-digit access codes** — students join quizzes with a short code, no link-hunting required.
 
 ---
 
 ## How the login actually works
 
-Most of the magic is in step 2:
+1. Sign in with email and password. No photo, facial enrolment or camera permission is required.
+2. The backend validates credentials and current account status, then issues a session.
+3. Every protected request reads the current account and session version. Suspension, role changes, password reset and online logout revoke existing access.
+4. The frontend redirects administrators, teachers and students to their own dashboards.
 
-1. Student sends email + password.
-2. Backend validates and returns a **temporary** face-verification token — *not* a session token.
-3. Frontend activates the webcam and captures a live frame.
-4. `POST /api/auth/verify-face-login` runs a euclidean-distance match against the stored face encoding.
-5. Only on a confirmed match is the real JWT issued.
-
-Step 5 is the only door. There is no bypass route.
+The first administrator is created only through the [operator bootstrap procedure](ADMINISTRATION.md#first-administrator). Public registration never grants administrator access.
 
 ---
 
@@ -48,7 +48,6 @@ Step 5 is the only door. There is no bypass route.
 </p>
 <p align="center">
   <a href="./Quiz.png"><img src="./Quiz.png" alt="Quiz Screen" width="300" /></a>
-  <a href="./Face-detection.png"><img src="./Face-detection.png" alt="Face Verification" width="300" /></a>
 </p>
 
 ---
@@ -57,9 +56,9 @@ Step 5 is the only door. There is no bypass route.
 
 | Layer | Tech |
 |-------|------|
-| Frontend | React 18 · TypeScript · Vite · Tailwind · Zustand · face-api.js |
+| Frontend | React 18 · TypeScript · Vite · Tailwind · Zustand |
 | Backend | Node.js · Express · TypeScript · JWT · bcryptjs · helmet · express-rate-limit |
-| Services | Supabase (Postgres) · Google Generative AI (Gemini) · Resend |
+| Services | Supabase (Postgres) · Google Generative AI (Gemini) · Resend · Fastn |
 
 ---
 
@@ -67,7 +66,7 @@ Step 5 is the only door. There is no bypass route.
 
 ```
 QuizShield/
-├── frontend/   # React app — face-api.js models live in /public/models
+├── frontend/   # React app, role-specific dashboards and assessment UI
 ├── backend/    # Express API, Supabase client, migrations
 └── .github/    # CI workflows
 ```
@@ -98,17 +97,13 @@ PORT=5000
 NODE_ENV=development
 ```
 
-Run the face columns migration if you haven't:
-
-```sql
--- backend/migrations/003_add_profile_picture_columns.sql
-ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_picture_url TEXT;
-ALTER TABLE users ADD COLUMN IF NOT EXISTS face_encoding TEXT;
-```
+Apply the existing schema and additive migrations through 012 in order. The legacy schema files are retained as history; the application no longer reads or writes biometric descriptors. Do not run the separately gated cleanup under `backend/migrations/review/` automatically.
 
 ---
 
 ## Validate
+
+Durable assessment scheduling and Fastn workflow setup are documented in [AUTOMATIONS.md](./AUTOMATIONS.md). Run migrations 007 and 008 in order before using the new draft/publication, results-release and verified Google connection controls. Controlled staging live acceptance passed for email, Calendar and Sheets; unrestricted student delivery remains disabled. See [the verification report](./backend/deploy/STAGING-VERIFICATION.md).
 
 ```bash
 # backend
@@ -122,7 +117,7 @@ cd frontend && npm run lint && npm run build
 
 ## Deploy
 
-- **Frontend** → GitHub Pages (Vite `BASE_URL` keeps model paths intact)
+- **Frontend** → GitHub Pages (Vite `BASE_URL` keeps asset paths intact)
 - **Backend** → Vercel serverless
 - **Database** → Supabase
 
@@ -136,8 +131,8 @@ The backend was reviewed by a senior QA engineer — covering atomic submissions
 
 ## What I learned
 
-This started as a project I had to submit. Somewhere around the third refactor it became the thing I actually wanted to build. Enforcing integrity at the platform level — not through surveillance, but through a clean, two-step authentication flow — turned out to be a genuinely interesting design problem.
+This started as a project I had to submit. Somewhere around the third refactor it became the thing I actually wanted to build. Enforcing integrity at the platform level — not through surveillance, but through clear ownership, timing and assessment review — turned out to be a genuinely interesting design problem.
 
-The face-verification step especially. It sounds like overkill until you realize that without it, the whole system is just another honor policy with a nicer UI.
+The current version retires face verification and camera requirements, and adds administrator-controlled access and automation.
 
 — **Waqar**

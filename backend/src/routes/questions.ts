@@ -6,11 +6,12 @@ import {
   updateQuestion,
   deleteQuestion
 } from '../controllers/questionController';
-import { protect } from '../middleware/auth';
+import { protect, authorize } from '../middleware/auth';
 
 const router = express.Router();
 
 router.use(protect);
+router.use(authorize('teacher', 'admin'));
 
 // Create a new question
 router.post('/', createQuestion);

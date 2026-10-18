@@ -1,0 +1,11 @@
+{
+  "environment": "Supabase staging jixzholamkbktzusyqwe",
+  "accountsBeforeAdministratorQA": 6,
+  "legacyDescriptors": 1,
+  "profilePictureReferences": 0,
+  "privateProfileObjects": 0,
+  "assessmentRecordsBeforeAdministratorQA": 12,
+  "source": "Hosted Management API aggregate query before migration 010",
+  "imageClassification": "No images currently in staging. Production was not inventoried. Legacy profile storage may mix biometric enrolment photos and ordinary profile assets; explicit provenance review is required before image deletion.",
+  "destructiveCleanupApplied": false
+}

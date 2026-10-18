@@ -1,0 +1,20 @@
+{
+  "calendar.get": {
+    "connector": "googleCalendar",
+    "action": "getEvent",
+    "input": { "calendarId": "$calendarId", "eventId": "$eventId" },
+    "bodyPath": ""
+  },
+  "calendar.cancel": {
+    "connector": "googleCalendar",
+    "action": "deleteEvent",
+    "input": { "calendarId": "$calendarId", "eventId": "$eventId", "sendUpdates": "none" },
+    "bodyPath": ""
+  },
+  "sheets.update": {
+    "connector": "googleSheets",
+    "action": "updateValues",
+    "input": { "spreadsheetId": "$spreadsheetId", "range": "$range", "values": "$values", "valueInputOption": "RAW" },
+    "bodyPath": ""
+  }
+}

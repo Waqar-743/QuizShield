@@ -1,5 +1,4 @@
 import { supabase } from '../config/supabase';
-import { emailService } from './emailService';
 
 function isMissingColumnError(err: any, column: string): boolean {
   if (!err) return false;
@@ -35,7 +34,7 @@ async function assertCourseHasCapacity(courseId: string): Promise<void> {
 
 export const courseService = {
   async getAllCourses(filters: any = {}) {
-    let query = supabase.from('courses').select('*');
+    let query = supabase.from('courses').select('id,title,description,category,difficulty,max_students,created_at');
 
     if (filters.category) {
       query = query.eq('category', filters.category);
@@ -106,13 +105,7 @@ export const courseService = {
       throw new Error(error.message);
     }
 
-    // Fetch user and course details for email
-    const { data: user } = await supabase.from('users').select('email, name').eq('id', userId).single();
-    const { data: course } = await supabase.from('courses').select('title').eq('id', courseId).single();
-
-    if (user && course) {
-      await emailService.sendCourseEnrollmentEmail(user.email, user.name, course.title);
-    }
+    // The enrolment trigger durably queues the optional welcome workflow.
 
     return { message: 'Enrolled successfully' };
   },
@@ -153,15 +146,16 @@ export const courseService = {
   },
 
   async enrollByCourseCode(userId: string, courseCode: string) {
+    if (typeof courseCode!=='string' || !/^[A-Z0-9]{6}$/i.test(courseCode.trim())) throw Object.assign(new Error('Enter a valid six-character course code'),{statusCode:400});
     // Find the course by code
     const { data: course, error: courseError } = await supabase
       .from('courses')
       .select('id, title')
-      .eq('course_code', courseCode.toUpperCase())
+      .eq('course_code', courseCode.trim().toUpperCase())
       .single();
 
     if (courseError || !course) {
-      throw new Error('Invalid course code. Please check and try again.');
+      throw Object.assign(new Error('Invalid course code. Please check and try again.'),{statusCode:400});
     }
 
     // Check if already enrolled
@@ -186,22 +180,20 @@ export const courseService = {
       throw new Error(error.message);
     }
 
-    // Send enrollment email
-    const { data: user } = await supabase.from('users').select('email, name').eq('id', userId).single();
-    if (user) {
-      await emailService.sendCourseEnrollmentEmail(user.email, user.name, course.title);
-    }
+    // Email is delivered only by the automation workflow, under saved preferences.
 
     return { message: 'Enrolled successfully', course: { _id: course.id, title: course.title } };
   },
 
   async createCourse(teacherId: string, courseData: any) {
-    console.log('Creating course with data:', { teacherId, courseData });
+    if (typeof courseData.title !== 'string' || !courseData.title.trim() || courseData.title.length > 200) {
+      throw Object.assign(new Error('Course title must contain 1–200 characters'), {statusCode:400});
+    }
     
     const courseCode = await this.generateUniqueCourseCode();
 
     const insertData: any = {
-      title: courseData.title,
+      title: courseData.title.trim(),
       description: courseData.description || '',
       category: courseData.category || 'Other',
       difficulty: courseData.difficulty || 'Beginner',
@@ -213,7 +205,6 @@ export const courseService = {
       if (Number.isFinite(n) && n > 0) insertData.max_students = Math.floor(n);
     }
     
-    console.log('Insert data:', insertData);
 
     let insertResult = await supabase
       .from('courses')
@@ -449,7 +440,12 @@ export const courseService = {
 
   // ============ Question Management ============
 
-  async getQuestionsByTopic(topicId: string) {
+  async getQuestionsByTopic(topicId: string, userId: string, role: string) {
+    const {data:topic}=await supabase.from('topics').select('course_id').eq('id',topicId).single();
+    const {data:course}=await supabase.from('courses').select('created_by').eq('id',topic?.course_id).single();
+    const owner=Boolean(course && course.created_by===userId && ['teacher','admin'].includes(role));
+    const {data:enrollment}=await supabase.from('enrollments').select('id').eq('course_id',topic?.course_id).eq('user_id',userId).maybeSingle();
+    if(!topic || (!owner && !enrollment)) throw Object.assign(new Error('Not authorized to access this topic'),{statusCode:403});
     const { data: questions, error } = await supabase
       .from('questions')
       .select('*')
@@ -464,10 +460,9 @@ export const courseService = {
       _id: q.id,
       text: q.content || q.question_text,
       options: q.options || [],
-      correctAnswer: q.correct_answer,
+      ...(owner ? {correctAnswer:q.correct_answer,explanation:q.explanation} : {}),
       difficulty: q.difficulty,
       topicId: q.topic_id,
-      explanation: q.explanation,
     }));
   },
 

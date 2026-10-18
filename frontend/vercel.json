@@ -1,0 +1,5 @@
+{
+  "framework": "vite",
+  "headers": [{ "source": "/(.*)", "headers": [{ "key": "Permissions-Policy", "value": "camera=(), microphone=()" }] }],
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}

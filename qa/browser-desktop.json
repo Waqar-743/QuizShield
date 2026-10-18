@@ -1,0 +1,570 @@
+[
+  {
+    "path": "/dashboard/teacher/questions",
+    "viewport": "1440x900",
+    "state": "Browser tab: 1, Title: \"Quiz Shield - Adaptive Learning Platform\", URL: \"https://quizshield-automation-ui.vercel.app/dashboard/teacher/questions\".\n1 AXWebArea Quiz Shield - Adaptive Learning Platform, URL: quizshield-automation-ui.vercel.app/dashboard/teacher/questions\n\nThe focused UI element is 1 AXWebArea Quiz Shield - Adaptive Learning Platform, URL: quizshield-automation-ui.vercel.app/dashboard/teacher/questions"
+  },
+  {
+    "path": "/dashboard/teacher/submissions",
+    "viewport": "1440x900",
+    "state": "Browser tab: 1, Title: \"Quiz Shield - Adaptive Learning Platform\", URL: \"https://quizshield-automation-ui.vercel.app/dashboard/teacher/submissions\".\n1 AXWebArea Quiz Shield - Adaptive Learning Platform, URL: quizshield-automation-ui.vercel.app/dashboard/teacher/submissions\n\nThe focused UI element is 1 AXWebArea Quiz Shield - Adaptive Learning Platform, URL: quizshield-automation-ui.vercel.app/dashboard/teacher/submissions"
+  },
+  {
+    "label": "teacher-overview-after",
+    "headings": [
+      "Welcome, Staging test teacher"
+    ],
+    "height": 900,
+    "scrollWidth": 1420,
+    "text": " suite 2026-10-17T19:43:32.052Z\" and is waiting for your review.\n\n10/18/2026, 12:44:34 AM\n\nSubmission Pending Review\n\nA student submitted quiz \"Hosted Google lifecycle 2026-10-17T19:38:40.765Z\" and is waiting for your review.\n\n10/18/2026, 12:40:20 AM\n\nSubmission Pending Review\n\nA student submitted quiz \"Hosted Google acceptance 2026-10-17T19:25:25.845Z\" and is waiting for your review.\n\n10/18/2026, 12:28:58 AM\n\nSubmission Pending Review\n\nA student submitted quiz \"Submitted reminder acceptance\" and is waiting for your review.\n\n10/17/2026, 7:35:15 PM\n\nS\nStaging test teacher\n\nSIGNED IN AS\n\nteacher@quizshield.invalid\n\nYour profile\nSettings\nSign out\nEDUCATOR CONSOLE\nWelcome, Staging test teacher\n\nAuthor quizzes, curate questions, and watch your cohort progress in real time.\n\nExport Marks\nNew Quiz\nAdd Question\n\nTOTAL COURSES\n\n2\n\nTOTAL STUDENTS\n\n3\n\nQUESTIONS CREATED\n\n0\n\nAVG. AUTO SCORE\n\n100.0%\n\nCOHORT PULSE\nCourse Performance\nAvg Score\nCompletion\n0\n25\n50\n75\n100\nQuizShieldhostedacceptance\nQA lifecycle2026-10-18T07:35:21.655Z\nDISTRIBUTION\nQuestion Difficulty\n\nNo questions yet. Add a question to see its difficulty distribution.\n\nEasyMediumHard\nLIVE FEED\nRecent Activity\nView all →\n\nA student submitted quiz \"QA lifecycle assessment\" and is waiting for your review.\n\n10/18/2026, 12:35:44 PM\n\nA student submitted quiz \"Saved workflow Google suite 2026-10-17T19:43:32.052Z\" and is waiting for your review.\n\n10/18/2026, 12:44:34 AM\n\nA student submitted quiz \"Hosted Google lifecycle 2026-10-17T19:38:40.765Z\" and is waiting for your review.\n\n10/18/2026, 12:40:20 AM\n\nSHORTCUTS\nQuick Actions\n\nCreate a Quiz\n\nBuild assessments with timing & proctoring\n\nManage Questions\n\nAuthor MCQs, tag topics, set difficulty\n\nView Analytics\n\nCohort trends, completion rates, hotspots\n\nQuizShield hosted acceptance",
+    "title": "Quiz Shield - Adaptive Learning Platform",
+    "unlabelledFields": [],
+    "url": "https://quizshield-automation-ui.vercel.app/dashboard/teacher",
+    "width": 1435
+  },
+  {
+    "label": "course-form-after",
+    "headings": [
+      "Create New Course"
+    ],
+    "height": 900,
+    "scrollWidth": 1435,
+    "text": "QuizShield\nINTEGRITY ENGINE\nEDUCATOR\nOverview\nCourses\nQuizzes\nQuestions\nSubmissions\nAnalytics\nIntegrations & automation\nS\n\nStaging test teacher\n\nteacher@quizshield.invalid\n\nSign out\nEDUCATOR\nDashboard\n5\nNOTIFICATIONS\nMark all read\n\nSubmission Pending Review\n\nA student submitted quiz \"QA lifecycle assessment\" and is waiting for your review.\n\n10/18/2026, 12:35:44 PM\n\nSubmission Pending Review\n\nA student submitted quiz \"Saved workflow Google suite 2026-10-17T19:43:32.052Z\" and is waiting for your review.\n\n10/18/2026, 12:44:34 AM\n\nSubmission Pending Review\n\nA student submitted quiz \"Hosted Google lifecycle 2026-10-17T19:38:40.765Z\" and is waiting for your review.\n\n10/18/2026, 12:40:20 AM\n\nSubmission Pending Review\n\nA student submitted quiz \"Hosted Google acceptance 2026-10-17T19:25:25.845Z\" and is waiting for your review.\n\n10/18/2026, 12:28:58 AM\n\nSubmission Pending Review\n\nA student submitted quiz \"Submitted reminder acceptance\" and is waiting for your review.\n\n10/17/2026, 7:35:15 PM\n\nS\nStaging test teacher\n\nSIGNED IN AS\n\nteacher@quizshield.invalid\n\nYour profile\nSettings\nSign out\nBack to Courses\nCreate New Course\nCourse Title *\nDescription\nCategory\nWeb Development\nMobile Development\nData Science\nMachine Learning\nDevOps\nCybersecurity\nDatabase\nCloud Computing\nProgramming Languages\nSoftware Engineering\nOther\nDifficulty\nBeginner\nIntermediate\nAdvanced\nMax Students (optional — blank = unlimited)\nCancel\nCreate Course\n\nAfter creating a course, you can add topics and questions from the Topics section.",
+    "title": "Quiz Shield - Adaptive Learning Platform",
+    "unlabelledFields": [],
+    "url": "https://quizshield-automation-ui.vercel.app/dashboard/teacher/courses/new",
+    "width": 1435
+  },
+  {
+    "label": "course-create-success",
+    "headings": [
+      "My Courses"
+    ],
+    "height": 900,
+    "scrollWidth": 1435,
+    "text": "QuizShield\nINTEGRITY ENGINE\nEDUCATOR\nOverview\nCourses\nQuizzes\nQuestions\nSubmissions\nAnalytics\nIntegrations & automation\nS\n\nStaging test teacher\n\nteacher@quizshield.invalid\n\nSign out\nEDUCATOR\nDashboard\n5\nNOTIFICATIONS\nMark all read\n\nSubmission Pending Review\n\nA student submitted quiz \"QA lifecycle assessment\" and is waiting for your review.\n\n10/18/2026, 12:35:44 PM\n\nSubmission Pending Review\n\nA student submitted quiz \"Saved workflow Google suite 2026-10-17T19:43:32.052Z\" and is waiting for your review.\n\n10/18/2026, 12:44:34 AM\n\nSubmission Pending Review\n\nA student submitted quiz \"Hosted Google lifecycle 2026-10-17T19:38:40.765Z\" and is waiting for your review.\n\n10/18/2026, 12:40:20 AM\n\nSubmission Pending Review\n\nA student submitted quiz \"Hosted Google acceptance 2026-10-17T19:25:25.845Z\" and is waiting for your review.\n\n10/18/2026, 12:28:58 AM\n\nSubmission Pending Review\n\nA student submitted quiz \"Submitted reminder acceptance\" and is waiting for your review.\n\n10/17/2026, 7:35:15 PM\n\nS\nStaging test teacher\n\nSIGNED IN AS\n\nteacher@quizshield.invalid\n\nYour profile\nSettings\nSign out\nMy Courses\n\nManage your courses, topics, and content\n\nCreate Course\nCOURSE\tDIFFICULTY\tCOURSE CODE\tTOPICS\tSTUDENTS\tAVG SCORE\tSTATUS\tACTIONS\n\nQ\n\nQA browser course 18 October\n\nWeb Development\n\n\tBeginner\t[controlled code]\n\t0 topics\t\n0\n\t-\tDraft\t\n\n\nQ\n\nQA lifecycle 2026-10-18T07:35:21.655Z\n\nOther\n\n\tBeginner\t[controlled code]\n\t0 topics\t\n1 / 3\n\t-\tDraft\t\n\n\nQ\n\nQuizShield hosted acceptance\n\n\tBeginner\t[controlled code]\n\t0 topics\t\n2\n\t-\tDraft\t",
+    "title": "Quiz Shield - Adaptive Learning Platform",
+    "unlabelledFields": [],
+    "url": "https://quizshield-automation-ui.vercel.app/dashboard/teacher/courses",
+    "width": 1435
+  },
+  {
+    "label": "teacher-questions",
+    "headings": [
+      "Questions"
+    ],
+    "height": 900,
+    "scrollWidth": 1435,
+    "text": "QuizShield\nINTEGRITY ENGINE\nEDUCATOR\nOverview\nCourses\nQuizzes\nQuestions\nSubmissions\nAnalytics\nIntegrations & automation\nS\n\nStaging test teacher\n\nteacher@quizshield.invalid\n\nSign out\nEDUCATOR\nDashboard\nNOTIFICATIONS\n\nNo notifications yet\n\nS\nStaging test teacher\n\nSIGNED IN AS\n\nteacher@quizshield.invalid\n\nYour profile\nSettings\nSign out\nQuestions\n\nManage quiz questions for your topics\n\nAdd Question\nAll Topics\nAll Difficulties\nEasy\nMedium\nHard",
+    "title": "Quiz Shield - Adaptive Learning Platform",
+    "unlabelledFields": [
+      {
+        "placeholder": null,
+        "tag": "SELECT",
+        "type": "select-one"
+      },
+      {
+        "placeholder": null,
+        "tag": "SELECT",
+        "type": "select-one"
+      }
+    ],
+    "url": "https://quizshield-automation-ui.vercel.app/dashboard/teacher/questions",
+    "width": 1435
+  },
+  {
+    "label": "teacher-topics",
+    "headings": [
+      "Topics"
+    ],
+    "height": 900,
+    "scrollWidth": 1435,
+    "text": "QuizShield\nINTEGRITY ENGINE\nEDUCATOR\nOverview\nCourses\nQuizzes\nQuestions\nSubmissions\nAnalytics\nIntegrations & automation\nS\n\nStaging test teacher\n\nteacher@quizshield.invalid\n\nSign out\nEDUCATOR\nDashboard\nNOTIFICATIONS\n\nNo notifications yet\n\nS\nStaging test teacher\n\nSIGNED IN AS\n\nteacher@quizshield.invalid\n\nYour profile\nSettings\nSign out\nTopics\n\nManage topics for your courses\n\nAdd Topic\nAll Courses",
+    "title": "Quiz Shield - Adaptive Learning Platform",
+    "unlabelledFields": [
+      {
+        "placeholder": null,
+        "tag": "SELECT",
+        "type": "select-one"
+      }
+    ],
+    "url": "https://quizshield-automation-ui.vercel.app/dashboard/teacher/topics",
+    "width": 1435
+  },
+  {
+    "label": "teacher-analytics",
+    "headings": [
+      "Analytics Dashboard"
+    ],
+    "height": 900,
+    "scrollWidth": 1420,
+    "text": "QuizShield\nINTEGRITY ENGINE\nEDUCATOR\nOverview\nCourses\nQuizzes\nQuestions\nSubmissions\nAnalytics\nIntegrations & automation\nS\n\nStaging test teacher\n\nteacher@quizshield.invalid\n\nSign out\nEDUCATOR\nDashboard\n5\nNOTIFICATIONS\nMark all read\n\nSubmission Pending Review\n\nA student submitted quiz \"QA lifecycle assessment\" and is waiting for your review.\n\n10/18/2026, 12:35:44 PM\n\nSubmission Pending Review\n\nA student submitted quiz \"Saved workflow Google suite 2026-10-17T19:43:32.052Z\" and is waiting for your review.\n\n10/18/2026, 12:44:34 AM\n\nSubmission Pending Review\n\nA student submitted quiz \"Hosted Google lifecycle 2026-10-17T19:38:40.765Z\" and is waiting for your review.\n\n10/18/2026, 12:40:20 AM\n\nSubmission Pending Review\n\nA student submitted quiz \"Hosted Google acceptance 2026-10-17T19:25:25.845Z\" and is waiting for your review.\n\n10/18/2026, 12:28:58 AM\n\nSubmission Pending Review\n\nA student submitted quiz \"Submitted reminder acceptance\" and is waiting for your review.\n\n10/17/2026, 7:35:15 PM\n\nS\nStaging test teacher\n\nSIGNED IN AS\n\nteacher@quizshield.invalid\n\nYour profile\nSettings\nSign out\nAnalytics Dashboard\n\nTrack student performance and engagement\n\nTOTAL STUDENTS\n\n1\n\nQUIZ ATTEMPTS\n\n5\n\nAVERAGE SCORE\n\n100%\n\nPASS RATE\n\n100%\n\nWeekly Performance\nWeek 1\nWeek 2\nWeek 3\nWeek 4\n0\n25\n50\n75\n100\nAvg Score %\nScore Distribution\n0-50\n50-70\n70-85\n85-100\nScore Range\n0\n2\n4\n6\n8\nStudents\nWeekly Quiz Attempts\nWeek 1\nWeek 2\nWeek 3\nWeek 4\n0\n2\n4\n6\n8\nCourse Participation (%)\n0\n25\n50\n75\n100\nQuizShield hostedacceptance\nQA lifecycle2026-10-18T07:35:21.655Z\nQA browsercourse 18October\nPass Rate\n\n100%\n\nGreat job! Students are performing well.\n\nTotal Quizzes\n\n9\n\nQuizzes created and available\n\nEngagement\n\n5\n\nTotal quiz attempts by students\n\nQuizShield hosted acceptance",
+    "title": "Quiz Shield - Adaptive Learning Platform",
+    "unlabelledFields": [],
+    "url": "https://quizshield-automation-ui.vercel.app/dashboard/teacher/analytics",
+    "width": 1435
+  },
+  {
+    "label": "profile",
+    "headings": [],
+    "height": 900,
+    "scrollWidth": 1435,
+    "text": "QuizShield\nINTEGRITY ENGINE\nDashboard\nCourses\nAnalytics\nProfile\nCurrent role: Teacher\nQuizShield\nINTEGRITY ENGINE\nS\nStaging test teacher\n\nSigned in as\n\nteacher@quizshield.invalid\n\nYour profile\nSettings\nSign out\nUser Profile\n\nPersonal details and application settings.\n\nEdit\nLogout\nFull name\nStaging test teacher\nEmail address\nteacher@quizshield.invalid\nRole\nTeacher\nBio\nNo bio provided\nInterests\nNo interests listed",
+    "title": "Quiz Shield - Adaptive Learning Platform",
+    "unlabelledFields": [],
+    "url": "https://quizshield-automation-ui.vercel.app/profile",
+    "width": 1435
+  },
+  {
+    "label": "quiz-browser-draft-saved",
+    "headings": [
+      "My Quizzes"
+    ],
+    "height": 900,
+    "scrollWidth": 1420,
+    "text": "ber\t1 questions\t30 min\tAnytime\t\nPublish\n\n\n\nQA lifecycle assessment\n\nPublished\n\n\t\n[controlled code]\n\tQA lifecycle 2026-10-18T07:44:43.723Z\t1 questions\t15 min\t18/10/2026, 12:43:58\nAsia/Karachi\nCloses 18/10/2026, 14:44:51\n\t\n\n\n\nQA lifecycle assessment\n\nCancelled\n\n\t\n[controlled code]\n\tQA lifecycle 2026-10-18T07:35:21.655Z\t1 questions\t15 min\t18/10/2026, 12:34:35\nAsia/Karachi\nCloses 18/10/2026, 14:35:27\n\t\n\n\n\nSaved workflow Google suite 2026-10-17T19:43:32.052Z\n\nCancelled\n\n\t\n[controlled code]\n\tQuizShield hosted acceptance\t1 questions\t15 min\t18/10/2026, 00:42:32\nAsia/Karachi\nCloses 18/10/2026, 03:13:32\n\t\n\n\n\nHosted Google lifecycle 2026-10-17T19:38:40.765Z\n\nCancelled\n\n\t\n[controlled code]\n\tQuizShield hosted acceptance\t1 questions\t15 min\t18/10/2026, 00:37:40\nAsia/Karachi\nCloses 18/10/2026, 02:48:40\n\t\n\n\n\nHosted Google acceptance 2026-10-17T19:25:25.845Z\n\nCancelled\n\n\t\n[controlled code]\n\tQuizShield hosted acceptance\t1 questions\t15 min\t18/10/2026, 00:24:25\nAsia/Karachi\nCloses 18/10/2026, 02:35:25\n\t\n\n\n\nHosted cron acceptance 2026-10-17T18:48:38.379Z\n\nCancelled\n\n\t\n[controlled code]\n\tQuizShield hosted acceptance\t1 questions\t15 min\t17/10/2026, 23:58:38\nAsia/Karachi\nCloses 18/10/2026, 00:50:38\n\t\n\n\n\nDisallowed recipient acceptance\n\nCancelled\n\n\t\n[controlled code]\n\tQuizShield hosted acceptance\t1 questions\t15 min\t17/10/2026, 22:53:11\nAsia/Karachi\nCloses 18/10/2026, 00:43:11\n\t\n\n\n\nHosted cron acceptance 2026-10-17T17:31:44.985Z\n\nCancelled\n\n\t\n[controlled code]\n\tQuizShield hosted acceptance\t1 questions\t15 min\t17/10/2026, 22:41:44\nAsia/Karachi\nCloses 17/10/2026, 23:33:44\n\t\n\n\n\nSubmitted reminder acceptance\n\nCancelled\n\n\t\n[controlled code]\n\tQuizShield hosted acceptance\t1 questions\t15 min\t17/10/2026, 19:32:57\nAsia/Karachi\nCloses 17/10/2026, 22:35:44\n\t\n\n\n\nControlled hosted email acceptance\n\nCancelled\n\n\t\n[controlled code]\n\tQuizShield hosted acceptance\t1 questions\t15 min\t17/10/2026, 21:30:21\nAsia/Karachi\nCloses 17/10/2026, 23:30:21\n\t",
+    "title": "Quiz Shield - Adaptive Learning Platform",
+    "unlabelledFields": [],
+    "url": "https://quizshield-automation-ui.vercel.app/dashboard/teacher/quizzes",
+    "width": 1435
+  },
+  {
+    "label": "mock-student-overview",
+    "headings": [
+      "Welcome back, Preview student"
+    ],
+    "height": 720,
+    "scrollWidth": 1265,
+    "text": "QuizShield\nINTEGRITY ENGINE\nLEARNER\nOverview\nCourses\nEnter Quiz Code\nQuiz History\nPractice suggestions\nP\n\nPreview student\n\npreview@example.test\n\nSign out\nLEARNER\nDashboard\nNOTIFICATIONS\n\nNo notifications yet\n\nJoin a Quiz →\nP\nPreview student\n\nSIGNED IN AS\n\npreview@example.test\n\nYour profile\nSettings\nSign out\nLEARNER CONSOLE\nWelcome back, Preview student\n\nReady to take a quiz? Enter the code shared by your teacher to begin.\n\n0 day streak\n0 quizzes completed\nJoin Quiz\n\nQUIZZES COMPLETED\n\n0\n\nAVERAGE SCORE\n\nN/A\n\nLEARNING STREAK\n\n0 Days\n\nTRAJECTORY\nPerformance Trend\n\nComplete quizzes to see your performance trend\n\nINBOX\nNotifications\n0\n\nNo notifications yet. Your teacher will notify you when a new quiz is available.\n\nSHORTCUTS\nQuick Actions\n\nJoin Quiz\n\nEnter a code to take a quiz\n\nQuiz History\n\nReview your past attempts\n\nMy Courses\n\nBrowse enrolled courses\n\nMy Analytics\n\nDetailed performance insights",
+    "title": "Quiz Shield - Adaptive Learning Platform",
+    "unlabelledFields": [],
+    "url": "http://127.0.0.1:5173/dashboard/student",
+    "width": 1280,
+    "mockedApi": true
+  },
+  {
+    "label": "mock-history-failure",
+    "headings": [],
+    "height": 720,
+    "scrollWidth": 1280,
+    "text": "QuizShield\nINTEGRITY ENGINE\nLEARNER\nOverview\nCourses\nEnter Quiz Code\nQuiz History\nPractice suggestions\nP\n\nPreview student\n\npreview@example.test\n\nSign out\nLEARNER\nDashboard\nNOTIFICATIONS\n\nNo notifications yet\n\nJoin a Quiz →\nP\nPreview student\n\nSIGNED IN AS\n\npreview@example.test\n\nYour profile\nSettings\nSign out\n\nQuiz history could not be loaded.\n\nTry again",
+    "title": "Quiz Shield - Adaptive Learning Platform",
+    "unlabelledFields": [],
+    "url": "http://127.0.0.1:5173/dashboard/student/quiz-history",
+    "width": 1280,
+    "mockedApi": true
+  },
+  {
+    "label": "mock-courses",
+    "headings": [
+      "My Courses",
+      "Join a New Course",
+      "Enrolled Courses"
+    ],
+    "height": 720,
+    "scrollWidth": 1265,
+    "text": "QuizShield\nINTEGRITY ENGINE\nLEARNER\nOverview\nCourses\nEnter Quiz Code\nQuiz History\nPractice suggestions\nP\n\nPreview student\n\npreview@example.test\n\nSign out\nLEARNER\nDashboard\nNOTIFICATIONS\n\nNo notifications yet\n\nJoin a Quiz →\nP\nPreview student\n\nSIGNED IN AS\n\npreview@example.test\n\nYour profile\nSettings\nSign out\nMy Courses\n\n0 courses enrolled\n\nJoin Course\nJoin a New Course\n\nEnter the course code provided by your teacher to enroll\n\nEnter Code\nAll Courses\nIn Progress\nCompleted\nEnrolled Courses\nNo Courses Yet\n\nAsk your teacher for a course code to get started, or browse available courses.\n\nJoin with Code",
+    "title": "Quiz Shield - Adaptive Learning Platform",
+    "unlabelledFields": [
+      {
+        "placeholder": "Search enrolled courses...",
+        "tag": "INPUT",
+        "type": "text"
+      },
+      {
+        "placeholder": null,
+        "tag": "SELECT",
+        "type": "select-one"
+      }
+    ],
+    "url": "http://127.0.0.1:5173/dashboard/student/courses",
+    "width": 1280,
+    "mockedApi": true
+  },
+  {
+    "label": "mock-recommendations",
+    "headings": [
+      "Practice suggestions"
+    ],
+    "height": 720,
+    "scrollWidth": 1280,
+    "text": "QuizShield\nINTEGRITY ENGINE\nLEARNER\nOverview\nCourses\nEnter Quiz Code\nQuiz History\nPractice suggestions\nP\n\nPreview student\n\npreview@example.test\n\nSign out\nLEARNER\nDashboard\nNOTIFICATIONS\n\nNo notifications yet\n\nJoin a Quiz →\nP\nPreview student\n\nSIGNED IN AS\n\npreview@example.test\n\nYour profile\nSettings\nSign out\nPractice suggestions\n\nPrepared from your reviewed, released results and teacher feedback.\n\nYour practice suggestions will appear after your teacher releases reviewed results.",
+    "title": "Quiz Shield - Adaptive Learning Platform",
+    "unlabelledFields": [],
+    "url": "http://127.0.0.1:5173/dashboard/student/recommendations",
+    "width": 1280,
+    "mockedApi": true
+  },
+  {
+    "label": "mock-join-quiz",
+    "headings": [
+      "Join Quiz"
+    ],
+    "height": 720,
+    "scrollWidth": 1265,
+    "text": "QuizShield\nINTEGRITY ENGINE\nLEARNER\nOverview\nCourses\nEnter Quiz Code\nQuiz History\nPractice suggestions\nP\n\nPreview student\n\npreview@example.test\n\nSign out\nLEARNER\nDashboard\nNOTIFICATIONS\n\nNo notifications yet\n\nJoin a Quiz →\nP\nPreview student\n\nSIGNED IN AS\n\npreview@example.test\n\nYour profile\nSettings\nSign out\nJoin Quiz\n\nEnter the quiz code provided by your teacher to start a quiz\n\nEnter Quiz Code\n\n0/4 digits\n\nAccess Quiz\nHow it works:\n1\nGet the 4-digit code from your teacher\n2\nEnter the code above and click \"Access Quiz\"\n3\nReview quiz details and start when ready",
+    "title": "Quiz Shield - Adaptive Learning Platform",
+    "unlabelledFields": [],
+    "url": "http://127.0.0.1:5173/dashboard/student/join-quiz",
+    "width": 1280,
+    "mockedApi": true
+  },
+  {
+    "label": "mock-learner-mobile",
+    "headings": [
+      "Join Quiz"
+    ],
+    "height": 844,
+    "scrollWidth": 390,
+    "text": "QuizShield\nINTEGRITY ENGINE\nLEARNER\nOverview\nCourses\nEnter Quiz Code\nQuiz History\nPractice suggestions\nP\n\nPreview student\n\npreview@example.test\n\nSign out\nNOTIFICATIONS\n\nNo notifications yet\n\nJoin a Quiz →\nP\n\nSIGNED IN AS\n\npreview@example.test\n\nYour profile\nSettings\nSign out\nJoin Quiz\n\nEnter the quiz code provided by your teacher to start a quiz\n\nEnter Quiz Code\n\n2/4 digits\n\nAccess Quiz\nHow it works:\n1\nGet the 4-digit code from your teacher\n2\nEnter the code above and click \"Access Quiz\"\n3\nReview quiz details and start when ready",
+    "title": "Quiz Shield - Adaptive Learning Platform",
+    "unlabelledFields": [],
+    "url": "http://127.0.0.1:5173/dashboard/student/join-quiz",
+    "width": 390,
+    "mockedApi": true
+  },
+  {
+    "label": "mock-student-role-guard",
+    "headings": [
+      "Welcome back, Preview student"
+    ],
+    "height": 844,
+    "scrollWidth": 375,
+    "text": "QuizShield\nINTEGRITY ENGINE\nLEARNER\nOverview\nCourses\nEnter Quiz Code\nQuiz History\nPractice suggestions\nP\n\nPreview student\n\npreview@example.test\n\nSign out\nNOTIFICATIONS\n\nNo notifications yet\n\nJoin a Quiz →\nP\n\nSIGNED IN AS\n\npreview@example.test\n\nYour profile\nSettings\nSign out\nLEARNER CONSOLE\nWelcome back, Preview student\n\nReady to take a quiz? Enter the code shared by your teacher to begin.\n\n0 day streak\n0 quizzes completed\nJoin Quiz\n\nQUIZZES COMPLETED\n\n0\n\nAVERAGE SCORE\n\nN/A\n\nLEARNING STREAK\n\n0 Days\n\nTRAJECTORY\nPerformance Trend\n\nComplete quizzes to see your performance trend\n\nINBOX\nNotifications\n0\n\nNo notifications yet. Your teacher will notify you when a new quiz is available.\n\nSHORTCUTS\nQuick Actions\n\nJoin Quiz\n\nEnter a code to take a quiz\n\nQuiz History\n\nReview your past attempts\n\nMy Courses\n\nBrowse enrolled courses\n\nMy Analytics\n\nDetailed performance insights",
+    "title": "Quiz Shield - Adaptive Learning Platform",
+    "unlabelledFields": [],
+    "url": "http://127.0.0.1:5173/dashboard/student",
+    "width": 390,
+    "mockedApi": true
+  },
+  {
+    "label": "homepage-320-before",
+    "headings": [
+      "The integrity engine for modern classrooms",
+      "Every layer of integrity, in one platform.",
+      "From blank slate to defensible grade.",
+      "Proctoring that respects students.",
+      "A clear path from draft to released results.",
+      "Bring integrity back to every assessment."
+    ],
+    "height": 800,
+    "scrollWidth": 305,
+    "text": " spend more time teaching, less time policing.\n\nTry the workflow\n01\nAuthor a quiz in minutes\n\nCreate multiple-choice and short-answer questions, save a draft, then publish when the assessment is ready.\n\n02\nDistribute via secure code\n\nStudents enrol using a course code and enter a four-digit assessment code. The server checks assignments and availability.\n\n03\nMonitor in real time\n\nReview submitted answers and recorded tab/focus or face-presence events before assigning a grade.\n\n04\nAnalyze & defend grades\n\nSave a private reviewed grade, explicitly release results, and export assessment marks.\n\nAI INTEGRITY\nProctoring that respects students.\n\nFace detection runs in the browser using face-api.js. Registration photos and numeric face descriptors are sent to the backend for identity verification. Assessment events are stored for teacher review; continuous video is not recorded.\n\nBrowser detection; identity descriptors stored on the backend\nEvent-only logs with timestamped rationale\nTeacher-controlled camera monitoring per assessment\nAuditable trail for every flagged moment\nREC · 00:14:32\nQS · v4.2\n\nIllustration\n\nVIEW\n\nPreview\n\nMODE\n\n0\n\nANOMALIES\n\nDraft\n\nSave before publishing\n\nTimed\n\nServer-enforced availability\n\nReview\n\nTeacher-approved grades\n\nRelease\n\nShare results when ready\n\nYOUR WORKFLOW\nA clear path from draft to released results.\n\nSave assessments as drafts and choose which enrolled students receive them.\n\na\n\nDraft and assign\n\nTeacher controls\n\nReview answers and recorded events before releasing a saved grade.\n\nr\n\nReview and release\n\nAssessment workflow\n\nConnect a verified teacher-owned Calendar and results Sheet through Fastn.\n\nt\n\nConnect your tools\n\nOptional integrations\n\nREADY WHEN YOU ARE\nBring integrity back to every assessment.\n\nManage courses, scheduled assessments and reviewed results with QuizShield.\n\nCreate an account\nGet support\nQuizShield\nINTEGRITY ENGINE\n\nQuizShield is the integrity engine for modern classrooms. Built by educators, secured by engineers.\n\nPLATFORM\n\nFeatures\nWorkflow\nAI Integrity\nTrust\n\nACCOUNT\n\nSign in\nCreate account\nProfile\n\nCOMPANY\n\nContact\nPrivacy\nTerms\n\n© 2026 QuizShield. All rights reserved.\n\nEngineered for academic integrity.",
+    "title": "Quiz Shield - Adaptive Learning Platform",
+    "unlabelledFields": [],
+    "url": "http://127.0.0.1:5173/",
+    "width": 320,
+    "mockedApi": true
+  },
+  {
+    "label": "homepage-320-after",
+    "headings": [
+      "The integrity engine for modern classrooms",
+      "Every layer of integrity, in one platform.",
+      "From blank slate to defensible grade.",
+      "Proctoring that respects students.",
+      "A clear path from draft to released results.",
+      "Bring integrity back to every assessment."
+    ],
+    "height": 800,
+    "scrollWidth": 305,
+    "text": " spend more time teaching, less time policing.\n\nTry the workflow\n01\nAuthor a quiz in minutes\n\nCreate multiple-choice and short-answer questions, save a draft, then publish when the assessment is ready.\n\n02\nDistribute via secure code\n\nStudents enrol using a course code and enter a four-digit assessment code. The server checks assignments and availability.\n\n03\nMonitor in real time\n\nReview submitted answers and recorded tab/focus or face-presence events before assigning a grade.\n\n04\nAnalyze & defend grades\n\nSave a private reviewed grade, explicitly release results, and export assessment marks.\n\nAI INTEGRITY\nProctoring that respects students.\n\nFace detection runs in the browser using face-api.js. Registration photos and numeric face descriptors are sent to the backend for identity verification. Assessment events are stored for teacher review; continuous video is not recorded.\n\nBrowser detection; identity descriptors stored on the backend\nEvent-only logs with timestamped rationale\nTeacher-controlled camera monitoring per assessment\nAuditable trail for every flagged moment\nREC · 00:14:32\nQS · v4.2\n\nIllustration\n\nVIEW\n\nPreview\n\nMODE\n\n0\n\nANOMALIES\n\nDraft\n\nSave before publishing\n\nTimed\n\nServer-enforced availability\n\nReview\n\nTeacher-approved grades\n\nRelease\n\nShare results when ready\n\nYOUR WORKFLOW\nA clear path from draft to released results.\n\nSave assessments as drafts and choose which enrolled students receive them.\n\na\n\nDraft and assign\n\nTeacher controls\n\nReview answers and recorded events before releasing a saved grade.\n\nr\n\nReview and release\n\nAssessment workflow\n\nConnect a verified teacher-owned Calendar and results Sheet through Fastn.\n\nt\n\nConnect your tools\n\nOptional integrations\n\nREADY WHEN YOU ARE\nBring integrity back to every assessment.\n\nManage courses, scheduled assessments and reviewed results with QuizShield.\n\nCreate an account\nGet support\nQuizShield\nINTEGRITY ENGINE\n\nQuizShield is the integrity engine for modern classrooms. Built by educators, secured by engineers.\n\nPLATFORM\n\nFeatures\nWorkflow\nAI Integrity\nTrust\n\nACCOUNT\n\nSign in\nCreate account\nProfile\n\nCOMPANY\n\nContact\nPrivacy\nTerms\n\n© 2026 QuizShield. All rights reserved.\n\nEngineered for academic integrity.",
+    "title": "Quiz Shield - Adaptive Learning Platform",
+    "unlabelledFields": [],
+    "url": "http://127.0.0.1:5173/",
+    "width": 320,
+    "mockedApi": true
+  },
+  {
+    "label": "homepage-tablet",
+    "headings": [
+      "The integrity engine for modern classrooms",
+      "Every layer of integrity, in one platform.",
+      "From blank slate to defensible grade.",
+      "Proctoring that respects students.",
+      "A clear path from draft to released results.",
+      "Bring integrity back to every assessment."
+    ],
+    "height": 1024,
+    "scrollWidth": 753,
+    "text": " spend more time teaching, less time policing.\n\nTry the workflow\n01\nAuthor a quiz in minutes\n\nCreate multiple-choice and short-answer questions, save a draft, then publish when the assessment is ready.\n\n02\nDistribute via secure code\n\nStudents enrol using a course code and enter a four-digit assessment code. The server checks assignments and availability.\n\n03\nMonitor in real time\n\nReview submitted answers and recorded tab/focus or face-presence events before assigning a grade.\n\n04\nAnalyze & defend grades\n\nSave a private reviewed grade, explicitly release results, and export assessment marks.\n\nAI INTEGRITY\nProctoring that respects students.\n\nFace detection runs in the browser using face-api.js. Registration photos and numeric face descriptors are sent to the backend for identity verification. Assessment events are stored for teacher review; continuous video is not recorded.\n\nBrowser detection; identity descriptors stored on the backend\nEvent-only logs with timestamped rationale\nTeacher-controlled camera monitoring per assessment\nAuditable trail for every flagged moment\nREC · 00:14:32\nQS · v4.2\n\nIllustration\n\nVIEW\n\nPreview\n\nMODE\n\n0\n\nANOMALIES\n\nDraft\n\nSave before publishing\n\nTimed\n\nServer-enforced availability\n\nReview\n\nTeacher-approved grades\n\nRelease\n\nShare results when ready\n\nYOUR WORKFLOW\nA clear path from draft to released results.\n\nSave assessments as drafts and choose which enrolled students receive them.\n\na\n\nDraft and assign\n\nTeacher controls\n\nReview answers and recorded events before releasing a saved grade.\n\nr\n\nReview and release\n\nAssessment workflow\n\nConnect a verified teacher-owned Calendar and results Sheet through Fastn.\n\nt\n\nConnect your tools\n\nOptional integrations\n\nREADY WHEN YOU ARE\nBring integrity back to every assessment.\n\nManage courses, scheduled assessments and reviewed results with QuizShield.\n\nCreate an account\nGet support\nQuizShield\nINTEGRITY ENGINE\n\nQuizShield is the integrity engine for modern classrooms. Built by educators, secured by engineers.\n\nPLATFORM\n\nFeatures\nWorkflow\nAI Integrity\nTrust\n\nACCOUNT\n\nSign in\nCreate account\nProfile\n\nCOMPANY\n\nContact\nPrivacy\nTerms\n\n© 2026 QuizShield. All rights reserved.\n\nEngineered for academic integrity.",
+    "title": "Quiz Shield - Adaptive Learning Platform",
+    "unlabelledFields": [],
+    "url": "http://127.0.0.1:5173/",
+    "width": 768,
+    "mockedApi": true
+  },
+  {
+    "label": "mock-learner-mobile-after",
+    "headings": [
+      "Welcome back, Preview student"
+    ],
+    "height": 844,
+    "scrollWidth": 375,
+    "text": "Overview\nCourses\nEnter Quiz Code\nQuiz History\nPractice suggestions\nSign out\nP\nLEARNER CONSOLE\nWelcome back, Preview student\n\nReady to take a quiz? Enter the code shared by your teacher to begin.\n\n0 day streak\n0 quizzes completed\nJoin Quiz\n\nQUIZZES COMPLETED\n\n0\n\nAVERAGE SCORE\n\nN/A\n\nLEARNING STREAK\n\n0 Days\n\nTRAJECTORY\nPerformance Trend\n\nComplete quizzes to see your performance trend\n\nINBOX\nNotifications\n0\n\nNo notifications yet. Your teacher will notify you when a new quiz is available.\n\nSHORTCUTS\nQuick Actions\n\nJoin Quiz\n\nEnter a code to take a quiz\n\nQuiz History\n\nReview your past attempts\n\nMy Courses\n\nBrowse enrolled courses\n\nMy Analytics\n\nDetailed performance insights",
+    "title": "Quiz Shield - Adaptive Learning Platform",
+    "unlabelledFields": [],
+    "url": "http://127.0.0.1:5173/dashboard/student",
+    "width": 390,
+    "mockedApi": true
+  },
+  {
+    "label": "topic-navigation-fixed",
+    "headings": [
+      "QA topic navigation"
+    ],
+    "height": 900,
+    "scrollWidth": 1435,
+    "text": "QuizShield\nINTEGRITY ENGINE\nDashboard\nCourses\nAnalytics\nProfile\nCurrent role: Teacher\nQuizShield\nINTEGRITY ENGINE\nS\nStaging test teacher\n\nSigned in as\n\nteacher@quizshield.invalid\n\nYour profile\nSettings\nSign out\nQA topic navigation\n\nDifficulty:\n\nControlled topic content for navigation and permission tests.\nJoin a scheduled assessment",
+    "title": "Quiz Shield - Adaptive Learning Platform",
+    "unlabelledFields": [],
+    "url": "https://quizshield-automation-ui.vercel.app/courses/ac246ec0-edb0-4412-8d95-6766f65683ba/topics/4d90a8bc-5d4f-4b5f-b4f9-5307683d4212",
+    "width": 1435,
+    "mockedApi": false
+  },
+  {
+    "label": "course-alias-fixed",
+    "headings": [
+      "My Courses"
+    ],
+    "height": 900,
+    "scrollWidth": 1435,
+    "text": "QuizShield\nINTEGRITY ENGINE\nEDUCATOR\nOverview\nCourses\nQuizzes\nQuestions\nSubmissions\nAnalytics\nIntegrations & automation\nS\n\nStaging test teacher\n\nteacher@quizshield.invalid\n\nSign out\nEDUCATOR\nDashboard\nS\nStaging test teacher\nMy Courses\n\nManage your courses, topics, and content\n\nCreate Course",
+    "title": "Quiz Shield - Adaptive Learning Platform",
+    "unlabelledFields": [],
+    "url": "https://quizshield-automation-ui.vercel.app/dashboard/teacher/courses",
+    "width": 1435,
+    "mockedApi": false
+  },
+  {
+    "label": "hosted-teacher-desktop-extra",
+    "headings": [
+      "Welcome, Staging test teacher"
+    ],
+    "height": 900,
+    "scrollWidth": 1420,
+    "text": "QuizShield\nINTEGRITY ENGINE\nEDUCATOR\nOverview\nCourses\nQuizzes\nQuestions\nSubmissions\nAnalytics\nIntegrations & automation\nS\n\nStaging test teacher\n\nteacher@quizshield.invalid\n\nSign out\nEDUCATOR\nDashboard\n8\nS\nStaging test teacher\nEDUCATOR CONSOLE\nWelcome, Staging test teacher\n\nAuthor quizzes, curate questions, and watch your cohort progress in real time.\n\nExport Marks\nNew Quiz\nAdd Question\n\nTOTAL COURSES\n\n5\n\nTOTAL STUDENTS\n\n2\n\nQUESTIONS CREATED\n\n2\n\nAVG. AUTO SCORE\n\n100.0%\n\nCOHORT PULSE\nCourse Performance\nAvg Score\nCompletion\n0\n25\n50\n75\n100\nQuizShieldhostedacceptance\nQA lifecycle2026-10-18T07:35:21.655Z\nQA browsercourse 18October\nQA lifecycle2026-10-18T07:44:43.723Z\nQA lifecycle2026-10-18T08:03:05.543Z\nDISTRIBUTION\nQuestion Difficulty\nEasyMediumHard\nLIVE FEED\nRecent Activity\nView all →\n\nA student submitted quiz \"QA lifecycle assessment\" and is waiting for your review.\n\n10/18/2026, 1:03:30 PM\n\nA student submitted quiz \"QA lifecycle assessment\" and is waiting for your review.\n\n10/18/2026, 12:45:09 PM\n\nA student submitted quiz \"QA lifecycle assessment\" and is waiting for your review.\n\n10/18/2026, 12:35:44 PM\n\nSHORTCUTS\nQuick Actions\n\nCreate a Quiz\n\nBuild assessments with timing & proctoring\n\nManage Questions\n\nAuthor MCQs, tag topics, set difficulty\n\nView Analytics\n\nCohort trends, completion rates, hotspots\n\nQuizShield hosted acceptance",
+    "title": "Quiz Shield - Adaptive Learning Platform",
+    "unlabelledFields": [],
+    "url": "https://quizshield-automation-ui.vercel.app/dashboard/teacher",
+    "width": 1435,
+    "mockedApi": false
+  },
+  {
+    "label": "hosted-teacher-mobile-final",
+    "headings": [
+      "Welcome, Staging test teacher"
+    ],
+    "height": 844,
+    "scrollWidth": 375,
+    "text": "8\nS\nEDUCATOR CONSOLE\nWelcome, Staging test teacher\n\nAuthor quizzes, curate questions, and watch your cohort progress in real time.\n\nExport Marks\nNew Quiz\nAdd Question\n\nTOTAL COURSES\n\n5\n\nTOTAL STUDENTS\n\n2\n\nQUESTIONS CREATED\n\n2\n\nAVG. AUTO SCORE\n\n100.0%\n\nCOHORT PULSE\nCourse Performance\n0\n25\n50\n75\n100\nQuizShieldhostedacceptance\nQA lifecycle2026-10-18T07:35:21.655Z\nQA browsercourse 18October\nQA lifecycle2026-10-18T07:44:43.723Z\nQA lifecycle2026-10-18T08:03:05.543Z\nDISTRIBUTION\nQuestion Difficulty\nEasyMediumHard\nLIVE FEED\nRecent Activity\nView all →\n\nA student submitted quiz \"Saved workflow Google suite 2026-10-18T08:05:51.030Z\" and is waiting for your review.\n\n10/18/2026, 1:08:23 PM\n\nA student submitted quiz \"QA lifecycle assessment\" and is waiting for your review.\n\n10/18/2026, 1:03:30 PM\n\nA student submitted quiz \"QA lifecycle assessment\" and is waiting for your review.\n\n10/18/2026, 12:45:09 PM\n\nSHORTCUTS\nQuick Actions\n\nCreate a Quiz\n\nBuild assessments with timing & proctoring\n\nManage Questions\n\nAuthor MCQs, tag topics, set difficulty\n\nView Analytics\n\nCohort trends, completion rates, hotspots\n\nQuizShield hosted acceptance",
+    "title": "Quiz Shield - Adaptive Learning Platform",
+    "unlabelledFields": [],
+    "url": "https://quizshield-automation-ui.vercel.app/dashboard/teacher",
+    "width": 390,
+    "mockedApi": false
+  },
+  {
+    "label": "hosted-logout-protected-redirect",
+    "headings": [
+      "Sign in to your account"
+    ],
+    "height": 900,
+    "scrollWidth": 1435,
+    "text": "QuizShield\nINTEGRITY ENGINE\n\nAI-Powered Adaptive Learning Platform\n\nSign in to your account\n\nOr create a new account\n\nEmail address\nPassword\nForgot password?\nSign in",
+    "title": "Quiz Shield - Adaptive Learning Platform",
+    "unlabelledFields": [],
+    "url": "https://quizshield-automation-ui.vercel.app/login",
+    "width": 1435,
+    "mockedApi": false
+  },
+  {
+    "label": "hosted-invalid-login-feedback",
+    "headings": [
+      "Sign in to your account"
+    ],
+    "height": 900,
+    "scrollWidth": 1435,
+    "text": "QuizShield\nINTEGRITY ENGINE\n\nAI-Powered Adaptive Learning Platform\n\nSign in to your account\n\nOr create a new account\n\nEmail address\nPassword\nForgot password?\nSign in",
+    "title": "Quiz Shield - Adaptive Learning Platform",
+    "unlabelledFields": [],
+    "url": "https://quizshield-automation-ui.vercel.app/login",
+    "width": 1435,
+    "mockedApi": false
+  },
+  {
+    "label": "hosted-privacy-mobile",
+    "headings": [
+      "Privacy Policy",
+      "Data we collect",
+      "How we use it",
+      "Retention and access"
+    ],
+    "height": 844,
+    "scrollWidth": 375,
+    "text": "QuizShield\nINTEGRITY ENGINE\n\nLEGAL\n\nPrivacy Policy\n\nQuizShield is designed to collect the minimum information required to keep exams secure and support the learning experience.\n\nData we collect\n\nQuizShield stores account and course details, quiz answers, reviewed grades, assessment events, registration photos and numeric face descriptors used for student identity verification.\n\nHow we use it\n\nFace detection runs in the browser. Registration photos and descriptors are sent to the backend; continuous webcam video is not recorded. Verified teacher integrations can send schedules to Calendar and released results to Sheets.\n\nRetention and access\n\nAdministrative data is retained for as long as the account or school deployment needs it, and access is limited to authorized users.\n\nCreate account\nBack to sign in",
+    "title": "Quiz Shield - Adaptive Learning Platform",
+    "unlabelledFields": [],
+    "url": "https://quizshield-automation-ui.vercel.app/privacy",
+    "width": 390,
+    "mockedApi": false
+  },
+  {
+    "label": "hosted-face-gate-observed",
+    "headings": [
+      "Face Verification Required"
+    ],
+    "height": 900,
+    "scrollWidth": 1435,
+    "text": "QuizShield\nINTEGRITY ENGINE\n\nAI-Powered Adaptive Learning Platform\n\nFace Verification Required\n\nWelcome back, Controlled inbox student. Please verify your identity using your camera. If this is your first time, your face will be enrolled for future logins.\n\nVerifying your face...\nBack to Login\nVerifying...\n\nYour live image is used for verification only and is not stored.",
+    "title": "Quiz Shield - Adaptive Learning Platform",
+    "unlabelledFields": [],
+    "url": "https://quizshield-automation-ui.vercel.app/login",
+    "width": 1435,
+    "mockedApi": false,
+    "cameraAcceptance": "incomplete; synthetic enrolment fixture is not a real-person match"
+  },
+  {
+    "label": "hosted-terms-desktop",
+    "headings": [
+      "Terms of Use",
+      "Authorized use only",
+      "Academic integrity",
+      "Service availability"
+    ],
+    "height": 900,
+    "scrollWidth": 1435,
+    "text": "QuizShield\nINTEGRITY ENGINE\n\nLEGAL\n\nTerms of Use\n\nThese terms describe the basic expectations for using the QuizShield platform in a school or training environment.\n\nAuthorized use only\n\nAccounts should only be used by the teacher or student assigned to them, and exam credentials must not be shared.\n\nAcademic integrity\n\nStudents must follow the exam rules shown by their instructor, including webcam verification and proctoring checks.\n\nService availability\n\nQuizShield is provided on a best-effort basis and may be updated or temporarily unavailable during maintenance.\n\nGet started\nBack to sign in",
+    "title": "Quiz Shield - Adaptive Learning Platform",
+    "unlabelledFields": [],
+    "url": "https://quizshield-automation-ui.vercel.app/terms",
+    "width": 1435,
+    "mockedApi": false
+  },
+  {
+    "label": "hosted-contact-mobile",
+    "headings": [
+      "Contact",
+      "School administrator",
+      "Instructor support",
+      "Account access"
+    ],
+    "height": 844,
+    "scrollWidth": 375,
+    "text": "QuizShield\nINTEGRITY ENGINE\n\nSUPPORT\n\nContact\n\nQuizShield support is usually handled through the institution that deployed the platform. The options below cover the most common ways to get help.\n\nSchool administrator\n\nMost QuizShield deployments are managed by your institution, so that is the first place to request help.\n\nInstructor support\n\nTeachers can review quiz activity, student status, and proctoring flags from their dashboard.\n\nAccount access\n\nIf you cannot sign in, use the password reset flow or ask your teacher to confirm your access.\n\nSign in\nCreate account",
+    "title": "Quiz Shield - Adaptive Learning Platform",
+    "unlabelledFields": [],
+    "url": "https://quizshield-automation-ui.vercel.app/contact",
+    "width": 390,
+    "mockedApi": false
+  },
+  {
+    "label": "hosted-register-required-fields",
+    "headings": [
+      "Create your account"
+    ],
+    "height": 900,
+    "scrollWidth": 1420,
+    "text": "QuizShield\nINTEGRITY ENGINE\n\nAI-Powered Adaptive Learning Platform\n\nCreate your account\n\nOr sign in to existing account\n\nFull Name\n\nName is required\n\nEmail address\n\nEmail is required\n\nI am a\nStudent\nTeacher\nPassword\n\nPassword is required\n\nConfirm Password\n\nPlease confirm your password\n\nUpload Profile Picture\n\nUsed for face recognition verification during quizzes. Accepts JPG or PNG (max 5MB).\n\nClick to upload a photo\nJPG or PNG, max 5MB\nCreate account",
+    "title": "Quiz Shield - Adaptive Learning Platform",
+    "unlabelledFields": [],
+    "url": "https://quizshield-automation-ui.vercel.app/register",
+    "width": 1435,
+    "mockedApi": false
+  },
+  {
+    "label": "hosted-recovery-required-email",
+    "headings": [
+      "Forgot your password?"
+    ],
+    "height": 844,
+    "scrollWidth": 390,
+    "text": "QuizShield\nINTEGRITY ENGINE\n\nAI-Powered Adaptive Learning Platform\n\nForgot your password?\n\nEnter your email address and we'll send you a password reset link.\n\nEmail address\n\nEmail is required\n\nSend reset link\n\nBack to sign in",
+    "title": "Quiz Shield - Adaptive Learning Platform",
+    "unlabelledFields": [],
+    "url": "https://quizshield-automation-ui.vercel.app/forgot-password",
+    "width": 390,
+    "mockedApi": false
+  },
+  {
+    "label": "hosted-reset-missing-token",
+    "headings": [
+      "Invalid reset link"
+    ],
+    "height": 844,
+    "scrollWidth": 390,
+    "text": "QuizShield\nINTEGRITY ENGINE\n\nAI-Powered Adaptive Learning Platform\n\nInvalid reset link\n\nThis password reset link is missing the required token.\n\nRequest a new reset link",
+    "title": "Quiz Shield - Adaptive Learning Platform",
+    "unlabelledFields": [],
+    "url": "https://quizshield-automation-ui.vercel.app/reset-password",
+    "width": 390,
+    "mockedApi": false
+  },
+  {
+    "label": "hosted-invalid-login-error-visible",
+    "headings": [
+      "Sign in to your account"
+    ],
+    "height": 900,
+    "scrollWidth": 1435,
+    "text": "QuizShield\nINTEGRITY ENGINE\n\nAI-Powered Adaptive Learning Platform\n\nSign in to your account\n\nOr create a new account\n\nEmail address\nPassword\nForgot password?\nSign in\nInvalid credentials",
+    "title": "Quiz Shield - Adaptive Learning Platform",
+    "unlabelledFields": [],
+    "url": "https://quizshield-automation-ui.vercel.app/login",
+    "width": 1435,
+    "mockedApi": false
+  },
+  {
+    "label": "hosted-unknown-route",
+    "headings": [
+      "404",
+      "Page not found"
+    ],
+    "height": 900,
+    "scrollWidth": 1435,
+    "text": "404\nPage not found\n\nSorry, we couldn't find the page you're looking for.\n\nGo back home →",
+    "title": "Quiz Shield - Adaptive Learning Platform",
+    "unlabelledFields": [],
+    "url": "https://quizshield-automation-ui.vercel.app/qa-missing-page",
+    "width": 1435,
+    "mockedApi": false
+  },
+  {
+    "label": "hosted-home-320",
+    "headings": [
+      "The integrity engine for modern classrooms",
+      "Every layer of integrity, in one platform.",
+      "From blank slate to defensible grade.",
+      "Proctoring that respects students.",
+      "A clear path from draft to released results.",
+      "Bring integrity back to every assessment."
+    ],
+    "height": 800,
+    "scrollWidth": 305,
+    "text": " spend more time teaching, less time policing.\n\nTry the workflow\n01\nAuthor a quiz in minutes\n\nCreate multiple-choice and short-answer questions, save a draft, then publish when the assessment is ready.\n\n02\nDistribute via secure code\n\nStudents enrol using a course code and enter a four-digit assessment code. The server checks assignments and availability.\n\n03\nMonitor in real time\n\nReview submitted answers and recorded tab/focus or face-presence events before assigning a grade.\n\n04\nAnalyze & defend grades\n\nSave a private reviewed grade, explicitly release results, and export assessment marks.\n\nAI INTEGRITY\nProctoring that respects students.\n\nFace detection runs in the browser using face-api.js. Registration photos and numeric face descriptors are sent to the backend for identity verification. Assessment events are stored for teacher review; continuous video is not recorded.\n\nBrowser detection; identity descriptors stored on the backend\nEvent-only logs with timestamped rationale\nTeacher-controlled camera monitoring per assessment\nAuditable trail for every flagged moment\nREC · 00:14:32\nQS · v4.2\n\nIllustration\n\nVIEW\n\nPreview\n\nMODE\n\n0\n\nANOMALIES\n\nDraft\n\nSave before publishing\n\nTimed\n\nServer-enforced availability\n\nReview\n\nTeacher-approved grades\n\nRelease\n\nShare results when ready\n\nYOUR WORKFLOW\nA clear path from draft to released results.\n\nSave assessments as drafts and choose which enrolled students receive them.\n\na\n\nDraft and assign\n\nTeacher controls\n\nReview answers and recorded events before releasing a saved grade.\n\nr\n\nReview and release\n\nAssessment workflow\n\nConnect a verified teacher-owned Calendar and results Sheet through Fastn.\n\nt\n\nConnect your tools\n\nOptional integrations\n\nREADY WHEN YOU ARE\nBring integrity back to every assessment.\n\nManage courses, scheduled assessments and reviewed results with QuizShield.\n\nCreate an account\nGet support\nQuizShield\nINTEGRITY ENGINE\n\nQuizShield is the integrity engine for modern classrooms. Built by educators, secured by engineers.\n\nPLATFORM\n\nFeatures\nWorkflow\nAI Integrity\nTrust\n\nACCOUNT\n\nSign in\nCreate account\nProfile\n\nCOMPANY\n\nContact\nPrivacy\nTerms\n\n© 2026 QuizShield. All rights reserved.\n\nEngineered for academic integrity.",
+    "title": "Quiz Shield - Adaptive Learning Platform",
+    "unlabelledFields": [],
+    "url": "https://quizshield-automation-ui.vercel.app/",
+    "width": 320,
+    "mockedApi": false
+  },
+  {
+    "label": "hosted-home-tablet",
+    "headings": [
+      "The integrity engine for modern classrooms",
+      "Every layer of integrity, in one platform.",
+      "From blank slate to defensible grade.",
+      "Proctoring that respects students.",
+      "A clear path from draft to released results.",
+      "Bring integrity back to every assessment."
+    ],
+    "height": 1024,
+    "scrollWidth": 753,
+    "text": " spend more time teaching, less time policing.\n\nTry the workflow\n01\nAuthor a quiz in minutes\n\nCreate multiple-choice and short-answer questions, save a draft, then publish when the assessment is ready.\n\n02\nDistribute via secure code\n\nStudents enrol using a course code and enter a four-digit assessment code. The server checks assignments and availability.\n\n03\nMonitor in real time\n\nReview submitted answers and recorded tab/focus or face-presence events before assigning a grade.\n\n04\nAnalyze & defend grades\n\nSave a private reviewed grade, explicitly release results, and export assessment marks.\n\nAI INTEGRITY\nProctoring that respects students.\n\nFace detection runs in the browser using face-api.js. Registration photos and numeric face descriptors are sent to the backend for identity verification. Assessment events are stored for teacher review; continuous video is not recorded.\n\nBrowser detection; identity descriptors stored on the backend\nEvent-only logs with timestamped rationale\nTeacher-controlled camera monitoring per assessment\nAuditable trail for every flagged moment\nREC · 00:14:32\nQS · v4.2\n\nIllustration\n\nVIEW\n\nPreview\n\nMODE\n\n0\n\nANOMALIES\n\nDraft\n\nSave before publishing\n\nTimed\n\nServer-enforced availability\n\nReview\n\nTeacher-approved grades\n\nRelease\n\nShare results when ready\n\nYOUR WORKFLOW\nA clear path from draft to released results.\n\nSave assessments as drafts and choose which enrolled students receive them.\n\na\n\nDraft and assign\n\nTeacher controls\n\nReview answers and recorded events before releasing a saved grade.\n\nr\n\nReview and release\n\nAssessment workflow\n\nConnect a verified teacher-owned Calendar and results Sheet through Fastn.\n\nt\n\nConnect your tools\n\nOptional integrations\n\nREADY WHEN YOU ARE\nBring integrity back to every assessment.\n\nManage courses, scheduled assessments and reviewed results with QuizShield.\n\nCreate an account\nGet support\nQuizShield\nINTEGRITY ENGINE\n\nQuizShield is the integrity engine for modern classrooms. Built by educators, secured by engineers.\n\nPLATFORM\n\nFeatures\nWorkflow\nAI Integrity\nTrust\n\nACCOUNT\n\nSign in\nCreate account\nProfile\n\nCOMPANY\n\nContact\nPrivacy\nTerms\n\n© 2026 QuizShield. All rights reserved.\n\nEngineered for academic integrity.",
+    "title": "Quiz Shield - Adaptive Learning Platform",
+    "unlabelledFields": [],
+    "url": "https://quizshield-automation-ui.vercel.app/",
+    "width": 768,
+    "mockedApi": false
+  }
+]

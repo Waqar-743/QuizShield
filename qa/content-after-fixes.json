@@ -1,0 +1,27 @@
+{
+  "verifiedAt": "2026-10-18T08:03:00.914Z",
+  "environment": "hosted-staging",
+  "fixtures": {
+    "course": "ac246ec0-edb0-4412-8d95-6766f65683ba",
+    "topic": "2c9a6a14-e34f-4da2-badf-bb0cc1a74b6b",
+    "question": "2f6ee2b5-070e-45c3-8c81-df003f7d0731"
+  },
+  "results": [
+    {
+      "id": "QUESTION-CREATOR",
+      "pass": true,
+      "status": 201
+    },
+    {
+      "id": "QUESTION-ANSWER-ZERO",
+      "pass": true,
+      "status": 200,
+      "storedAnswer": 0
+    },
+    {
+      "id": "STUDENT-TOPIC-KEY-PRIVACY",
+      "pass": true,
+      "status": 200
+    }
+  ]
+}

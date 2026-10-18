@@ -6,7 +6,7 @@ import { asyncHandler } from '../middleware/errorHandler';
 export const generateQuizCode = asyncHandler(async (req: Request, res: Response) => {
   const { quizId } = req.params;
   const { maxAttempts, expiresAt, courseId } = req.body;
-  const userId = (req as any).user?.id;
+  const userId = req.user!._id;
 
   if (!quizId || !courseId) {
     res.status(400).json({
@@ -74,7 +74,7 @@ export const accessQuizByCode = asyncHandler(async (req: Request, res: Response)
 // Get all codes for a quiz (teacher)
 export const getQuizCodes = asyncHandler(async (req: Request, res: Response) => {
   const { quizId } = req.params;
-  const userId = (req as any).user?.id;
+  const userId = req.user!._id;
 
   try {
     const codes = await quizCodeService.getCodesForQuiz(quizId, userId);
@@ -102,7 +102,7 @@ export const getQuizCodes = asyncHandler(async (req: Request, res: Response) => 
 export const toggleQuizCode = asyncHandler(async (req: Request, res: Response) => {
   const { code } = req.params;
   const { isActive } = req.body;
-  const userId = (req as any).user?.id;
+  const userId = req.user!._id;
 
   try {
     const updated = await quizCodeService.toggleCode(code, userId, isActive);
@@ -125,7 +125,7 @@ export const toggleQuizCode = asyncHandler(async (req: Request, res: Response) =
 // Delete a code
 export const deleteQuizCode = asyncHandler(async (req: Request, res: Response) => {
   const { code } = req.params;
-  const userId = (req as any).user?.id;
+  const userId = req.user!._id;
 
   try {
     await quizCodeService.deleteCode(code, userId);

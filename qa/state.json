@@ -1,0 +1,29 @@
+{
+  "branch": "codex/fastn-email-staging",
+  "baseCommit": "18c36e7",
+  "backendDeployment": "dpl_251jKiTvVwHvgvAutpY1oamKYdDp",
+  "frontendDeployment": "dpl_H96svPkyCQWEg7nVFe1kSJgcdDU5",
+  "stagingMigration009Applied": true,
+  "backendTestsPassed": 89,
+  "workflowUnitTestsPassed": 24,
+  "frontendLintTypeBuild": "passed; audit exits nonzero separately",
+  "cronActive": true,
+  "localPreviewPorts": [],
+  "pending": [],
+  "automationPhase": "complete; all 19 saved cases and six correlated hosted executions passed",
+  "privatePhotoBucket": true,
+  "verifiedAt": "2026-10-18T11:45:25.503Z",
+  "productionChanged": false,
+  "unrestrictedDeliveryEnabled": false,
+  "remainingRolloutGates": [
+    "Durable recovery of unsubmitted answers",
+    "Real-person camera acceptance",
+    "Second-teacher Fastn provisioning/isolation",
+    "Credential rotation and dependency/session hardening"
+  ],
+  "hostedAssertionsPassed": 68,
+  "liveSavedWorkflowCasesPassed": 19,
+  "exactHostedExecutionCorrelations": 6,
+  "qaChangesCommitted": false,
+  "qaChangesPushed": false
+}

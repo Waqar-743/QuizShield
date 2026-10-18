@@ -68,7 +68,7 @@ const StudentOverview = () => {
       const response = await api.get('/quizzes/student/analytics');
       setAnalytics(response.data.data);
     } catch (error) {
-      console.error('Failed to fetch analytics:', error);
+      console.error('Failed to fetch analytics:');
       setAnalytics({ totalQuizzes: 0, avgScore: 0, passRate: 0, streakDays: 0, performanceData: [] });
     } finally {
       setAnalyticsLoading(false);
@@ -81,7 +81,7 @@ const StudentOverview = () => {
       const response = await api.get('/notifications');
       setNotifications(response.data.data || []);
     } catch (error) {
-      console.error('Failed to fetch notifications:', error);
+      console.error('Failed to fetch notifications:');
       setNotifications([]);
     } finally {
       setNotifLoading(false);

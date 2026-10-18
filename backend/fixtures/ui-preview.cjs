@@ -2,7 +2,8 @@
 const express = require('express');
 const app = express();
 app.use(require('cors')()); app.use(express.json());
-const user = { _id:'teacher',name:'Preview teacher',email:'preview@example.test',role:'teacher' };
+const previewStudent=process.argv.includes('--student');
+const user = { _id:previewStudent?'student':'teacher',name:previewStudent?'Preview student':'Preview teacher',email:'preview@example.test',role:previewStudent?'student':'teacher' };
 let settings = { ...require('../dist/src/services/automationPolicy').defaultAutomationSettings };
 const quizzes = [{_id:'quiz',title:'October assessment',description:'Controlled UI preview',courseId:'course',courseTitle:'Test course',timeLimit:30,questions:[{text:'What is 2+2?',options:['4','5'],correctAnswer:0,difficulty:'Easy',timeLimit:60}],accessCode:'2468',scheduledStart:'2026-10-25T05:00:00Z',closesAt:'2026-10-25T07:00:00Z',timezone:'Asia/Karachi',lifecycle:'draft',createdAt:new Date().toISOString()}];
 app.post('/api/auth/login',(_req,res)=>res.json({success:true,data:{user,token:'local-ui-preview-only'}}));
@@ -18,5 +19,7 @@ app.get('/api/quizzes/teacher/my-quizzes',(_req,res)=>res.json({success:true,dat
 app.get('/api/courses/teacher/my-courses',(_req,res)=>res.json({success:true,data:[{_id:'course',title:'Test course'}]}));
 app.get('/api/automations/courses/course/students',(_req,res)=>res.json({success:true,data:[{id:'student',name:'Controlled student',email:'student@example.test'}]}));
 app.get('/api/notifications',(_req,res)=>res.json({success:true,data:[]}));
+app.get('/api/quizzes/student/analytics',(_req,res)=>res.json({success:true,data:{totalQuizzes:0,avgScore:0,passRate:0,streakDays:0,performanceData:[]}}));
+app.get('/api/quizzes/history',(_req,res)=>process.argv.includes('--fail-history')?res.status(503).json({success:false,message:'Controlled preview failure'}):res.json({success:true,data:[]}));
 app.get('*',(_req,res)=>res.json({success:true,data:[]}));
 app.listen(5556,'127.0.0.1',()=>console.log('Isolated UI fixture ready at http://127.0.0.1:5556'));

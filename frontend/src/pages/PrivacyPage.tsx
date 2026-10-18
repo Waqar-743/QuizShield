@@ -5,12 +5,12 @@ const privacyPoints = [
   {
     title: 'Data we collect',
     description:
-      'QuizShield only stores the account, course, quiz, and verification data needed to authenticate users and protect assessments.',
+      'QuizShield stores account and course details, quiz answers, reviewed grades, and non-camera assessment activity events. Optional ordinary profile assets are stored privately.',
   },
   {
     title: 'How we use it',
     description:
-      'Information is used to run the platform, verify student identity, generate reports, and support instructors during exams.',
+      'Authentication uses email and password. The application does not request camera access or collect facial descriptors. Legacy biometric information is isolated for operator-reviewed cleanup. Verified teacher integrations can send schedules to Calendar and released results to Sheets.',
   },
   {
     title: 'Retention and access',

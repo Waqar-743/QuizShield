@@ -52,7 +52,7 @@ const TeacherAnalytics = () => {
       const response = await api.get('/quizzes/teacher/analytics');
       setAnalytics(response.data.data);
     } catch (error) {
-      console.error('Error fetching analytics:', error);
+      console.error('Error fetching analytics:');
       setAnalytics({
         totalStudents: 0,
         totalQuizzes: 0,

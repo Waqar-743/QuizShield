@@ -52,8 +52,12 @@ const teacherItems: SidebarItem[] = [
   { label: 'Integrations & automation', href: '/dashboard/teacher/automations', icon: <Stroke d="M12 8v8 M8 12h8 M4 4h16v16H4z" /> },
 ];
 
+const adminItems: SidebarItem[] = [
+  ['Overview',''],['Automation operations','automations'],['Teachers','teachers'],['Students','students'],['All accounts','accounts'],['Courses & enrolment','courses'],['Audit history','audit']
+].map(([label,path])=>({label,href:'/dashboard/admin'+(path?'/'+path:''),icon:<Stroke d="M4 4h16v16H4z M8 9h8 M8 15h8" />}));
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ role }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const closeSidebar=React.useCallback(()=>{setSidebarOpen(false);document.getElementById('dashboard-menu-toggle')?.focus();},[]);
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -63,7 +67,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ role }) => {
   const userMenuRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
 
-  const sidebarItems = role === 'teacher' || role === 'admin' ? teacherItems : studentItems;
+  const sidebarItems = role === 'admin' ? adminItems : role === 'teacher' ? teacherItems : studentItems;
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -73,7 +77,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ role }) => {
         setNotifications(notifs);
         setUnreadCount(notifs.filter((n: Notification) => !n.is_read).length);
       } catch (error) {
-        console.error('Error fetching notifications:', error);
+        console.error('Error fetching notifications:');
       }
     };
     fetchNotifications();
@@ -100,7 +104,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ role }) => {
       setNotifications(notifications.map((n) => (n.id === notificationId ? { ...n, is_read: true } : n)));
       setUnreadCount((prev) => Math.max(0, prev - 1));
     } catch (error) {
-      console.error(error);
+      console.error('Request failed');
     }
   };
 
@@ -110,7 +114,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ role }) => {
       setNotifications(notifications.map((n) => ({ ...n, is_read: true })));
       setUnreadCount(0);
     } catch (error) {
-      console.error(error);
+      console.error('Request failed');
     }
   };
 
@@ -134,7 +138,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ role }) => {
       <RoleSidebar
         items={sidebarItems}
         isOpen={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
+        onClose={closeSidebar}
         role={role}
       />
 
@@ -157,6 +161,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ role }) => {
                 active:scale-[0.96]
               "
               aria-label="Open sidebar"
+              id="dashboard-menu-toggle"
+              aria-expanded={sidebarOpen}
+              aria-controls="dashboard-sidebar"
             >
               <Stroke d="M3 6h18 M3 12h18 M3 18h18" />
             </button>
@@ -173,7 +180,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ role }) => {
 
             <div className="ml-auto flex items-center gap-1.5 pr-1">
               {/* Notifications */}
-              <div className="relative" ref={notifRef}>
+              <div className="relative" ref={notifRef} onKeyDown={e=>{if(e.key==='Escape'){setShowNotifications(false);notifRef.current?.querySelector('button')?.focus();}}}>
                 <button
                   onClick={() => setShowNotifications((s) => !s)}
                   className="
@@ -182,6 +189,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ role }) => {
                     hover:bg-ink-900/[0.04] hover:text-ink-900 active:scale-[0.96]
                   "
                   aria-label="Notifications"
+                  aria-expanded={showNotifications}
                 >
                   <Stroke d="M6 8a6 6 0 1 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9z M10 21a2 2 0 0 0 4 0" />
                   {unreadCount > 0 && (
@@ -193,14 +201,14 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ role }) => {
 
                 <div
                   className={`
-                    absolute right-0 mt-3 w-[22rem] origin-top-right
+                    absolute right-0 mt-3 w-[22rem] max-w-[calc(100vw-2rem)] origin-top-right
                     rounded-3xl p-1.5 bg-ink-900/[0.04] ring-1 ring-ink-900/5
                     shadow-[0_30px_80px_-20px_rgba(5,7,11,0.25)]
                     transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]
                     ${
                       showNotifications
-                        ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto'
-                        : 'opacity-0 -translate-y-2 scale-[0.98] pointer-events-none'
+                        ? 'visible opacity-100 translate-y-0 scale-100 pointer-events-auto'
+                        : 'invisible opacity-0 -translate-y-2 scale-[0.98] pointer-events-none'
                     }
                   `}
                 >
@@ -270,7 +278,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ role }) => {
               </div>
 
               {/* User menu */}
-              <div className="relative" ref={userMenuRef}>
+              <div className="relative" ref={userMenuRef} onKeyDown={e=>{if(e.key==='Escape'){setShowUserMenu(false);userMenuRef.current?.querySelector('button')?.focus();}}}>
                 <button
                   onClick={() => setShowUserMenu((s) => !s)}
                   className="
@@ -301,8 +309,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ role }) => {
                     transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]
                     ${
                       showUserMenu
-                        ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto'
-                        : 'opacity-0 -translate-y-2 scale-[0.98] pointer-events-none'
+                        ? 'visible opacity-100 translate-y-0 scale-100 pointer-events-auto'
+                        : 'invisible opacity-0 -translate-y-2 scale-[0.98] pointer-events-none'
                     }
                   `}
                 >
@@ -323,7 +331,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ role }) => {
                     Your profile
                   </Link>
                   <Link
-                    to={role === 'teacher' || role === 'admin' ? '/dashboard/teacher/automations' : '/profile'}
+                    to={role === 'admin' ? '/dashboard/admin/automations' : role === 'teacher' ? '/dashboard/teacher/automations' : '/profile'}
                     onClick={() => setShowUserMenu(false)}
                     className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-ink-700 transition-colors duration-300 hover:bg-ink-50"
                   >

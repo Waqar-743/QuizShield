@@ -24,7 +24,6 @@ interface QuizData {
   assignedStudentIds?: string[] | null;
   courseId?: string;
   questions: QuizQuestion[];
-  cameraMonitoring?: boolean;
 }
 
 // PostgREST returns 42703 / "column ... does not exist" when a referenced
@@ -234,30 +233,7 @@ export const quizService = {
       created_at: new Date(),
     };
 
-    // camera_monitoring column was added in migration 005.
-    let insertResult = await supabase
-      .from('teacher_quizzes')
-      .insert([{ ...baseInsert, camera_monitoring: data.cameraMonitoring !== false }])
-      .select()
-      .single();
-
-    if (insertResult.error && isMissingColumnError(insertResult.error, 'camera_monitoring')) {
-      // If teacher explicitly opted OUT of camera, we must refuse — silently
-      // falling back would persist the wrong setting and surprise the student.
-      if (data.cameraMonitoring === false) {
-        const err: any = new Error(
-          'Database is missing the camera_monitoring column. Please run migration 005_add_camera_monitoring.sql in Supabase before disabling camera for a quiz.'
-        );
-        err.statusCode = 500;
-        throw err;
-      }
-      console.warn('teacher_quizzes.camera_monitoring missing — run migration 005. Falling back to default (camera on).');
-      insertResult = await supabase
-        .from('teacher_quizzes')
-        .insert([baseInsert])
-        .select()
-        .single();
-    }
+    const insertResult = await supabase.from('teacher_quizzes').insert([baseInsert]).select().single();
 
     const { data: quiz, error } = insertResult;
     if (error) throw new Error(error.message);
@@ -284,7 +260,6 @@ export const quizService = {
       timezone: quiz.timezone,
       lifecycle: quiz.lifecycle,
       assignedStudentIds: quiz.assigned_student_ids,
-      cameraMonitoring: quiz.camera_monitoring !== false,
       createdAt: quiz.created_at,
     };
   },
@@ -324,7 +299,6 @@ export const quizService = {
       timezone: q.timezone,
       lifecycle: q.lifecycle,
       assignedStudentIds: q.assigned_student_ids,
-      cameraMonitoring: q.camera_monitoring !== false,
       createdAt: q.created_at,
     }));
   },
@@ -353,28 +327,7 @@ export const quizService = {
       ...(data.assignedStudentIds !== undefined ? { assigned_student_ids: data.assignedStudentIds } : {}),
       updated_at: new Date(),
     };
-    const withCamera = typeof data.cameraMonitoring === 'boolean'
-      ? { ...baseUpdate, camera_monitoring: data.cameraMonitoring }
-      : baseUpdate;
-
-    let updateResult = await supabase
-      .from('teacher_quizzes')
-      .update(withCamera)
-      .eq('id', quizId)
-      .eq('teacher_id', teacherId)
-      .select()
-      .single();
-
-    if (updateResult.error && isMissingColumnError(updateResult.error, 'camera_monitoring')) {
-      console.warn('teacher_quizzes.camera_monitoring missing — run migration 005. Falling back without it.');
-      updateResult = await supabase
-        .from('teacher_quizzes')
-        .update(baseUpdate)
-        .eq('id', quizId)
-        .eq('teacher_id', teacherId)
-        .select()
-        .single();
-    }
+    const updateResult = await supabase.from('teacher_quizzes').update(baseUpdate).eq('id',quizId).eq('teacher_id',teacherId).select().single();
 
     const { data: quiz, error } = updateResult;
     if (error) throw new Error(error.message);
@@ -495,7 +448,6 @@ export const quizService = {
         description: quiz.description,
         courseId: quiz.course_id,
         timeLimit: quiz.time_limit,
-        cameraMonitoring: quiz.camera_monitoring !== false,
         questions: quiz.questions?.map((q: any, index: number) => ({
           _id: `${quiz.id}-q${index}`,
           text: q.text,
@@ -531,7 +483,7 @@ export const quizService = {
     const isTeacherOwner = !!quiz && quiz.teacher_id === userId;
 
     if (!isStudentOwner && !(userRole === 'teacher' && isTeacherOwner) && userRole !== 'admin') {
-      throw new Error('Unauthorized to view this attempt');
+      throw Object.assign(new Error('Unauthorized to view this attempt'), {statusCode:403});
     }
 
     const isReviewed = attempt.teacher_grade != null && (!isStudentOwner || Boolean(attempt.results_released_at));
@@ -545,7 +497,6 @@ export const quizService = {
       return { id: attempt.id, status: attempt.status, startedAt: attempt.started_at,
         deadlineAt: new Date(attemptDeadline(quiz, attempt)).toISOString(),
         quiz: { _id: quiz.id, title: quiz.title, description: quiz.description, timeLimit: quiz.time_limit,
-          cameraMonitoring: quiz.camera_monitoring !== false,
           questions: (quiz.questions || []).map((q: any, index: number) => ({
             _id: `${quiz.id}-q${index}`, text: q.text, options: q.options, difficulty: q.difficulty,
             timeLimit: q.timeLimit, questionType: q.questionType || 'multipleChoice',
@@ -564,7 +515,6 @@ export const quizService = {
         quiz: quiz ? {
           title: quiz.title,
           description: quiz.description,
-          cameraMonitoring: quiz.camera_monitoring !== false,
           questions: [],
         } : null,
       };
@@ -594,7 +544,6 @@ export const quizService = {
       quiz: quiz ? {
         title: quiz.title,
         description: quiz.description,
-        cameraMonitoring: quiz.camera_monitoring !== false,
         questions: quiz.questions || [],
       } : null,
     };
@@ -677,7 +626,7 @@ export const quizService = {
       .single();
 
     if (error || !quiz) {
-      throw new Error('Quiz not found');
+      throw Object.assign(new Error('Quiz not found'), {statusCode:404});
     }
 
     return {
@@ -695,7 +644,7 @@ export const quizService = {
     // Verify the submission belongs to a quiz by this teacher
     const { data: attempt } = await supabase
       .from('quiz_attempts')
-      .select('quiz_id, user_id')
+      .select('quiz_id, user_id, results_released_at')
       .eq('id', submissionId)
       .single();
 
@@ -710,8 +659,9 @@ export const quizService = {
       .single();
 
     if (!quiz || quiz.teacher_id !== teacherId) {
-      throw new Error('Unauthorized');
+      throw Object.assign(new Error('Unauthorized'), {statusCode:403});
     }
+    if (attempt.results_released_at) throw Object.assign(new Error('Released grades cannot be changed'),{statusCode:409});
 
     // Update the attempt with grade and feedback
     const { error: updateError } = await supabase
@@ -745,11 +695,11 @@ export const quizService = {
       .single();
 
     if (attemptError || !attempt) {
-      throw new Error('Quiz attempt not found');
+      throw Object.assign(new Error('Quiz attempt not found'), {statusCode:404});
     }
 
     if (attempt.status === 'completed') {
-      throw new Error('Quiz already submitted');
+      throw Object.assign(new Error('Quiz already submitted'), {statusCode:409});
     }
 
     // Get quiz to calculate score
@@ -760,13 +710,13 @@ export const quizService = {
       .single();
 
     if (quizError || !quiz) {
-      throw new Error('Quiz not found');
+      throw Object.assign(new Error('Quiz not found'), {statusCode:404});
     }
     if (attempt.status !== 'in-progress') throw Object.assign(new Error('Attempt is no longer accepting answers'), { statusCode: 409 });
     if (quiz.lifecycle !== 'published' || quiz.is_active === false || Date.now() >= attemptDeadline(quiz, attempt)) {
       throw Object.assign(new Error('Submission deadline has passed or quiz was cancelled'), { statusCode: 403 });
     }
-    if (!Array.isArray(answers) || answers.length > quiz.questions.length || new Set(answers.map(a => a.questionId)).size !== answers.length) {
+    if (!Array.isArray(answers) || answers.some(a=>!a || typeof a.questionId!=='string') || answers.length > quiz.questions.length || new Set(answers.map(a => a.questionId)).size !== answers.length) {
       throw Object.assign(new Error('Invalid or duplicate answers'), { statusCode: 400 });
     }
     for (const answer of answers) {
@@ -833,7 +783,7 @@ export const quizService = {
 
     if (updateError) throw new Error(updateError.message);
     if (!updatedRows || updatedRows.length === 0) {
-      throw new Error('Quiz already submitted');
+      throw Object.assign(new Error('Quiz already submitted'), {statusCode:409});
     }
 
     if (quiz.teacher_id) {
@@ -855,6 +805,9 @@ export const quizService = {
   },
 
   async getQuizForTopic(topicId: string, userId: string, difficulty?: string) {
+    const {data:topic}=await supabase.from('topics').select('course_id').eq('id',topicId).single();
+    const {data:enrollment}=await supabase.from('enrollments').select('id').eq('course_id',topic?.course_id).eq('user_id',userId).maybeSingle();
+    if(!topic || !enrollment) throw Object.assign(new Error('You must enrol in this course before starting practice'),{statusCode:403});
     // 1. Determine difficulty (simplified logic)
     let targetDifficulty = difficulty || 'Medium';
 
@@ -897,6 +850,7 @@ export const quizService = {
        }
     }
 
+    if (!finalQuestions.length) throw Object.assign(new Error('No practice questions are available for this topic. Ask your teacher to add questions.'),{statusCode:503});
     // Create a quiz attempt record
     const { data: attempt, error: attemptError } = await supabase
       .from('quiz_attempts')
@@ -916,7 +870,7 @@ export const quizService = {
     return {
       quizId: topicId, // Using topicId as quizId for simplicity in this context
       attemptId: attempt.id,
-      questions: finalQuestions.map(q => ({ ...q, _id: q.id })), // Map id to _id
+      questions: finalQuestions.map(q => ({ _id:q.id, content:q.content, options:q.options, question_type:q.question_type, difficulty:q.difficulty })),
       difficulty: targetDifficulty
     };
   },

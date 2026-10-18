@@ -9,7 +9,8 @@
     "build": "tsc",
     "test:fastn": "node --test fastn/*.test.mjs",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --forceExit",
-    "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage --forceExit"
+    "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage --forceExit",
+    "admin:bootstrap": "ts-node src/scripts/bootstrapAdmin.ts"
   },
   "jest": {
     "preset": "ts-jest",

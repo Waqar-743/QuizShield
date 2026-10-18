@@ -28,19 +28,17 @@ async function prepare(kind){
   return {jobId:j.id,version:j.version,kind,tokenStoredInIgnoredEnvironment:true};
 }
 async function reschedule(t){const q=await quiz();await api('/api/quizzes/'+q.id,{title:q.title,questions:q.questions,timeLimit:q.time_limit,
-  scheduledStart:q.scheduled_start,timezone:q.timezone,assignedStudentIds:q.assigned_student_ids,cameraMonitoring:false,
-  closesAt:new Date(Date.parse(q.closes_at)+600000).toISOString()},t,'PUT');}
+  scheduledStart:q.scheduled_start,timezone:q.timezone,assignedStudentIds:q.assigned_student_ids,closesAt:new Date(Date.parse(q.closes_at)+600000).toISOString()},t,'PUT');}
 async function main(){
   const phase=process.argv[2],t=(await api('/api/auth/login',{email:'teacher@quizshield.invalid',password:env.STAGING_TEST_PASSWORD})).token;
   if(phase==='create'){
     const q=await api('/api/quizzes',{title:'Saved workflow Google suite '+new Date().toISOString(),courseId:ids.course,scheduledStart:new Date(Date.now()-60000).toISOString(),
-      closesAt:new Date(Date.now()+7200000).toISOString(),timezone:'Asia/Karachi',timeLimit:15,assignedStudentIds:[ids.student],cameraMonitoring:false,
-      questions:[{text:'What is 2 + 2?',options:['4','5'],correctAnswer:0,difficulty:'Easy'}]},t);
+      closesAt:new Date(Date.now()+7200000).toISOString(),timezone:'Asia/Karachi',timeLimit:15,assignedStudentIds:[ids.student],questions:[{text:'What is 2 + 2?',options:['4','5'],correctAnswer:0,difficulty:'Easy'}]},t);
     ids.googleManualQuiz=q._id;save();await api('/api/quizzes/teacher/'+q._id+'/publish',{},t);
     console.log(JSON.stringify({phase,quizId:q._id,eventId:crypto.createHash('sha256').update(q._id).digest('hex'),...await prepare('calendar')}));
   }else if(phase==='sheets'){
     const q=await quiz(),login=await api('/api/auth/login',{email:env.AUTOMATION_TEST_RECIPIENTS,password:env.STAGING_TEST_PASSWORD});
-    const s=login.requiresFaceVerification?await api('/api/auth/verify-face-login',{tempToken:login.tempToken,faceEncoding:Array(128).fill(.01)}):login;
+    const s=login;
     const a=await api('/api/quizzes/start-by-code/'+q.access_code,{},s.token);
     await api('/api/quizzes/'+a.attemptId+'/submit-all',{answers:[{questionId:q.id+'-q0',selectedAnswer:0}]},s.token);
     await api('/api/quizzes/submissions/'+a.attemptId+'/grade',{grade:91,feedback:'Reviewed suite fixture.'},t,'PUT');

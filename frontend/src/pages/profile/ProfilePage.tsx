@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 const ProfilePage: React.FC = () => {
-  const { user, logout, updateProfile } = useAuthStore();
+  const { user, logout, updateProfile, isLoading } = useAuthStore();
   const [isEditing, setIsEditing] = useState(false);
   const { register, handleSubmit, formState: { errors } } = useForm({
     defaultValues: {
@@ -38,7 +38,7 @@ const ProfilePage: React.FC = () => {
       <div className="bg-white shadow overflow-hidden sm:rounded-lg">
         <div className="px-4 py-5 sm:px-6 flex justify-between items-center">
           <div>
-            <h3 className="text-lg leading-6 font-medium text-gray-900">User Profile</h3>
+            <h1 className="text-lg leading-6 font-medium text-gray-900">User Profile</h1>
             <p className="mt-1 max-w-2xl text-sm text-gray-500">Personal details and application settings.</p>
           </div>
           <div className="flex space-x-3">
@@ -77,6 +77,7 @@ const ProfilePage: React.FC = () => {
                   <input
                     type="text"
                     id="name"
+                    maxLength={80}
                     className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md p-2 border"
                     {...register('name', { required: 'Name is required' })}
                   />
@@ -89,6 +90,7 @@ const ProfilePage: React.FC = () => {
                 <div className="mt-1">
                   <textarea
                     id="bio"
+                    maxLength={500}
                     rows={3}
                     className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md p-2 border"
                     {...register('bio')}
@@ -113,10 +115,11 @@ const ProfilePage: React.FC = () => {
               <div className="flex justify-end">
                 <button
                   type="submit"
+                  disabled={isLoading}
                   className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 >
                   <CheckIcon className="-ml-1 mr-2 h-5 w-5" />
-                  Save Changes
+                  {isLoading ? 'Saving…' : 'Save Changes'}
                 </button>
               </div>
             </form>

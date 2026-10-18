@@ -1,0 +1,106 @@
+{
+  "verifiedAt": "2026-10-18T15:49:14.184Z",
+  "environment": "hosted staging",
+  "hostedCronOnly": true,
+  "quiz": "d6c2375d-cb28-471e-a2d8-69516f4a2f6d",
+  "attempt": "adccd8cd-115a-4037-860a-31445f7b937e",
+  "eventId": "b0e4f8a240b77cbd19f9d16aa5bc6d9aba0a417e83eb0cfd964ea5a996d99352",
+  "email": {
+    "jobId": "d21ad9e8-ce95-4ce0-92b9-3f27d45d5408",
+    "providerId": "01a14f94-6f32-76f4-84b8-fdf0ec51ecfb",
+    "lastEvent": "delivered",
+    "recipientRestricted": true
+  },
+  "jobs": [
+    {
+      "id": "6099af93-f84e-4478-9d97-c51353c1d40c",
+      "kind": "announcement",
+      "channel": "inapp",
+      "status": "succeeded",
+      "provider_id": "d6c2375d-cb28-471e-a2d8-69516f4a2f6d:7b5cf6da-b32c-4ff2-98a8-bac19d1918e3:announcement:inapp",
+      "attempts": 1
+    },
+    {
+      "id": "2047fded-05c0-44fb-ad46-0320967b0136",
+      "kind": "reminder",
+      "channel": "email",
+      "status": "cancelled",
+      "provider_id": null,
+      "attempts": 1
+    },
+    {
+      "id": "c5a224f6-c83c-4d54-84b9-3fb18367f1f3",
+      "kind": "calendar",
+      "channel": "fastn",
+      "status": "succeeded",
+      "provider_id": "b0e4f8a240b77cbd19f9d16aa5bc6d9aba0a417e83eb0cfd964ea5a996d99352",
+      "attempts": 1
+    },
+    {
+      "id": "d21ad9e8-ce95-4ce0-92b9-3f27d45d5408",
+      "kind": "announcement",
+      "channel": "email",
+      "status": "succeeded",
+      "provider_id": "01a14f94-6f32-76f4-84b8-fdf0ec51ecfb",
+      "attempts": 1
+    },
+    {
+      "id": "a17c4072-7624-4dc2-aa54-74db6987eac5",
+      "kind": "results",
+      "channel": "email",
+      "status": "cancelled",
+      "provider_id": null,
+      "attempts": 1
+    },
+    {
+      "id": "bdea93c9-5c0e-4aec-b340-8b993f8c5bb9",
+      "kind": "followup",
+      "channel": "internal",
+      "status": "succeeded",
+      "provider_id": "adccd8cd-115a-4037-860a-31445f7b937e:followup:internal",
+      "attempts": 1
+    },
+    {
+      "id": "f50b8deb-dd7a-45c5-abcd-4b61a69ea516",
+      "kind": "results",
+      "channel": "inapp",
+      "status": "succeeded",
+      "provider_id": "adccd8cd-115a-4037-860a-31445f7b937e:results:inapp",
+      "attempts": 1
+    },
+    {
+      "id": "112dde4e-02b2-4fea-96d8-5e4662da9f76",
+      "kind": "sheets",
+      "channel": "fastn",
+      "status": "succeeded",
+      "provider_id": "1NMfl6P1F0ppqtBt_Lcs4BTFN2sG4yhhx3GLOy7wYD2Y:Sheet1!A7:F7",
+      "attempts": 1
+    },
+    {
+      "id": "8cfe6b87-2213-4bd8-8b98-aad9c3b73030",
+      "kind": "cancellation",
+      "channel": "email",
+      "status": "cancelled",
+      "provider_id": null,
+      "attempts": 1
+    },
+    {
+      "id": "a6272fb1-a645-41b7-ac06-f22a958869e9",
+      "kind": "cancellation",
+      "channel": "inapp",
+      "status": "succeeded",
+      "provider_id": "d6c2375d-cb28-471e-a2d8-69516f4a2f6d:7b5cf6da-b32c-4ff2-98a8-bac19d1918e3:cancellation:inapp:3",
+      "attempts": 1
+    },
+    {
+      "id": "a2cdce9e-485f-4c40-b6aa-093e34871e16",
+      "kind": "calendar",
+      "channel": "fastn",
+      "status": "succeeded",
+      "provider_id": "b0e4f8a240b77cbd19f9d16aa5bc6d9aba0a417e83eb0cfd964ea5a996d99352",
+      "attempts": 1
+    }
+  ],
+  "unrestrictedDelivery": false,
+  "fixtureRetention": "Cancelled assessment and reviewed submission retained as audit evidence; no destructive cleanup"
+}

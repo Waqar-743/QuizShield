@@ -1,0 +1,6 @@
+{
+  "algorithm": "sha256 of sorted runtime file paths and content",
+  "files": 116,
+  "hash": "654953ee573808ea003dc514c5b915521a196f5b85a781723f29820a98f7d1b7",
+  "excludes": "Tests, scripts, docs, evidence and deleted files"
+}

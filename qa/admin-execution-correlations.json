@@ -1,0 +1,58 @@
+{
+  "environment": "hosted staging",
+  "correlation": "Exact deliveryId payload match; no local worker invoked",
+  "results": [
+    {
+      "kind": "calendar",
+      "deliveryId": "c5a224f6-c83c-4d54-84b9-3fb18367f1f3:1",
+      "matches": [
+        {
+          "id": "exec_7bf08806ff23",
+          "status": "completed",
+          "createdAt": "2026-10-18T15:13:09.394Z",
+          "completedAt": "2026-10-18T15:14:50.126Z",
+          "installationId": "inst_e162c34cd402"
+        }
+      ]
+    },
+    {
+      "kind": "sheets",
+      "deliveryId": "112dde4e-02b2-4fea-96d8-5e4662da9f76:1",
+      "matches": [
+        {
+          "id": "exec_4c6286c2f15b",
+          "status": "completed",
+          "createdAt": "2026-10-18T15:40:19.271Z",
+          "completedAt": "2026-10-18T15:41:29.927Z",
+          "installationId": "inst_e162c34cd402"
+        }
+      ]
+    },
+    {
+      "kind": "cancellation",
+      "deliveryId": "a2cdce9e-485f-4c40-b6aa-093e34871e16:1",
+      "matches": [
+        {
+          "id": "exec_fd9999f3f865",
+          "status": "completed",
+          "createdAt": "2026-10-18T15:45:09.349Z",
+          "completedAt": "2026-10-18T15:46:30.784Z",
+          "installationId": "inst_e162c34cd402"
+        }
+      ]
+    },
+    {
+      "kind": "email",
+      "deliveryId": "d21ad9e8-ce95-4ce0-92b9-3f27d45d5408:1",
+      "matches": [
+        {
+          "id": "exec_e2d1ae2d3d8b",
+          "status": "completed",
+          "createdAt": "2026-10-18T15:13:12.841Z",
+          "completedAt": "2026-10-18T15:14:50.981Z",
+          "installationId": null
+        }
+      ]
+    }
+  ]
+}

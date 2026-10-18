@@ -56,6 +56,9 @@ const TeacherOverview = () => {
   const [coursePerformance, setCoursePerformance] = useState<CoursePerformance[]>([]);
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
+  const [loadError, setLoadError] = useState(false);
+  const [difficultyDistribution, setDifficultyDistribution] = useState<{name:string;value:number;color:string}[]>([]);
+  const [recentActivity, setRecentActivity] = useState<{text:string;time:string}[]>([]);
 
   const handleExportMarks = useCallback(async () => {
     setExporting(true);
@@ -79,18 +82,13 @@ const TeacherOverview = () => {
       window.URL.revokeObjectURL(url);
       toast.success('Marks exported successfully!');
     } catch (error) {
-      console.error('Export failed:', error);
+      console.error('Export failed:');
       toast.error('Failed to export marks. Please try again.');
     } finally {
       setExporting(false);
     }
   }, []);
 
-  const difficultyDistribution = [
-    { name: 'Beginner', value: 35, color: '#10B981' },
-    { name: 'Intermediate', value: 45, color: '#06B6D4' },
-    { name: 'Advanced', value: 20, color: '#7C3AED' },
-  ];
 
   useEffect(() => {
     fetchTeacherStats();
@@ -98,29 +96,21 @@ const TeacherOverview = () => {
 
   const fetchTeacherStats = async () => {
     setLoading(true);
+    setLoadError(false);
     try {
-      const [statsRes, performanceRes] = await Promise.all([
+      const [statsRes, performanceRes, questionsRes, activityRes] = await Promise.all([
         api.get('/analytics/teacher/stats'),
         api.get('/analytics/teacher/course-performance'),
+        api.get('/courses/teacher/questions'),
+        api.get('/notifications'),
       ]);
       setStats(statsRes.data.data);
       setCoursePerformance(performanceRes.data.data || []);
+      const questions=questionsRes.data.data || [];
+      setDifficultyDistribution(['Easy','Medium','Hard'].map((name,index)=>({name,value:questions.filter((q:{difficulty:string})=>q.difficulty===name).length,color:['#10B981','#06B6D4','#7C3AED'][index]})));
+      setRecentActivity((activityRes.data.data || []).slice(0,3).map((item:{message:string;created_at:string})=>({text:item.message,time:new Date(item.created_at).toLocaleString()})));
     } catch (error) {
-      setStats({
-        totalCourses: 5,
-        totalStudents: 128,
-        totalQuestions: 245,
-        totalTopics: 32,
-        avgStudentScore: 76.5,
-        activeEnrollments: 89,
-      });
-      setCoursePerformance([
-        { courseName: 'JavaScript Basics', avgScore: 82, completionRate: 75, enrollments: 45 },
-        { courseName: 'React Fundamentals', avgScore: 78, completionRate: 68, enrollments: 38 },
-        { courseName: 'Node.js Backend', avgScore: 71, completionRate: 52, enrollments: 28 },
-        { courseName: 'Python for Beginners', avgScore: 85, completionRate: 82, enrollments: 52 },
-        { courseName: 'Data Structures', avgScore: 68, completionRate: 45, enrollments: 21 },
-      ]);
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
@@ -135,6 +125,8 @@ const TeacherOverview = () => {
       </div>
     );
   }
+
+  if (loadError) return <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-6"><p>Dashboard data could not be loaded. Your records have not changed.</p><button className="mt-3 underline" onClick={fetchTeacherStats}>Try again</button></div>;
 
   return (
     <div className="mx-auto max-w-7xl space-y-8">
@@ -259,8 +251,6 @@ const TeacherOverview = () => {
           label="Total Students"
           value={stats?.totalStudents || 0}
           color="blue"
-          trend="up"
-          change={8}
         />
         <StatCard
           icon={<Stroke d="M9 9a3 3 0 1 1 4.3 2.7c-.8.4-1.3 1-1.3 2V14 M12 18h.01 M3 12a9 9 0 1 1 18 0 9 9 0 0 1-18 0z" />}
@@ -270,10 +260,9 @@ const TeacherOverview = () => {
         />
         <StatCard
           icon={<Stroke d="M3 21h18 M6 17V9 M11 17V5 M16 17v-7 M21 17v-3" />}
-          label="Avg. Student Score"
+          label="Avg. Auto Score"
           value={`${stats?.avgStudentScore?.toFixed(1) || 0}%`}
           color="orange"
-          trend={stats?.avgStudentScore && stats.avgStudentScore >= 70 ? 'up' : 'down'}
         />
       </section>
 
@@ -340,6 +329,7 @@ const TeacherOverview = () => {
               Question Difficulty
             </h3>
             <div className="h-64 mt-2">
+              {!difficultyDistribution.some(item=>item.value>0) && <p className="text-sm text-ink-500">No questions yet. Add a question to see its difficulty distribution.</p>}
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -395,11 +385,8 @@ const TeacherOverview = () => {
               </Link>
             </div>
             <ul className="space-y-2">
-              {[
-                { text: 'New student enrolled in JavaScript Basics', time: '2 hours ago' },
-                { text: '15 students completed React Quiz #3', time: '5 hours ago' },
-                { text: 'Python course reached 50 enrollments', time: '1 day ago' },
-              ].map((a, i) => (
+              {recentActivity.length===0 && <li className="text-sm text-ink-500">No recent activity yet.</li>}
+              {recentActivity.map((a, i) => (
                 <li
                   key={i}
                   className="flex items-start gap-3 rounded-2xl bg-ink-50/60 ring-1 ring-ink-900/[0.04] px-4 py-3 transition-colors duration-500 hover:bg-ink-50"

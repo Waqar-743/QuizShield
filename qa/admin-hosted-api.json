@@ -1,0 +1,164 @@
+{
+  "verifiedAt": "2026-10-18T15:38:47.470Z",
+  "environment": "hosted staging",
+  "productionChanged": false,
+  "restrictedRecipients": true,
+  "results": [
+    {
+      "name": "Student ordinary password sign-in without biometric stage",
+      "pass": true
+    },
+    {
+      "name": "teacher denied GET /admin/overview",
+      "pass": true
+    },
+    {
+      "name": "teacher denied POST /admin/accounts",
+      "pass": true
+    },
+    {
+      "name": "teacher denied PATCH /admin/accounts/40e1f628-6b46-456e-98e0-9f01c12b5bf4",
+      "pass": true
+    },
+    {
+      "name": "teacher denied POST /admin/jobs/40e1f628-6b46-456e-98e0-9f01c12b5bf4/retry",
+      "pass": true
+    },
+    {
+      "name": "student denied GET /admin/overview",
+      "pass": true
+    },
+    {
+      "name": "student denied POST /admin/accounts",
+      "pass": true
+    },
+    {
+      "name": "student denied PATCH /admin/accounts/40e1f628-6b46-456e-98e0-9f01c12b5bf4",
+      "pass": true
+    },
+    {
+      "name": "student denied POST /admin/jobs/40e1f628-6b46-456e-98e0-9f01c12b5bf4/retry",
+      "pass": true
+    },
+    {
+      "name": "Administrator real counts",
+      "pass": true,
+      "counts": {
+        "teachers": 6,
+        "students": 3,
+        "courses": 7,
+        "quizzes": 23,
+        "submissions": 12
+      }
+    },
+    {
+      "name": "Search and pagination",
+      "pass": true
+    },
+    {
+      "name": "Account impact and assessment records",
+      "pass": true
+    },
+    {
+      "name": "Administrator DTO excludes credentials and biometrics",
+      "pass": true
+    },
+    {
+      "name": "Last administrator demotion denied",
+      "pass": true
+    },
+    {
+      "name": "Last administrator suspension denied",
+      "pass": true
+    },
+    {
+      "name": "Profile editing cannot set passwords",
+      "pass": true
+    },
+    {
+      "name": "Retired endpoint /auth/verify-face-login",
+      "pass": true
+    },
+    {
+      "name": "Retired endpoint /auth/validate-picture",
+      "pass": true
+    },
+    {
+      "name": "No public administrator registration",
+      "pass": true
+    },
+    {
+      "name": "Secure invitation without ordinary password entry",
+      "pass": true
+    },
+    {
+      "name": "Invited account cannot be activated before setup",
+      "pass": true
+    },
+    {
+      "name": "Permitted account edit audited",
+      "pass": true
+    },
+    {
+      "name": "Suspend account",
+      "pass": true
+    },
+    {
+      "name": "Existing session revoked on suspension",
+      "pass": true
+    },
+    {
+      "name": "Suspended password sign-in denied",
+      "pass": true
+    },
+    {
+      "name": "Role change",
+      "pass": true
+    },
+    {
+      "name": "Existing role session revoked",
+      "pass": true
+    },
+    {
+      "name": "Removal requires impact confirmation",
+      "pass": true
+    },
+    {
+      "name": "Recoverable removal",
+      "pass": true
+    },
+    {
+      "name": "Administrator automation assignment",
+      "pass": true
+    },
+    {
+      "name": "Teacher sees assigned capabilities",
+      "pass": true
+    },
+    {
+      "name": "Teacher cannot enable administrator-controlled capability",
+      "pass": true
+    },
+    {
+      "name": "Cross-teacher destination change denied",
+      "pass": true
+    },
+    {
+      "name": "Incomplete Google setup remains honestly blocked",
+      "pass": true,
+      "blocker": "Administrator setup required: set FASTN_GOOGLE_WIDGET_ID and FASTN_PLATFORM_API_KEY on the staging server. Google authorization alone does not provision a working route. The Fastn operator must allow this teacher in the widget, verify the teacher-owned installation and Google destinations, and provision/test its Google webhook route. Existing installation fan-out omits the Google trigger. Never copy another teacher’s route or credentials."
+    },
+    {
+      "name": "Execution history filtered by teacher",
+      "pass": true
+    },
+    {
+      "name": "Administrative audit history",
+      "pass": true
+    },
+    {
+      "name": "Server logout revokes session",
+      "pass": true
+    }
+  ]
+}

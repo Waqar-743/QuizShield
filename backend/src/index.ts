@@ -16,6 +16,7 @@ import aiRoutes from './routes/ai';
 import questionRoutes from './routes/questions';
 import notificationRoutes from './routes/notifications';
 import automationRoutes from './routes/automations';
+import adminRoutes from './routes/admin';
 
 const app = express();
 
@@ -47,11 +48,10 @@ const allowedOrigins = new Set([
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin) return callback(null, true);
-    const isGitLabPages = /^https:\/\/[a-z0-9-]+\.gitlab\.io$/i.test(origin);
-    if (allowedOrigins.has(origin) || isGitLabPages) {
+    if (allowedOrigins.has(origin)) {
       return callback(null, true);
     }
-    return callback(new Error('Not allowed by CORS'), false);
+    return callback(Object.assign(new Error('Not allowed by CORS'), {statusCode:403}), false);
   },
   credentials: true,
 }));
@@ -59,8 +59,7 @@ app.use(cors({
 // ---------------------------------------------------------------------------
 // Body parsing
 // ---------------------------------------------------------------------------
-// 10mb is wide enough for face encodings + base64 profile pictures used during
-// registration. Tighten if those flows move to multipart uploads.
+// Request limits also cover optional ordinary profile assets.
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '2mb' }));
 
@@ -91,14 +90,6 @@ const authLoginLimiter = rateLimit({
   message: { success: false, error: { message: 'Too many login attempts. Please try again in 15 minutes.' } },
 });
 
-const faceVerifyLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 10,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { success: false, error: { message: 'Too many face verification attempts. Please try again in 15 minutes.' } },
-});
-
 const passwordResetLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   max: 5,
@@ -126,7 +117,6 @@ const violationLimiter = rateLimit({
 
 // Apply targeted rate limits before routes
 app.use('/api/auth/login', authLoginLimiter);
-app.use('/api/auth/verify-face-login', faceVerifyLimiter);
 app.use('/api/auth/forgot-password', passwordResetLimiter);
 app.use('/api/auth/reset-password', passwordResetLimiter);
 app.use('/api/ai', aiLimiter);
@@ -143,6 +133,7 @@ app.use('/api/ai', aiRoutes);
 app.use('/api/questions', questionRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/automations', automationRoutes);
+app.use('/api/admin', adminRoutes);
 
 // ---------------------------------------------------------------------------
 // Health check — verifies DB reachability

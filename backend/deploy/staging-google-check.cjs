@@ -21,7 +21,7 @@ async function quiz(){return check(await db.from('teacher_quizzes').select('*').
 async function review(token) {
   const q=await quiz();
   const login=await api('/api/auth/login',{email:env.AUTOMATION_TEST_RECIPIENTS,password:env.STAGING_TEST_PASSWORD});
-  const session=login.requiresFaceVerification?await api('/api/auth/verify-face-login',{tempToken:login.tempToken,faceEncoding:Array(128).fill(0.01)}):login;
+  const session=login;
   const a=await api(`/api/quizzes/start-by-code/${q.access_code}`,{},session.token);
   await api(`/api/quizzes/${a.attemptId}/submit-all`,{answers:[{questionId:`${q.id}-q0`,selectedAnswer:0}]},session.token);
   await api(`/api/quizzes/submissions/${a.attemptId}/grade`,{grade:87,feedback:'Reviewed controlled staging submission.'},token,'PUT');
@@ -55,7 +55,7 @@ async function main(){
       calendar_id:resources.calendar.id,spreadsheet_id:resources.sheet.id,sheet_tab:resources.sheet.tab,calendar_sync:true,sheets_sync:true},t,'PUT');
     const q=await api('/api/quizzes',{title:'Hosted Google lifecycle '+new Date().toISOString(),courseId:ids.course,
       scheduledStart:new Date(Date.now()-60000).toISOString(),closesAt:new Date(Date.now()+7200000).toISOString(),timezone:'Asia/Karachi',timeLimit:15,
-      assignedStudentIds:[ids.student],cameraMonitoring:false,questions:[{text:'What is 2 + 2?',options:['4','5'],correctAnswer:0,difficulty:'Easy'}]},t);
+      assignedStudentIds:[ids.student],questions:[{text:'What is 2 + 2?',options:['4','5'],correctAnswer:0,difficulty:'Easy'}]},t);
     ids.googleQuiz=q._id;ids.googleAttempt=null;save();
     assert.equal(check(await db.from('automation_jobs').select('id').eq('quiz_id',q._id)).length,0);
     await api(`/api/quizzes/teacher/${q._id}/publish`,{},t);
@@ -71,7 +71,7 @@ async function main(){
   } else if(phase==='reschedule'){
     const t=await teacher(),q=await quiz();
     await api(`/api/quizzes/${q.id}`,{title:q.title,questions:q.questions,timeLimit:q.time_limit,scheduledStart:q.scheduled_start,timezone:q.timezone,
-      assignedStudentIds:q.assigned_student_ids,cameraMonitoring:q.camera_monitoring,closesAt:new Date(Date.parse(q.closes_at)+600000).toISOString()},t,'PUT');
+      assignedStudentIds:q.assigned_student_ids,closesAt:new Date(Date.parse(q.closes_at)+600000).toISOString()},t,'PUT');
     console.log(JSON.stringify({phase,quizId:q.id,oldRevision:q.schedule_version,newRevision:(await quiz()).schedule_version}));
   } else if(phase==='cancel'){
     await api(`/api/quizzes/teacher/${ids.googleQuiz}/cancel`,{},await teacher());console.log(JSON.stringify({phase,quizId:ids.googleQuiz}));

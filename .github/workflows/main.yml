@@ -35,6 +35,9 @@ jobs:
         SUPABASE_URL: ${{ secrets.SUPABASE_URL || 'https://placeholder.supabase.co' }}
         SUPABASE_KEY: ${{ secrets.SUPABASE_KEY || 'placeholder-key' }}
 
+    - name: Workflow adapter regressions
+      run: npm run test:fastn
+
     - name: Build
       run: npm run build
       env:
@@ -59,7 +62,9 @@ jobs:
 
     - name: Lint
       run: npm run lint
-      continue-on-error: true
+
+    - name: Check types
+      run: npx tsc --noEmit
 
     - name: Build
       run: npx vite build

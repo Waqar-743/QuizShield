@@ -40,6 +40,12 @@ const Arrow = ({ size = 14, className = '' }: { size?: number; className?: strin
 /* ───── Floating Glass Island Nav (with morphing hamburger) ───── */
 const NavIsland = () => {
   const [open, setOpen] = useState(false);
+  useEffect(()=>{
+    if(!open) return;
+    const close=(event:KeyboardEvent)=>{if(event.key==='Escape'){setOpen(false);document.getElementById('mobile-menu-toggle')?.focus();}};
+    document.addEventListener('keydown',close);
+    return ()=>document.removeEventListener('keydown',close);
+  },[open]);
 
   useEffect(() => {
     document.documentElement.style.overflow = open ? 'hidden' : '';
@@ -95,7 +101,7 @@ const NavIsland = () => {
             >
               Sign in
             </Link>
-            <Link to="/register" className="btn-island-primary">
+            <Link to="/register" className="btn-island-primary hidden sm:inline-flex">
               <span className="pr-1">Get started</span>
               <span className="btn-icon bg-white/15">
                 <Arrow />
@@ -107,6 +113,9 @@ const NavIsland = () => {
               type="button"
               onClick={() => setOpen((o) => !o)}
               aria-label="Menu"
+              id="mobile-menu-toggle"
+              aria-expanded={open}
+              aria-controls="mobile-navigation"
               className="
                 md:hidden relative ml-1 flex h-10 w-10 items-center justify-center
                 rounded-full bg-ink-900/[0.04] ring-1 ring-ink-900/5
@@ -129,6 +138,9 @@ const NavIsland = () => {
 
       {/* Mobile screen-filling glass overlay */}
       <div
+        id="mobile-navigation"
+        aria-hidden={!open}
+        style={{visibility:open?'visible':'hidden'}}
         className={`
           fixed inset-0 z-30 md:hidden
           transition-all duration-700 ease-spring
@@ -199,7 +211,7 @@ const Hero = () => (
       <div className="mx-auto max-w-4xl text-center">
         <span className="eyebrow eyebrow-light reveal">
           <span className="h-1.5 w-1.5 rounded-full bg-primary-500 animate-pulse" />
-          Now with AI face-presence proctoring
+          Assessment scheduling and review
         </span>
 
         <h1 className="reveal reveal-delay-1 mt-6 font-display text-[44px] sm:text-6xl md:text-7xl lg:text-[88px] leading-[0.95] tracking-tightest text-balance text-ink-900">
@@ -219,14 +231,14 @@ const Hero = () => (
         </h1>
 
         <p className="reveal reveal-delay-2 mx-auto mt-8 max-w-2xl text-pretty text-lg leading-relaxed text-ink-500">
-          QuizShield secures every assessment with face-presence detection,
+          QuizShield secures every assessment with server-enforced timing,
           tab-switch sentinels, and copy-paste guards — so educators measure what
           students actually know, not what they could borrow.
         </p>
 
         <div className="reveal reveal-delay-3 mt-10 flex flex-wrap items-center justify-center gap-3">
           <Link to="/register" className="btn-island-primary">
-            <span className="pr-1">Start free trial</span>
+            <span className="pr-1">Create an account</span>
             <span className="btn-icon bg-white/15">
               <Arrow />
             </span>
@@ -240,7 +252,7 @@ const Hero = () => (
         </div>
 
         <p className="reveal reveal-delay-4 mt-6 text-xs text-ink-400">
-          No credit card · Set up in under 5 minutes · Trusted by 200+ institutions
+          Create a teacher account · Draft, publish and review assessments
         </p>
       </div>
 
@@ -336,7 +348,7 @@ const Hero = () => (
                     Flagged
                   </p>
                   <p className="mt-1 text-xs text-rose-900">
-                    Seat 06 — face absent 4.2s
+                    Seat 06 — tab focus changed
                   </p>
                 </div>
               </div>
@@ -349,51 +361,6 @@ const Hero = () => (
 );
 
 /* ───── SOCIAL PROOF marquee ───── */
-const TrustStrip = () => (
-  <section className="border-y border-ink-900/5 bg-white py-10">
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <p className="text-center text-[10px] font-semibold uppercase tracking-eyebrow text-ink-400">
-        Trusted by faculty, security teams, and academic boards worldwide
-      </p>
-      <div className="relative mt-6 overflow-hidden [mask-image:linear-gradient(90deg,transparent,black_15%,black_85%,transparent)]">
-        <div className="flex w-max animate-marquee gap-12 whitespace-nowrap py-2">
-          {[
-            'NUTECH',
-            'COMSATS',
-            'STANFORD ED',
-            'BUITEMS',
-            'IBA',
-            'NUST',
-            'OXFORD ONLINE',
-            'CAMBRIDGE EDU',
-            'MIT OPEN',
-            'UoP',
-          ]
-            .concat([
-              'NUTECH',
-              'COMSATS',
-              'STANFORD ED',
-              'BUITEMS',
-              'IBA',
-              'NUST',
-              'OXFORD ONLINE',
-              'CAMBRIDGE EDU',
-              'MIT OPEN',
-              'UoP',
-            ])
-            .map((n, i) => (
-              <span
-                key={i}
-                className="font-display text-2xl font-medium tracking-tightest text-ink-300"
-              >
-                {n}
-              </span>
-            ))}
-        </div>
-      </div>
-    </div>
-  </section>
-);
 
 /* ───── FEATURE BENTO (Asymmetrical) ───── */
 type Feat = {
@@ -446,8 +413,8 @@ const FeaturesBento = () => (
       <div className="mt-16 grid grid-cols-1 gap-5 md:grid-cols-12 md:auto-rows-[minmax(280px,auto)]">
         <FeatureCard
           span="md:col-span-7 md:row-span-2"
-          title="AI Face-Presence Proctoring"
-          copy="Continuously verifies the student is present, alone, and focused — using an on-device face-detection pipeline. Zero footage uploaded."
+          title="Assessment activity review"
+          copy="Records tab and focus events for teacher review alongside submitted answers."
           accent="emerald"
           visual={
             <div className="relative flex h-full items-center justify-center">
@@ -459,7 +426,7 @@ const FeaturesBento = () => (
               />
               <span className="absolute right-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-[10px] font-semibold text-primary-700 ring-1 ring-primary-200">
                 <span className="h-1.5 w-1.5 rounded-full bg-primary-500 animate-pulse" />
-                FACE OK
+                EVENT REVIEW
               </span>
             </div>
           }
@@ -467,7 +434,7 @@ const FeaturesBento = () => (
         <FeatureCard
           span="md:col-span-5"
           title="Tab-Switch Sentinel"
-          copy="Detects every blur, alt-tab, and split-screen attempt. Counts toward a configurable strike system."
+          copy="Records supported tab visibility and focus changes during an attempt for teacher review."
           accent="cyan"
           visual={
             <div className="relative flex h-full items-center justify-center bg-ink-900">
@@ -505,8 +472,8 @@ const FeaturesBento = () => (
         />
         <FeatureCard
           span="md:col-span-4"
-          title="Adaptive Question Flow"
-          copy="Difficulty self-tunes to each student's signal — keeping the cohort in challenge state."
+          title="Reviewed Practice Suggestions"
+          copy="Students receive private practice guidance after reviewed results are released. Published assessments follow the teacher’s question set."
           accent="emerald"
           visual={
             <div className="relative flex h-full items-end justify-around p-4">
@@ -522,8 +489,8 @@ const FeaturesBento = () => (
         />
         <FeatureCard
           span="md:col-span-4"
-          title="Live Cohort Heatmap"
-          copy="Educators see attention, accuracy, and risk in a single ambient grid."
+          title="Course Performance"
+          copy="Educators review course performance, submissions and reported proctoring events from their dashboard."
           accent="cyan"
           visual={
             <div className="grid h-full grid-cols-6 gap-1 p-3">
@@ -545,7 +512,7 @@ const FeaturesBento = () => (
         <FeatureCard
           span="md:col-span-4"
           title="Forensic Analytics"
-          copy="Per-student timelines, violation receipts, and exportable academic reports."
+          copy="Review student submissions and recorded events, then export marks as CSV."
           accent="violet"
           visual={
             <div className="relative h-full p-4">
@@ -582,22 +549,22 @@ const HowItWorks = () => {
     {
       n: '01',
       t: 'Author a quiz in minutes',
-      d: 'Build with rich question types — multiple-choice, code blocks, free response. Versioned, branchable, instantly publishable.',
+      d: 'Create multiple-choice and short-answer questions, save a draft, then publish when the assessment is ready.',
     },
     {
       n: '02',
       t: 'Distribute via secure code',
-      d: 'Students enter a 6-digit join code. We verify identity, request camera permission, and lock the testing window.',
+      d: 'Students enrol using a course code and enter a four-digit assessment code. The server checks assignments and availability.',
     },
     {
       n: '03',
       t: 'Monitor in real time',
-      d: 'A live heatmap surfaces presence anomalies, tab switches, and pace outliers. Intervene with one click.',
+      d: 'Review submitted answers and recorded tab and focus events before assigning a grade.',
     },
     {
       n: '04',
       t: 'Analyze & defend grades',
-      d: 'Per-student forensic timelines and exportable reports give you the receipts to defend every score.',
+      d: 'Save a private reviewed grade, explicitly release results, and export assessment marks.',
     },
   ];
 
@@ -684,16 +651,14 @@ const IntegritySpotlight = () => (
             </span>
           </h2>
           <p className="reveal reveal-delay-2 mt-5 max-w-xl text-lg text-white/60 text-pretty">
-            All face-presence inference happens on-device using face-api.js.
-            We store anomaly events, never video. Reviewable. Explainable.
-            FERPA-aligned.
+            Sign in with email and password. Assessment timing and assignments are checked by the server. Browser activity events provide context for teacher review.
           </p>
 
           <ul className="reveal reveal-delay-3 mt-10 space-y-4">
             {[
-              'On-device inference — no biometric uploads',
+              'Server-enforced assessment timing and assignment',
               'Event-only logs with timestamped rationale',
-              'Configurable strike thresholds per quiz',
+              'Private reviewed results until explicit release',
               'Auditable trail for every flagged moment',
             ].map((line) => (
               <li key={line} className="flex items-start gap-3 text-white/80">
@@ -706,7 +671,7 @@ const IntegritySpotlight = () => (
           </ul>
         </div>
 
-        {/* Visual — Camera ring + telemetry */}
+        {/* Visual — Assessment activity illustration */}
         <div className="reveal reveal-delay-2 relative">
           <div className="bezel-dark">
             <div className="bezel-core-dark relative aspect-[4/5] overflow-hidden p-8">
@@ -719,7 +684,7 @@ const IntegritySpotlight = () => (
                 <div className="flex items-center justify-between">
                   <span className="inline-flex items-center gap-2 rounded-full bg-white/5 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-eyebrow text-white/70 ring-1 ring-white/10">
                     <span className="h-1.5 w-1.5 rounded-full bg-rose-400 animate-pulse" />
-                    REC · 00:14:32
+                    ASSESSMENT PREVIEW
                   </span>
                   <span className="font-mono text-[10px] text-white/40">
                     QS · v4.2
@@ -740,8 +705,8 @@ const IntegritySpotlight = () => (
 
                 <div className="grid grid-cols-3 gap-2 text-center">
                   {[
-                    { l: 'Confidence', v: '99.4%' },
-                    { l: 'Latency', v: '12ms' },
+                    { l: 'View', v: 'Illustration' },
+                    { l: 'Mode', v: 'Preview' },
                     { l: 'Anomalies', v: '0' },
                   ].map((m) => (
                     <div
@@ -767,10 +732,10 @@ const IntegritySpotlight = () => (
 /* ───── METRICS strip ───── */
 const Metrics = () => {
   const items = [
-    { k: '2.4M+', l: 'Sessions secured' },
-    { k: '99.97%', l: 'Uptime SLA' },
-    { k: '<14ms', l: 'Detection latency' },
-    { k: '0', l: 'Biometric uploads' },
+    { k: 'Draft', l: 'Save before publishing' },
+    { k: 'Timed', l: 'Server-enforced availability' },
+    { k: 'Review', l: 'Teacher-approved grades' },
+    { k: 'Release', l: 'Share results when ready' },
   ];
   return (
     <section className="bg-white py-24">
@@ -797,21 +762,21 @@ const Metrics = () => {
 const Testimonials = () => {
   const quotes = [
     {
-      q: 'QuizShield killed our cheating problem in a single semester. Faculty actually trust online assessments again.',
-      a: 'Dr. Hira Khan',
-      r: 'Dean of Computing, NUTECH',
+      q: 'Save assessments as drafts and choose which enrolled students receive them.',
+      a: 'Draft and assign',
+      r: 'Teacher controls',
       rot: 'md:-rotate-2',
     },
     {
-      q: 'The forensic timeline is what sold us. When a student disputes a grade, we have the receipts.',
-      a: 'Prof. Daniyal Ahmad',
-      r: 'Department Head, COMSATS',
+      q: 'Review answers and recorded events before releasing a saved grade.',
+      a: 'Review and release',
+      r: 'Assessment workflow',
       rot: 'md:rotate-1',
     },
     {
-      q: 'On-device proctoring with no video upload — finally an integrity tool our DPO actually approves.',
-      a: 'Sara Iqbal',
-      r: 'Privacy Officer, IBA',
+      q: 'Connect a verified teacher-owned Calendar and results Sheet through Fastn.',
+      a: 'Connect your tools',
+      r: 'Optional integrations',
       rot: 'md:-rotate-1',
     },
   ];
@@ -820,9 +785,9 @@ const Testimonials = () => {
     <section id="trust" className="relative bg-ink-50 py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="reveal mx-auto max-w-3xl text-center">
-          <span className="eyebrow eyebrow-light">Voices</span>
+          <span className="eyebrow eyebrow-light">Your workflow</span>
           <h2 className="mt-4 font-display text-4xl md:text-6xl tracking-tightest text-ink-900 text-balance">
-            Educators who got their classrooms back.
+            A clear path from draft to released results.
           </h2>
         </div>
 
@@ -883,18 +848,18 @@ const FinalCTA = () => (
             </span>
           </h2>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-white/60 text-pretty">
-            Join the institutions running fairer, faster, more defensible exams
+            Manage courses, scheduled assessments and reviewed results
             with QuizShield.
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
             <Link to="/register" className="btn-island-emerald">
-              <span className="pr-1">Start free trial</span>
+              <span className="pr-1">Create an account</span>
               <span className="btn-icon-dark">
                 <Arrow />
               </span>
             </Link>
             <Link to="/contact" className="btn-island-ghost-dark">
-              <span className="pr-1">Talk to sales</span>
+              <span className="pr-1">Get support</span>
               <span className="btn-icon">
                 <Arrow />
               </span>
@@ -983,7 +948,7 @@ const LandingPage = () => {
       <NavIsland />
       <main>
         <Hero />
-        <TrustStrip />
+
         <FeaturesBento />
         <HowItWorks />
         <IntegritySpotlight />

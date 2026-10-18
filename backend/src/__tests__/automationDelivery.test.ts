@@ -12,6 +12,7 @@ function mockQuery(table: string) {
     in: (k: string,v: any[]) => { predicates.push(r => v.includes(r[k])); return query; },
     is: (k: string,v: any) => { predicates.push(r => r[k] == v); return query; },
     update: (v: any) => { patch=v; return query; },
+    upsert: () => query,
     order: () => query,
     limit: (n: number) => { limit=n; return query; },
     maybeSingle: () => { single=true; return query; },
@@ -51,7 +52,8 @@ beforeEach(()=>{
     automation_settings:[{teacher_id:'teacher',deadline_reminder:true}],
     automation_connections:[],
     courses:[{id:'course',title:'Controlled course',created_by:'teacher'}],
-    users:[{id:'student',role:'student',name:'Test student',email:'student@example.test'}],
+    automation_grants:[{teacher_id:'teacher',status:'active',capabilities:['announcement','deadline_reminder','schedule_email','results_email','welcome_email','calendar_sync','sheets_sync'],editable_keys:['calendar_sync','sheets_sync']}],
+    users:[{id:'teacher',role:'teacher',status:'active',session_version:0},{id:'student',status:'active',session_version:0,role:'student',name:'Test student',email:'student@example.test'}],
     enrollments:[{id:'enrolled',user_id:'student',course_id:'course'}],
     teacher_quizzes:[{id:'quiz',teacher_id:'teacher',course_id:'course',title:'Controlled assessment',lifecycle:'published',schedule_version:2,
       assigned_student_ids:['student'],timezone:'Asia/Karachi',closes_at:new Date(Date.now()+3600_000).toISOString()}],
@@ -69,6 +71,16 @@ test('delivery rechecks current enrolment, assignment, completion, schedule and 
   mockTables.quiz_attempts=[{id:'submitted',user_id:'student',quiz_id:'quiz',status:'completed'}]; expect(await prepareAutomation(job())).toBeNull();
   mockTables.quiz_attempts=[]; mockTables.teacher_quizzes[0].schedule_version=3; expect(await prepareAutomation(job())).toBeNull();
   mockTables.teacher_quizzes[0].schedule_version=2; mockTables.automation_settings[0].deadline_reminder=false; expect(await prepareAutomation(job())).toBeNull();
+});
+test('suspension or revoked assignments block existing delivery callbacks',async()=>{
+  mockTables.users.find(r=>r.id==='teacher').status='suspended';
+  expect(await prepareAutomation(job())).toBeNull();
+  mockTables.users.find(r=>r.id==='teacher').status='active';
+  mockTables.automation_grants[0].status='paused';
+  expect(await prepareAutomation(job())).toBeNull();
+  mockTables.automation_grants[0].status='active';
+  mockTables.users.find(r=>r.id==='student').status='deactivated';
+  expect(await prepareAutomation(job())).toBeNull();
 });
 test('email delivery uses the existing Resend service, a private link, and one idempotency key', async ()=>{
   const endpoint='/api/automations/delivery/job/email';
@@ -88,7 +100,7 @@ test('preflight exposes no student addresses to Fastn and withdrawn enrolment ca
   expect(delivered.body.skipped).toBe(true); expect(emailService.sendAutomationEmail).not.toHaveBeenCalled();
 });
 test('controlled allowlist blocks unintended recipients', async ()=>{
-  mockTables.users[0].email='real-student@example.test';
+  mockTables.users.find(r=>r.id==='student').email='real-student@example.test';
   const result=await request(app).post('/api/automations/delivery/job/email').set('x-quizshield-execution-token',job().execution_token);
   expect(result.status).toBe(403); expect(emailService.sendAutomationEmail).not.toHaveBeenCalled();
 });
@@ -117,7 +129,7 @@ test('Google delivery requires the owning teacher and verified destination; emai
     expect(await automationWebhookFor({...job(),channel:'email'})).toBe(config.fastnWebhookUrl);
     const teacher=jwt.sign({id:'teacher',role:'teacher'},config.jwtSecret);
     const denied=await request(app).put('/api/automations/settings').set('Authorization',`Bearer ${teacher}`).send({calendar_id:'unverified',calendar_sync:true});
-    expect(denied.status).toBe(409);
+    expect(denied.status).toBe(403);
     mockTables.automation_settings[0].calendar_id='unverified';await expect(prepareAutomation(job())).rejects.toThrow('destination');
     expect(await prepareAutomation({...job(),teacher_id:'different-teacher'})).toBeNull();
   } finally {(config as any).automationGoogleEnabled=previous;}
@@ -193,6 +205,7 @@ test('Google diagnostic replay uses only the completed job owners verified webho
 test('unknown callback tokens cannot send, and failed retries are restricted to their owner', async ()=>{
   expect((await request(app).post('/api/automations/delivery/job/email').set('x-quizshield-execution-token','wrong')).status).toBe(401);
   job().status='failed';
+  mockTables.users.push({id:'another-teacher',role:'teacher',status:'active',session_version:0});
   const intruder=jwt.sign({id:'another-teacher',role:'teacher'},config.jwtSecret);
   expect((await request(app).post('/api/automations/jobs/job/retry').set('Authorization',`Bearer ${intruder}`)).status).toBe(409);
   expect(job().status).toBe('failed');

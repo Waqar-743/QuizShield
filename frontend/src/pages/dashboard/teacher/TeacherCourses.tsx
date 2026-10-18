@@ -62,7 +62,7 @@ const TeacherCourses = () => {
       const response = await api.get('/courses/teacher/my-courses');
       setCourses(response.data.data || []);
     } catch (error) {
-      console.error('Error fetching courses:', error);
+      console.error('Error fetching courses:');
       setCourses([]);
     } finally {
       setLoading(false);
@@ -297,7 +297,7 @@ const TeacherCourses = () => {
             <MagnifyingGlassIcon className="h-5 w-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Search courses..."
+              aria-label="Search courses" placeholder="Search courses..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"

@@ -67,7 +67,7 @@ const TeacherSubmissions = () => {
       const response = await api.get('/quizzes/teacher/submissions');
       setSubmissions(response.data.data || []);
     } catch (error) {
-      console.error('Error fetching submissions:', error);
+      console.error('Error fetching submissions:');
       setSubmissions([]);
     } finally {
       setLoading(false);
@@ -92,7 +92,7 @@ const TeacherSubmissions = () => {
         violations: violationsResponse.data.data 
       } : null);
     } catch (error) {
-      console.error('Error fetching details:', error);
+      console.error('Error fetching details:');
     }
   };
 
@@ -135,12 +135,12 @@ const TeacherSubmissions = () => {
       (sub.studentName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       (sub.quizTitle || '').toLowerCase().includes(searchTerm.toLowerCase());
     
-    if (filter === 'pending') return matchesSearch && sub.teacherGrade === undefined;
-    if (filter === 'graded') return matchesSearch && sub.teacherGrade !== undefined;
+    if (filter === 'pending') return matchesSearch && sub.teacherGrade == null;
+    if (filter === 'graded') return matchesSearch && sub.teacherGrade != null;
     return matchesSearch;
   });
 
-  const pendingCount = submissions.filter(s => s.teacherGrade === undefined).length;
+  const pendingCount = submissions.filter(s => s.teacherGrade == null).length;
 
   return (
     <div className="space-y-6">
@@ -166,7 +166,7 @@ const TeacherSubmissions = () => {
             <MagnifyingGlassIcon className="h-5 w-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Search by student or quiz..."
+              aria-label="Search by student or quiz" placeholder="Search by student or quiz..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
@@ -240,7 +240,7 @@ const TeacherSubmissions = () => {
                     
                     <div className="text-center">
                       <p className="text-sm text-gray-500">Grade</p>
-                      {submission.teacherGrade !== undefined ? (
+                      {submission.teacherGrade != null ? (
                         <p className="font-medium text-green-600">{submission.teacherGrade}%</p>
                       ) : (
                         <p className="font-medium text-orange-600">Pending</p>
@@ -281,11 +281,11 @@ const TeacherSubmissions = () => {
 
       {/* Review Modal */}
       {selectedSubmission && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto p-4">
+        <div role="dialog" aria-modal="true" aria-labelledby="review-title" className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto p-4">
           <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">Review Submission</h3>
+                <h3 id="review-title" className="text-lg font-semibold text-gray-900">Review Submission</h3>
                 <p className="text-sm text-gray-500">
                   {selectedSubmission.studentName} - {selectedSubmission.quizTitle}
                 </p>
@@ -444,6 +444,8 @@ const TeacherSubmissions = () => {
                     </label>
                     <input
                       type="number"
+                      aria-label="Final grade percent"
+                      disabled={Boolean(selectedSubmission.resultsReleasedAt)}
                       min="0"
                       max="100"
                       value={gradeInput}
@@ -457,6 +459,8 @@ const TeacherSubmissions = () => {
                       Feedback for Student
                     </label>
                     <textarea
+                      aria-label="Feedback for student"
+                      disabled={Boolean(selectedSubmission.resultsReleasedAt)}
                       value={feedbackInput}
                       onChange={(e) => setFeedbackInput(e.target.value)}
                       rows={3}

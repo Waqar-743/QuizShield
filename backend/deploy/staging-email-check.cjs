@@ -9,7 +9,6 @@ const env = dotenv.parse(fs.readFileSync('.env.staging.local'));
 assert.equal(env.SUPABASE_URL, 'https://jixzholamkbktzusyqwe.supabase.co');
 assert.equal(env.BACKEND_PUBLIC_URL, 'https://quizshield-automation-staging.vercel.app');
 assert.equal(env.AUTOMATION_ALLOW_ALL_RECIPIENTS, 'false');
-if (!['assert-hosted','receipt','replay-hosted'].includes(process.argv[2])) assert.equal(env.AUTOMATION_GOOGLE_ENABLED, 'false');
 const db = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
 const fixturesPath = '.vercel/staging-fixtures.json';
 const ids = JSON.parse(fs.readFileSync(fixturesPath));
@@ -33,12 +32,16 @@ async function jobs() {
 }
 async function main() {
   const phase = process.argv[2];
+  if (!['assert-hosted','receipt','replay-hosted'].includes(phase)) {
+    const preferences = check(await db.from('automation_settings').select('calendar_sync,sheets_sync').eq('teacher_id',ids.teacher).single());
+    assert.equal(preferences.calendar_sync, false, 'Use email-only preferences for this controlled suite');
+    assert.equal(preferences.sheets_sync, false, 'Use email-only preferences for this controlled suite');
+  }
   if (phase === 'draft') {
     const token = await teacherToken();
     const created = await api('/api/quizzes', { title: 'Controlled hosted email acceptance', courseId: ids.course,
       scheduledStart: new Date(Date.now() + 2 * 3600000).toISOString(), closesAt: new Date(Date.now() + 4 * 3600000).toISOString(),
-      timezone: 'Asia/Karachi', timeLimit: 15, assignedStudentIds: [ids.student], cameraMonitoring: false,
-      questions: [{ text: 'What is 2 + 2?', options: ['4','5'], correctAnswer: 0, difficulty: 'Easy', explanation: 'Two plus two equals four.' }] }, token);
+      timezone: 'Asia/Karachi', timeLimit: 15, assignedStudentIds: [ids.student], questions: [{ text: 'What is 2 + 2?', options: ['4','5'], correctAnswer: 0, difficulty: 'Easy', explanation: 'Two plus two equals four.' }] }, token);
     ids.quiz = created._id; assert.ok(ids.quiz); save();
     assert.equal((await jobs()).length, 0);
     console.log(JSON.stringify({ phase, quizId: ids.quiz, hostedApi: true, persistedJobs: 0, passed: true }));
@@ -79,16 +82,14 @@ async function main() {
     const token = await teacherToken();
     const created = ids.ineligibleQuiz ? { _id: ids.ineligibleQuiz } : await api('/api/quizzes', { title: 'Submitted reminder acceptance', courseId: ids.course,
       scheduledStart: new Date(Date.now() - 60000).toISOString(), closesAt: new Date(Date.now() + 2 * 3600000).toISOString(),
-      timezone: 'Asia/Karachi', timeLimit: 15, assignedStudentIds: [ids.student], cameraMonitoring: false,
-      questions: [{ text: 'What is 2 + 2?', options: ['4','5'], correctAnswer: 0, difficulty: 'Easy' }] }, token);
+      timezone: 'Asia/Karachi', timeLimit: 15, assignedStudentIds: [ids.student], questions: [{ text: 'What is 2 + 2?', options: ['4','5'], correctAnswer: 0, difficulty: 'Easy' }] }, token);
     const quizId = created._id;
     ids.ineligibleQuiz = quizId; save();
     await api(`/api/quizzes/teacher/${quizId}/publish`, {}, token);
     const quiz = check(await db.from('teacher_quizzes').select('*').eq('id', quizId).single());
     const login = await api('/api/auth/login', { email: env.AUTOMATION_TEST_RECIPIENTS, password: env.STAGING_TEST_PASSWORD });
     // Synthetic descriptor belongs only to this deliberately created fixture.
-    const studentSession = login.requiresFaceVerification ? await api('/api/auth/verify-face-login',
-      { tempToken: login.tempToken, faceEncoding: Array(128).fill(0.01) }) : login;
+    const studentSession=login;
     const attempt = await api(`/api/quizzes/start-by-code/${quiz.access_code}`, {}, studentSession.token);
     await api(`/api/quizzes/${attempt.attemptId}/submit-all`, { answers: [{ questionId: `${quizId}-q0`, selectedAnswer: 0 }] }, studentSession.token);
     const reminder = check(await db.from('automation_jobs').select('*').eq('quiz_id', quizId).eq('kind', 'reminder').eq('channel', 'email').single());
@@ -100,8 +101,7 @@ async function main() {
     const quiz = check(await db.from('teacher_quizzes').select('*').eq('id', ids.ineligibleQuiz).single());
     await api(`/api/quizzes/${ids.ineligibleQuiz}`, { title: quiz.title, questions: quiz.questions,
       timeLimit: quiz.time_limit, scheduledStart: quiz.scheduled_start, timezone: quiz.timezone,
-      assignedStudentIds: quiz.assigned_student_ids, cameraMonitoring: quiz.camera_monitoring,
-      closesAt: new Date(Date.now() + 3 * 3600000).toISOString() }, token, 'PUT');
+      assignedStudentIds: quiz.assigned_student_ids, closesAt: new Date(Date.now() + 3 * 3600000).toISOString() }, token, 'PUT');
     const after = check(await db.from('automation_jobs').select('id,version,status').eq('id', before.id).single());
     assert.ok(after.version > before.version, 'Unsent one-reminder row must adopt the new revision');
     await api(`/api/quizzes/teacher/${ids.ineligibleQuiz}/cancel`, {}, token);
@@ -113,8 +113,7 @@ async function main() {
     const token = await teacherToken();
     const created = await api('/api/quizzes', { title: 'Disallowed recipient acceptance', courseId: ids.course,
       scheduledStart: new Date(Date.now() + 10 * 60000).toISOString(), closesAt: new Date(Date.now() + 2 * 3600000).toISOString(),
-      timezone: 'Asia/Karachi', timeLimit: 15, assignedStudentIds: [ids.unassigned], cameraMonitoring: false,
-      questions: [{ text: 'What is 2 + 2?', options: ['4','5'], correctAnswer: 0, difficulty: 'Easy' }] }, token);
+      timezone: 'Asia/Karachi', timeLimit: 15, assignedStudentIds: [ids.unassigned], questions: [{ text: 'What is 2 + 2?', options: ['4','5'], correctAnswer: 0, difficulty: 'Easy' }] }, token);
     await api(`/api/quizzes/teacher/${created._id}/publish`, {}, token);
     const job = check(await db.from('automation_jobs').select('*').eq('quiz_id', created._id).eq('kind','announcement').eq('channel','email').single());
     const executionToken = crypto.randomUUID();
@@ -137,8 +136,7 @@ async function main() {
     const created = await api('/api/quizzes', { title, courseId: ids.course,
       scheduledStart: new Date(Date.now() + 10 * 60000).toISOString(),
       closesAt: new Date(Date.now() + 62 * 60000).toISOString(),
-      timezone: 'Asia/Karachi', timeLimit: 15, assignedStudentIds: [ids.student], cameraMonitoring: false,
-      questions: [{ text: 'What is 2 + 2?', options: ['4','5'], correctAnswer: 0, difficulty: 'Easy' }] }, token);
+      timezone: 'Asia/Karachi', timeLimit: 15, assignedStudentIds: [ids.student], questions: [{ text: 'What is 2 + 2?', options: ['4','5'], correctAnswer: 0, difficulty: 'Easy' }] }, token);
     ids.hostedQuiz = created._id; ids.hostedTitle = title; save();
     await api(`/api/quizzes/teacher/${created._id}/publish`, {}, token);
     const rows = check(await db.from('automation_jobs').select('id,kind,run_at,student_id').eq('quiz_id', created._id).eq('channel','email'));

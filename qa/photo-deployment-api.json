@@ -1,0 +1,88 @@
+{
+  "verifiedAt": "2026-10-18T08:25:50.558Z",
+  "environment": "hosted-staging",
+  "phase": "photo-deployment",
+  "syntheticFaceApiOnly": true,
+  "results": [
+    {
+      "id": "QA-PRIVACY-PROFILE",
+      "expected": "200 and no authentication or biometric fields",
+      "actual": [],
+      "pass": true,
+      "httpStatus": 200
+    },
+    {
+      "id": "QA-FACE-NONNUMERIC",
+      "expected": "400 and no session for nonnumeric descriptor",
+      "actual": 400,
+      "pass": true,
+      "issuedSession": false,
+      "syntheticDescriptor": true
+    },
+    {
+      "id": "QA-FACE-SYNTHETIC-MATCH",
+      "expected": "200 session for matching synthetic descriptor",
+      "actual": 200,
+      "pass": true,
+      "apiOnly": true
+    },
+    {
+      "id": "QA-NO-SESSION",
+      "expected": "401",
+      "actual": 401,
+      "pass": true
+    },
+    {
+      "id": "QA-STUDENT-TEACHER",
+      "expected": "403",
+      "actual": 403,
+      "pass": true
+    },
+    {
+      "id": "QA-FACE-TOKEN-SCOPE",
+      "expected": "401",
+      "actual": 401,
+      "pass": true
+    },
+    {
+      "id": "QA-INVALID-CREDENTIALS",
+      "expected": "401",
+      "actual": 401,
+      "pass": true
+    },
+    {
+      "id": "QA-LOGIN-TYPES",
+      "expected": "400",
+      "actual": 400,
+      "pass": true
+    },
+    {
+      "id": "QA-PUBLIC-COURSE-CODES",
+      "expected": "200 catalog excludes private join codes",
+      "actual": 0,
+      "pass": true,
+      "httpStatus": 200,
+      "courses": 5
+    },
+    {
+      "id": "QA-STUDENT-QUESTION-KEY",
+      "expected": "403 and no private answer key",
+      "actual": 403,
+      "pass": true,
+      "answerKeyFieldsPresent": false
+    },
+    {
+      "id": "QA-OWN-RELEASED-RESULT",
+      "expected": "200",
+      "actual": 200,
+      "pass": true
+    },
+    {
+      "id": "QA-HEALTH-DB",
+      "expected": "database ok",
+      "actual": "ok",
+      "pass": true,
+      "ai": "degraded"
+    }
+  ]
+}

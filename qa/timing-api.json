@@ -1,0 +1,47 @@
+{
+  "verifiedAt": "2026-10-18T11:24:04.911Z",
+  "environment": "hosted-staging",
+  "syntheticFaceApiOnly": true,
+  "realClock": true,
+  "results": [
+    {
+      "id": "DURATION-CAPS-WINDOW",
+      "pass": true,
+      "deadlineAt": "2026-10-18T11:23:39.176195+00:00",
+      "expectedDeadlineAt": "2026-10-18T11:23:39.176Z",
+      "startHttp": 200
+    },
+    {
+      "id": "REFRESH-DURATION",
+      "pass": true,
+      "httpStatus": 200
+    },
+    {
+      "id": "CLOSE-CAPS-DURATION",
+      "pass": true,
+      "deadlineAt": "2026-10-18T11:23:22.339+00:00",
+      "expectedDeadlineAt": "2026-10-18T11:23:22.339Z",
+      "startHttp": 200
+    },
+    {
+      "id": "REFRESH-CLOSE",
+      "pass": true,
+      "httpStatus": 200
+    },
+    {
+      "id": "EXPIRED-SUBMIT-DURATION",
+      "pass": true,
+      "httpStatus": 403,
+      "persistedStatus": "in-progress",
+      "persistedScore": 0
+    },
+    {
+      "id": "EXPIRED-SUBMIT-CLOSE",
+      "pass": true,
+      "httpStatus": 403,
+      "persistedStatus": "in-progress",
+      "persistedScore": 0
+    }
+  ],
+  "cleanup": "Both quizzes cancelled; original automation preferences restored"
+}

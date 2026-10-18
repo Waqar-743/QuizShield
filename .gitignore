@@ -1,5 +1,6 @@
 node_modules/
 dist/
+frontend/vite.config.ts.timestamp-*.mjs
 build/
 # Environment Variables
 .env
@@ -23,3 +24,5 @@ frontend/.git_backup/
 Untitled-1.json
 install.cmd
 .env*
+# Superseded browser capture after a result-release transition; not passing evidence.
+qa/admin-evidence/private-reviewed-results.png

@@ -1,11 +1,13 @@
 import { supabase } from '../config/supabase';
+import { courseService } from './courseService';
+const forbidden = () => Object.assign(new Error('Not authorized to access this question bank'), {statusCode:403});
 
 export interface CreateQuestionInput {
   topicId: string;
   questionText: string;
   questionType: 'multipleChoice' | 'shortAnswer';
   options?: string[];
-  correctAnswer?: string;
+  correctAnswer?: string | number | null;
   correctAnswers?: string[];
   explanation?: string;
   difficulty: 'Easy' | 'Medium' | 'Hard';
@@ -14,27 +16,15 @@ export interface CreateQuestionInput {
 
 export const questionService = {
   async createQuestion(input: CreateQuestionInput) {
-    const { data, error } = await supabase
-      .from('questions')
-      .insert([{
-        topic_id: input.topicId,
-        content: input.questionText,
-        question_type: input.questionType,
-        options: input.options || [],
-        correct_answer: input.correctAnswer || null,
-        correct_answers: input.correctAnswers || [],
-        hint: input.explanation || '',
-        difficulty: input.difficulty,
-        created_by: input.createdBy
-      }])
-      .select()
-      .single();
-
-    if (error) throw new Error(error.message);
-    return data;
+    return courseService.createQuestion(input.createdBy, { topicId:input.topicId, text:input.questionText,
+      questionType:input.questionType, options:input.options, correctAnswer:input.correctAnswer,
+      correctAnswers:input.correctAnswers, explanation:input.explanation, difficulty:input.difficulty });
   },
 
-  async getQuestionsByTopic(topicId: string) {
+  async getQuestionsByTopic(topicId: string, teacherId: string) {
+    const {data:topic}=await supabase.from('topics').select('course_id').eq('id',topicId).single();
+    const {data:course}=await supabase.from('courses').select('created_by').eq('id',topic?.course_id).single();
+    if(!topic || course?.created_by!==teacherId) throw forbidden();
     const { data, error } = await supabase
       .from('questions')
       .select('*')
@@ -45,7 +35,7 @@ export const questionService = {
     return data || [];
   },
 
-  async getQuestionById(questionId: string) {
+  async getQuestionById(questionId: string, teacherId: string) {
     const { data, error } = await supabase
       .from('questions')
       .select('*')
@@ -53,6 +43,7 @@ export const questionService = {
       .single();
 
     if (error) throw new Error(error.message);
+    if (!data || data.created_by !== teacherId) throw forbidden();
     return data;
   },
 
@@ -65,14 +56,14 @@ export const questionService = {
       .single();
 
     if (!existing || existing.created_by !== userId) {
-      throw new Error('You are not authorized to edit this question');
+      throw forbidden();
     }
 
     const updateData: any = {};
     if (updates.questionText) updateData.content = updates.questionText;
     if (updates.questionType) updateData.question_type = updates.questionType;
     if (updates.options) updateData.options = updates.options;
-    if (updates.correctAnswer) updateData.correct_answer = updates.correctAnswer;
+    if (updates.correctAnswer !== undefined) updateData.correct_answer = updates.correctAnswer;
     if (updates.correctAnswers) updateData.correct_answers = updates.correctAnswers;
     if (updates.explanation) updateData.hint = updates.explanation;
     if (updates.difficulty) updateData.difficulty = updates.difficulty;
@@ -97,7 +88,7 @@ export const questionService = {
       .single();
 
     if (!existing || existing.created_by !== userId) {
-      throw new Error('You are not authorized to delete this question');
+      throw forbidden();
     }
 
     const { error } = await supabase

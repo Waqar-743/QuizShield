@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 import { ClockIcon, CheckCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
-import FaceDetectionCamera from '../../components/shared/FaceDetectionCamera';
 
 interface Question {
   _id: string;
@@ -23,13 +22,12 @@ interface QuizData {
     title: string;
     description: string;
     timeLimit: number;
-    cameraMonitoring?: boolean;
     questions: Question[];
   };
   code: string;
 }
 
-type ViolationType = 'TAB_SWITCH' | 'SYSTEM_FOCUS_LOST' | 'RESTRICTED_KEY' | 'FACE_AWAY' | 'NO_FACE';
+type ViolationType = 'TAB_SWITCH' | 'SYSTEM_FOCUS_LOST' | 'RESTRICTED_KEY';
 
 interface ViolationPayload {
   violation_type: ViolationType;
@@ -110,8 +108,6 @@ const QuizTakePage = () => {
     const backendViolationType =
       payload.violation_type === 'TAB_SWITCH'       ? 'tab_change'        :
       payload.violation_type === 'SYSTEM_FOCUS_LOST' ? 'focus_loss'        :
-      payload.violation_type === 'FACE_AWAY'         ? 'face_away'         :
-      payload.violation_type === 'NO_FACE'           ? 'no_face'           :
       'keyboard_shortcut';
 
     try {
@@ -122,10 +118,7 @@ const QuizTakePage = () => {
         event_timestamp: payload.event_timestamp,
         duration_seconds: payload.duration_seconds,
         meta_data: payload.meta_data,
-        detectionMethod:
-          payload.violation_type === 'FACE_AWAY' || payload.violation_type === 'NO_FACE'
-            ? 'camera_face_detection'
-            : 'browser_event',
+        detectionMethod: 'browser_event',
         quizId: quizData?.quiz._id,
       });
 
@@ -137,21 +130,6 @@ const QuizTakePage = () => {
       // Non-critical — violation not saved, but student stays in exam
     }
   }, [attemptId, navigate, quizData]);
-
-  // -----------------------------------------------------------------------
-  // Face detection callbacks
-  // -----------------------------------------------------------------------
-  const handleFaceViolation = useCallback((kind: 'face_away' | 'no_face') => {
-    reportViolation(createViolationPayload(
-      kind === 'face_away' ? 'FACE_AWAY' : 'NO_FACE',
-      kind === 'face_away' ? 'Face Away Violation' : 'No Face Detected Violation',
-    ));
-  }, [createViolationPayload, reportViolation]);
-
-  const handleFaceAutoSubmit = useCallback(async () => {
-    toast.error('Extended face absence was recorded for your teacher to review.', { duration: 5000 });
-    await reportViolation(createViolationPayload('FACE_AWAY', 'Extended face absence; instructor review required'));
-  }, [createViolationPayload, reportViolation]);
 
   // -----------------------------------------------------------------------
   // Browser anti-cheat event listeners
@@ -420,12 +398,6 @@ const QuizTakePage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 select-none">
-      {/* Face Detection Camera — only when the teacher enabled monitoring for this quiz */}
-      <FaceDetectionCamera
-        enabled={!!quizData && quizData.quiz.cameraMonitoring !== false}
-        onViolation={handleFaceViolation}
-        onAutoSubmit={handleFaceAutoSubmit}
-      />
 
       {/* Violation Warning Banner */}
       {showWarning && (

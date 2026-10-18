@@ -56,36 +56,3 @@ export const updateProfile = asyncHandler(async (req: Request, res: Response) =>
     data: user,
   });
 });
-
-export const verifyFaceLogin = asyncHandler(async (req: Request, res: Response) => {
-  const { tempToken, faceEncoding } = req.body;
-
-  if (!tempToken || !faceEncoding) {
-    res.status(400).json({
-      success: false,
-      error: { message: 'tempToken and faceEncoding are required' },
-    });
-    return;
-  }
-
-  const result = await authService.verifyFaceLogin(tempToken, faceEncoding);
-
-  res.status(200).json({
-    success: true,
-    data: result,
-  });
-});
-
-export const switchRole = asyncHandler(async (req: Request, res: Response) => {
-  const { role } = req.body;
-  if (!role || !['student', 'teacher'].includes(role)) {
-    return res.status(400).json({ success: false, message: 'Invalid role. Must be "student" or "teacher"' });
-  }
-  
-  const result = await authService.switchRole(req.user!._id.toString(), role);
-  
-  res.status(200).json({
-    success: true,
-    data: result,
-  });
-});

@@ -1,0 +1,9 @@
+{
+  "verifiedAt": "2026-10-18T11:42:50.328Z",
+  "filesScanned": 102,
+  "secretFindings": [],
+  "brokenReportLinks": [],
+  "diffWhitespaceClean": true,
+  "scope": "Changed and new non-ignored text files; no credential values emitted; binary images not secret-scanned",
+  "finalDocumentationCheckAt": "2026-10-18T11:45:25.462Z"
+}

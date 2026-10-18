@@ -23,6 +23,7 @@ beforeAll(async () => {
   await db.exec(`ALTER TABLE teacher_quizzes ADD COLUMN course_id uuid REFERENCES courses(id);`);
   await db.exec(fs.readFileSync(path.join(__dirname, '../../migrations/007_durable_automations.sql'), 'utf8'));
   await db.exec(fs.readFileSync(path.join(__dirname, '../../migrations/008_verified_google_connections.sql'), 'utf8'));
+  await db.exec(fs.readFileSync(path.join(__dirname, '../../migrations/009_course_join_codes.sql'), 'utf8'));
 }, 60000);
 afterAll(async () => { await db?.close(); });
 beforeEach(async () => {
@@ -41,6 +42,15 @@ test('saving a draft is quiet; publication persists assigned recipient jobs exac
   expect(announcements).toHaveLength(2);
   expect(announcements.every(j => j.student_id === student)).toBe(true);
   expect(await rows(`SELECT * FROM automation_jobs WHERE kind='reminder'`)).toHaveLength(1);
+});
+test('course-code migration backfills missing join codes, preserves existing codes and enforces uniqueness',async()=>{
+  const migration=fs.readFileSync(path.join(__dirname,'../../migrations/009_course_join_codes.sql'),'utf8');
+  await db.exec(migration);
+  const first=await one('SELECT course_code FROM courses WHERE id=$1',[course]);
+  expect(first.course_code).toMatch(/^[A-F0-9]{6}$/);
+  await db.exec(migration);
+  expect((await one('SELECT course_code FROM courses WHERE id=$1',[course])).course_code).toBe(first.course_code);
+  await expect(db.query('INSERT INTO courses(title,created_by,course_code) VALUES($1,$2,$3)',['Duplicate',teacher,first.course_code])).rejects.toThrow();
 });
 test('Google connected flags require verified installation, webhook and destination metadata',async()=>{
   await db.query('INSERT INTO automation_connections(teacher_id,tenant_id) VALUES($1,$2)',[teacher,'tenant']);

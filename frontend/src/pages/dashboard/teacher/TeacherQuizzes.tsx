@@ -26,7 +26,6 @@ interface Quiz {
   timezone?: string;
   lifecycle?: 'draft' | 'published' | 'cancelled';
   assignedStudentIds?: string[] | null;
-  cameraMonitoring?: boolean;
   createdAt: string;
   accessCode: string;
 }
@@ -64,7 +63,6 @@ const TeacherQuizzes = () => {
     timeLimit: 30,
     scheduledStart: '',
     closesAt: '', timezone: 'Asia/Karachi', assignedStudentIds: null as string[] | null,
-    cameraMonitoring: true,
     questionTitle: '',
     questionScheduledStart: '',
     questions: [
@@ -92,7 +90,7 @@ const TeacherQuizzes = () => {
       const response = await api.get('/quizzes/teacher/my-quizzes');
       setQuizzes(response.data.data || []);
     } catch (error: any) {
-      console.error('Error fetching quizzes:', error);
+      console.error('Error fetching quizzes:');
       const message = error.response?.data?.message || 'Failed to load quizzes';
       toast.error(message);
       setQuizzes([]);
@@ -106,7 +104,7 @@ const TeacherQuizzes = () => {
       const response = await api.get('/courses/teacher/my-courses');
       setTeacherCourses(response.data.data || []);
     } catch (error) {
-      console.error('Error fetching teacher courses:', error);
+      console.error('Error fetching teacher courses:');
       setTeacherCourses([]);
     }
   };
@@ -125,7 +123,6 @@ const TeacherQuizzes = () => {
         closesAt: quiz.closesAt ? zonedInput(quiz.closesAt, quiz.timezone || defaultTimezone) : '',
         timezone: quiz.timezone || defaultTimezone,
         assignedStudentIds: quiz.assignedStudentIds ?? null,
-        cameraMonitoring: quiz.cameraMonitoring !== false,
         questionTitle: '',
         questionScheduledStart: '',
         questions: quiz.questions.length > 0 ? quiz.questions.map(q => ({
@@ -146,7 +143,6 @@ const TeacherQuizzes = () => {
         timeLimit: 30,
         scheduledStart: '',
         closesAt: '', timezone: defaultTimezone, assignedStudentIds: null,
-        cameraMonitoring: true,
         questionTitle: '',
         questionScheduledStart: '',
         questions: [
@@ -227,7 +223,6 @@ const TeacherQuizzes = () => {
           scheduledStart: start,
           closesAt: close, timezone: formData.timezone, assignedStudentIds: formData.assignedStudentIds,
           timeLimit: Math.max(1, Math.ceil(totalSeconds / 60)),
-          cameraMonitoring: formData.cameraMonitoring,
           questions: formData.questions.map((q) => ({
             text: q.text,
             options: [],
@@ -245,7 +240,7 @@ const TeacherQuizzes = () => {
         setModalOpen(false);
         fetchQuizzes();
       } catch (error: any) {
-        console.error('Save Question Error:', error);
+        console.error('Save Question Error:');
         const message = error.response?.data?.error?.message || error.response?.data?.message || error.message || 'Failed to save question';
         toast.error(message);
       } finally {
@@ -274,7 +269,6 @@ const TeacherQuizzes = () => {
     const submitData = {
       ...formData,
       scheduledStart: start, closesAt: close,
-      cameraMonitoring: formData.cameraMonitoring,
     };
 
     try {
@@ -289,7 +283,7 @@ const TeacherQuizzes = () => {
       setModalOpen(false);
       fetchQuizzes();
     } catch (error: any) {
-      console.error('Save Quiz Error:', error);
+      console.error('Save Quiz Error:');
       const message = error.response?.data?.message || error.message || 'Failed to save quiz';
       toast.error(message);
     } finally {
@@ -434,7 +428,7 @@ const TeacherQuizzes = () => {
           <MagnifyingGlassIcon className="h-5 w-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
           <input
             type="text"
-            placeholder="Search quizzes..."
+            aria-label="Search quizzes" placeholder="Search quizzes..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
@@ -512,12 +506,14 @@ const TeacherQuizzes = () => {
                         onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         placeholder="Enter quiz title"
+                        aria-label="Quiz title"
                         required
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Course</label>
                       <select
+                        aria-label="Quiz course"
                         value={formData.courseId}
                         disabled={Boolean(editingQuiz)}
                         onChange={(e) => setFormData({ ...formData, courseId: e.target.value })}
@@ -545,6 +541,7 @@ const TeacherQuizzes = () => {
                     </label>
                     <input
                       type="datetime-local"
+                      aria-label="Opening time"
                       value={formData.scheduledStart}
                       onChange={(e) => setFormData({ ...formData, scheduledStart: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
@@ -562,24 +559,11 @@ const TeacherQuizzes = () => {
                       rows={2}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                       placeholder="Brief description of the quiz"
+                      aria-label="Quiz description"
                     />
                   </div>
 
-                  <div className="flex items-start gap-3 p-3 border border-gray-200 rounded-lg bg-gray-50">
-                    <input
-                      id="cameraMonitoring"
-                      type="checkbox"
-                      checked={formData.cameraMonitoring}
-                      onChange={(e) => setFormData({ ...formData, cameraMonitoring: e.target.checked })}
-                      className="mt-1 h-4 w-4 text-indigo-600 focus:ring-indigo-500 rounded"
-                    />
-                    <label htmlFor="cameraMonitoring" className="text-sm text-gray-700 cursor-pointer">
-                      <span className="font-medium">Require camera monitoring</span>
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        When ON, students must enable their webcam to take this quiz. When OFF, no camera is required.
-                      </p>
-                    </label>
-                  </div>
+
                 </>
               )}
 
@@ -624,21 +608,7 @@ const TeacherQuizzes = () => {
                       If set, students cannot start the question before this time
                     </p>
                   </div>
-                  <div className="md:col-span-3 flex items-start gap-3 p-3 border border-gray-200 rounded-lg bg-gray-50">
-                    <input
-                      id="cameraMonitoringQ"
-                      type="checkbox"
-                      checked={formData.cameraMonitoring}
-                      onChange={(e) => setFormData({ ...formData, cameraMonitoring: e.target.checked })}
-                      className="mt-1 h-4 w-4 text-indigo-600 focus:ring-indigo-500 rounded"
-                    />
-                    <label htmlFor="cameraMonitoringQ" className="text-sm text-gray-700 cursor-pointer">
-                      <span className="font-medium">Require camera monitoring</span>
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        When ON, students must enable their webcam. When OFF, no camera is required.
-                      </p>
-                    </label>
-                  </div>
+
                 </div>
               )}
 
@@ -706,6 +676,7 @@ const TeacherQuizzes = () => {
                         rows={2}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 mb-3"
                         placeholder="Enter question text"
+                        aria-label={`Question ${qIndex+1} text`}
                         required
                       />
 
@@ -715,6 +686,7 @@ const TeacherQuizzes = () => {
                             <div key={oIndex} className="flex items-center gap-2">
                               <input
                                 type="radio"
+                                aria-label={`Question ${qIndex+1}: correct answer is option ${oIndex+1}`}
                                 name={`correct-${qIndex}`}
                                 checked={question.correctAnswer === oIndex}
                                 onChange={() => updateQuestion(qIndex, 'correctAnswer', oIndex)}
@@ -726,6 +698,7 @@ const TeacherQuizzes = () => {
                                 onChange={(e) => updateOption(qIndex, oIndex, e.target.value)}
                                 className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                                 placeholder={`Option ${oIndex + 1}`}
+                                aria-label={`Question ${qIndex+1} option ${oIndex+1}`}
                                 required
                               />
                               {question.correctAnswer === oIndex && (
@@ -746,6 +719,7 @@ const TeacherQuizzes = () => {
                         onChange={(e) => updateQuestion(qIndex, 'explanation', e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         placeholder="Explanation (optional)"
+                        aria-label={`Question ${qIndex+1} explanation`}
                       />
                     </div>
                   ))}

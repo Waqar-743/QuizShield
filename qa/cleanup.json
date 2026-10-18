@@ -1,0 +1,16 @@
+{
+  "verifiedAt": "2026-10-18T11:39:21.549Z",
+  "stagingOnly": true,
+  "originalPreferencesRestored": true,
+  "publishedFixtureQuizzes": 0,
+  "cancelledPendingFixtureJobs": 0,
+  "outstandingGlobalJobs": 0,
+  "outstandingStatuses": [],
+  "profileBucketPublic": false,
+  "temporaryEnvironmentInputsRemovedThisRun": [],
+  "temporaryEnvironmentInputsAbsent": true,
+  "allowAllRecipients": false,
+  "approvedRecipientCount": 1,
+  "sheetsAuditRowsRetained": true,
+  "fixtureAccountsRetained": true
+}

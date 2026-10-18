@@ -21,7 +21,7 @@ const AuthLayout = () => {
           />
         </div>
         <p className="mt-2 text-center text-sm text-gray-600">
-          AI-Powered Adaptive Learning Platform
+          Assessment scheduling, learning and review
         </p>
       </div>
 

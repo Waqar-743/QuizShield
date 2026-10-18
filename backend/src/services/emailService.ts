@@ -97,10 +97,10 @@ export const emailService = {
         `,
       });
 
-      console.log('Password reset email sent successfully:', data);
+      if (data.error || !data.data?.id) throw new Error('Provider did not acknowledge recovery email');
       return data;
     } catch (error) {
-      console.error('Error sending password reset email:', error);
+      console.error('Password reset email was not acknowledged by the provider');
       throw Object.assign(new Error('Failed to send password reset email.'), { statusCode: 503 });
     }
   }

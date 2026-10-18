@@ -1,0 +1,8 @@
+{
+  "environment": "hosted staging jixzholamkbktzusyqwe",
+  "execution": "Supabase Management API transaction",
+  "result": "PASS: descriptor cleanup and assessment counts verified; transaction rolled back",
+  "destructiveCleanupApplied": false,
+  "assessmentHistoryPreserved": true,
+  "ordinaryProfileAssetsDeleted": false
+}

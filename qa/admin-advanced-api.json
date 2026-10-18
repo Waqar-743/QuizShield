@@ -1,0 +1,59 @@
+{
+  "verifiedAt": "2026-10-18T15:36:20.102Z",
+  "environment": "hosted staging",
+  "results": [
+    {
+      "name": "Administrator enrolment",
+      "pass": true
+    },
+    {
+      "name": "Administrator unenrolment",
+      "pass": true
+    },
+    {
+      "name": "Ownership transfer requires explicit confirmation",
+      "pass": true
+    },
+    {
+      "name": "Ownership transfer succeeds",
+      "pass": true
+    },
+    {
+      "name": "Transferred assessment preserved with successor ownership",
+      "pass": true
+    },
+    {
+      "name": "Former owner loses assessment editing",
+      "pass": true
+    },
+    {
+      "name": "Second administrator created through audited role change",
+      "pass": true
+    },
+    {
+      "name": "Concurrent self-demotions leave one active administrator",
+      "pass": true,
+      "statuses": [
+        200,
+        409
+      ]
+    },
+    {
+      "name": "Recoverable removal invalidates queued and in-progress jobs",
+      "pass": true
+    },
+    {
+      "name": "Queued job cancelled and dispatched leases require reconciliation",
+      "pass": true
+    },
+    {
+      "name": "Disabled callback cannot initiate provider delivery",
+      "pass": true
+    },
+    {
+      "name": "Uncertain job cannot be blindly retried",
+      "pass": true
+    }
+  ],
+  "cleanup": "First QA administrator restored. Secondary fixture deactivated; draft course/assessment retained. Manually created delivery leases were never externally dispatched and were cancelled after assertions."
+}

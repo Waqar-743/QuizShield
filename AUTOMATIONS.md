@@ -1,10 +1,12 @@
 # QuizShield automations: implementation and deployment
 
-This extends the existing React/Express/Supabase project. The isolated staging database (migrations 001–008), Vercel backend, two authenticated Fastn workflows and hosted cron are running. Controlled live acceptance passed for email, teacher-owned Calendar creation/update/cancellation and released-results Sheets sync. Replay and ownership checks passed. Email remains restricted to the sole approved inbox; original production was not changed. See [the verification report](backend/deploy/STAGING-VERIFICATION.md), [email receipts](backend/deploy/HOSTED-EMAIL-EVIDENCE.json) and [Google evidence](backend/deploy/GOOGLE-LIVE-EVIDENCE.json). Local mocked tests are recorded separately. New environments default to delivery disabled.
+This extends the existing React/Express/Supabase project. The isolated staging database (migrations 001–009), Vercel backend, two authenticated Fastn workflows and hosted cron are running. Controlled live acceptance passed for email, teacher-owned Calendar creation/update/cancellation and released-results Sheets sync. Email remains restricted to the sole approved inbox; original production was not changed. See the current [full QA review](QA_REVIEW_2026-10-18.md) and [fresh live evidence](qa/fastn-verification.json). The [earlier verification report](backend/deploy/STAGING-VERIFICATION.md) is historical. Local mocked tests are recorded separately. New environments default to delivery disabled.
 
 ## Findings from the code review
 
-The active assessment path is `teacher_quizzes` → `quiz_attempts`, with inline questions and four-digit access codes. The separate `quizzes`/`quiz_questions`/topic path supports adaptive practice and remains separate. Course ownership uses `courses.created_by`; enrolment uses `enrollments(user_id, course_id)`. Authentication uses custom Express JWTs and student face verification, rather than Supabase Auth sessions.
+The active assessment path is `teacher_quizzes` → `quiz_attempts`, with inline questions and four-digit access codes. The separate `quizzes`/`quiz_questions`/topic path is legacy; its adaptive start flow is unavailable and is not an accepted feature. Course ownership uses `courses.created_by`; enrolment uses `enrollments(user_id, course_id)`. Authentication uses custom Express JWTs and ordinary email/password for all roles, with current-account and session-version checks on every protected request. See ADMINISTRATION.md for the new access and assignment controls.
+
+Migration 009 restores unique course join codes. Current photo code requires a private `profile-pictures` bucket and signs owned references for one hour; it refuses new uploads to an existing public bucket. Set that bucket private before deploying to another environment, then retest registration and profile reload. The 3 MB application limit leaves room for registration base64 data under the hosting request limit. These staging changes do not migrate or configure production.
 
 Before this change:
 
@@ -89,7 +91,7 @@ Edit the readable Google source `backend/fastn/quizshield-google.mjs`, then run 
 
 For a new environment:
 
-1. Apply migrations 007 and 008, then configure the backend secrets. Begin with live delivery and Google disabled.
+1. Apply migrations through 009, then configure the backend secrets and private photo storage as described above. Begin with live delivery and Google disabled.
 2. Create the email workflow from its source. Use Standard execution, a timeout below the five-minute lease, and one attempt. Publish and explicitly deploy it to Live.
 3. Create an API-key-authenticated webhook with Sequential dispatch, `deliveryId` deduplication and no automatic trigger retries; route it to the Live deployment. Set `FASTN_WEBHOOK_URL` and the **Live** `FASTN_ACCESS_KEY` in backend environment settings. MCP login does not provision this hosted credential.
 4. Complete controlled email acceptance before enabling Google. Keep `AUTOMATION_ALLOW_ALL_RECIPIENTS=false`.
@@ -125,9 +127,9 @@ Calendar sequential processing, stable IDs, revisions and a second preflight pre
 
 Run from `backend`: `npm ci`, `npm run build`, `npm test -- --runInBand`, `npm run test:fastn`. Database tests execute the real migration and triggers in isolated PGlite PostgreSQL. API delivery tests use controlled in-memory fixtures and a mocked email provider. Fastn orchestration tests use mocked connector adapters. The Jest command enables VM modules for PGlite's dynamic WASM imports. From `frontend`: `npm ci`, `npm run lint`, `npx tsc --noEmit`, `npm run build`.
 
-Local checks cover draft silence, atomic save/outbox rollback, assigned recipients, server window boundaries, attempt duration, repeated starts, no completed-student reminders, withdrawn enrolment, cancellation, stale revisions, one-reminder policy, lease expiry, private release, ownership, face-token rejection, fixed Sheet rows, Calendar orchestration and simulated external failures. Hosted email and teacher-bound Google acceptance have both passed separately; see the evidence report. The following checklist is retained for new environments.
+Local checks cover draft silence, atomic save/outbox rollback, assigned recipients, server window boundaries, attempt duration, repeated starts, no completed-student reminders, withdrawn enrolment, cancellation, stale revisions, one-reminder policy, lease expiry, private release, ownership, retired face-endpoint rejection, fixed Sheet rows, Calendar orchestration and simulated external failures. Hosted email and teacher-bound Google acceptance have both passed separately; see the evidence report. The following checklist is retained for new environments.
 
-The existing dependency audit reported 66 backend and 32 frontend findings during installation. They need a separate dependency review; no broad dependency upgrades were included in this feature. Existing frontend build warnings include an older Browserslist dataset and the large face-recognition bundle. The original smoke tests accept database-unavailable responses; passing them does not establish a working production authentication/database connection.
+The existing dependency audit reported 66 backend and 32 frontend findings during installation. They need a separate dependency review; no broad dependency upgrades were included in this feature. Existing frontend build warnings include an older Browserslist dataset ; the face-recognition dependency and models have been removed. The original smoke tests accept database-unavailable responses; passing them does not establish a working production authentication/database connection.
 
 1. Use a staging teacher, two controlled enrolled students and one unassigned controlled account. Keep the email allowlist enabled. Select a dedicated test Calendar and empty results tab.
 2. Save a future quiz, confirm no draft announcement, then publish and confirm only assigned students get one announcement. Restart/redeploy the worker and confirm completed jobs do not repeat.

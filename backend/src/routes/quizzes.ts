@@ -44,7 +44,7 @@ router.get('/student/analytics', getStudentAnalytics);
 router.put('/submissions/:submissionId/grade', gradeSubmission);
 
 // Adaptive quiz routes for students
-router.post('/generate', getQuizForTopic);
+router.post('/generate', authorize('student'), getQuizForTopic);
 
 router.post('/', authorize('teacher','admin'), createQuiz);
 router.put('/:quizId', authorize('teacher','admin'), updateQuiz);
@@ -54,20 +54,20 @@ router.delete('/:quizId', authorize('teacher','admin'), deleteQuiz);
 router.get('/access-by-code/:code', accessQuizByCode);
 router.post('/start-by-code/:code', authorize('student'), startQuizByCode);
 router.post('/:attemptId/submit-all', authorize('student'), submitAllAnswers);
-router.post('/:quizId/generate-code', generateQuizCode);
-router.get('/:quizId/codes', getQuizCodes);
-router.put('/codes/:code/toggle', toggleQuizCode);
-router.delete('/codes/:code', deleteQuizCode);
+router.post('/:quizId/generate-code', authorize('teacher','admin'), generateQuizCode);
+router.get('/:quizId/codes', authorize('teacher','admin'), getQuizCodes);
+router.put('/codes/:code/toggle', authorize('teacher','admin'), toggleQuizCode);
+router.delete('/codes/:code', authorize('teacher','admin'), deleteQuizCode);
 
 // Anti-cheating routes
-router.post('/attempts/:attemptId/report-violation', reportViolation);
+router.post('/attempts/:attemptId/report-violation', authorize('student'), reportViolation);
 router.get('/attempts/:attemptId/violations', getViolations);
-router.get('/violations/summary', getViolationSummary);
+router.get('/violations/summary', authorize('teacher','admin'), getViolationSummary);
 router.post('/attempts/:attemptId/flag', flagAttempt);
 router.post('/attempts/:attemptId/invalidate', invalidateAttempt);
 
 // Get quiz for a topic (starts a session essentially)
-router.get('/topic/:topicId', getQuizForTopic);
+router.get('/topic/:topicId', authorize('student'), getQuizForTopic);
 
 // Submit single answer
 router.post('/:attemptId/question/:questionId/submit', submitAnswer);

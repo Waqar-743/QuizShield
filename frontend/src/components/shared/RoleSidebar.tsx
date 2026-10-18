@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import Brand from './Brand';
 import { useAuthStore } from '../../store/authStore';
@@ -41,6 +41,23 @@ const roleAccent: Record<string, string> = {
 const RoleSidebar: React.FC<RoleSidebarProps> = ({ items, isOpen, onClose, role }) => {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
+  useEffect(()=>{
+    if(!isOpen || window.innerWidth>=1024) return;
+    const panel=document.getElementById('dashboard-sidebar');
+    const focusable=()=>Array.from(panel?.querySelectorAll<HTMLAnchorElement|HTMLButtonElement>('a[href],button:not([disabled])') || []);
+    focusable()[0]?.focus();
+    const key=(event:KeyboardEvent)=>{
+      if(window.innerWidth>=1024) return;
+      if(event.key==='Escape'){onClose();document.getElementById('dashboard-menu-toggle')?.focus();}
+      if(event.key==='Tab'){
+        const items=focusable(),first=items[0],last=items[items.length-1];
+        if(event.shiftKey&&document.activeElement===first){event.preventDefault();last?.focus();}
+        else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus();}
+      }
+    };
+    document.addEventListener('keydown',key);
+    return ()=>document.removeEventListener('keydown',key);
+  },[isOpen,onClose]);
 
   const handleSignOut = () => {
     logout();
@@ -60,11 +77,12 @@ const RoleSidebar: React.FC<RoleSidebarProps> = ({ items, isOpen, onClose, role 
 
       {/* Sidebar — outer shell (Doppelrand) */}
       <aside
+        id="dashboard-sidebar"
         className={`
           fixed inset-y-0 left-0 z-30 flex w-72 p-3
           transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]
           lg:translate-x-0 lg:static lg:inset-auto
-          ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+          ${isOpen ? 'visible translate-x-0' : 'invisible -translate-x-full lg:visible lg:translate-x-0'}
         `}
       >
         {/* Inner core — vantablack glass panel */}

@@ -56,8 +56,6 @@ export const getEnrolledCourses = asyncHandler(async (req: Request, res: Respons
 // ============ Course Controllers (Teacher) ============
 
 export const createCourse = asyncHandler(async (req: Request, res: Response) => {
-  console.log('createCourse called by user:', req.user);
-  console.log('Request body:', req.body);
   
   const course = await courseService.createCourse(req.user!._id.toString(), req.body);
   
@@ -126,7 +124,7 @@ export const deleteTopic = asyncHandler(async (req: Request, res: Response) => {
 // ============ Question Controllers (Teacher) ============
 
 export const getQuestionsByTopic = asyncHandler(async (req: Request, res: Response) => {
-  const questions = await courseService.getQuestionsByTopic(req.params.topicId);
+  const questions = await courseService.getQuestionsByTopic(req.params.topicId, req.user!._id, req.user!.role);
   
   res.status(200).json({
     success: true,

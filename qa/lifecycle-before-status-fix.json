@@ -1,0 +1,105 @@
+{
+  "verifiedAt": "2026-10-18T07:35:54.495Z",
+  "environment": "hosted-staging",
+  "syntheticFaceApiOnly": true,
+  "externalDeliveryDuringTest": false,
+  "fixtures": {
+    "course": "c80cf76a-eaeb-4cc3-a7d0-725a1cf3744b",
+    "quiz": "11a0430c-00b7-4989-a97a-9a46a32ac984",
+    "attempt": "b58638e0-6b1e-4401-b622-a2fefd82e969"
+  },
+  "results": [
+    {
+      "id": "COURSE-CREATE",
+      "pass": true,
+      "status": 201
+    },
+    {
+      "id": "COURSE-CODE",
+      "pass": true,
+      "length": 6
+    },
+    {
+      "id": "CATALOG-PRIVACY",
+      "pass": true,
+      "status": 200
+    },
+    {
+      "id": "COURSE-ENROL-REPLAY",
+      "pass": true,
+      "statuses": [
+        200,
+        200
+      ]
+    },
+    {
+      "id": "DRAFT-SILENCE",
+      "pass": true,
+      "jobs": 0
+    },
+    {
+      "id": "DRAFT-ACCESS",
+      "pass": true,
+      "status": 400
+    },
+    {
+      "id": "PUBLISH-ONCE",
+      "pass": true,
+      "statuses": [
+        200,
+        200
+      ],
+      "emailJobs": 1
+    },
+    {
+      "id": "EARLY-START",
+      "pass": true,
+      "status": 403
+    },
+    {
+      "id": "CONCURRENT-START",
+      "pass": true,
+      "statuses": [
+        200,
+        200
+      ],
+      "uniqueAttemptIds": 1
+    },
+    {
+      "id": "DUPLICATE-ANSWERS",
+      "pass": true,
+      "status": 400
+    },
+    {
+      "id": "SUBMIT-IMMUTABLE",
+      "pass": false,
+      "status": 500,
+      "persistedScore": 1
+    },
+    {
+      "id": "PRIVATE-REVIEW",
+      "pass": true,
+      "status": 200,
+      "gradeVisible": false
+    },
+    {
+      "id": "RELEASE-ONCE",
+      "pass": true,
+      "statuses": [
+        200,
+        200
+      ],
+      "releasedGrade": 82
+    },
+    {
+      "id": "RELEASE-IMMUTABLE",
+      "pass": true,
+      "status": 409
+    },
+    {
+      "id": "ROLE-ESCALATION",
+      "pass": true,
+      "status": 403
+    }
+  ]
+}

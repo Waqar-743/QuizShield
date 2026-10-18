@@ -55,7 +55,7 @@ const TeacherTopics = () => {
       setTopics(topicsRes.data.data || []);
       setCourses(coursesRes.data.data || []);
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error('Error fetching data:');
       setTopics([]);
       setCourses([]);
     } finally {
@@ -212,13 +212,14 @@ const TeacherTopics = () => {
             <MagnifyingGlassIcon className="h-5 w-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Search topics..."
+              aria-label="Search topics" placeholder="Search topics..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             />
           </div>
           <select
+            aria-label="Filter topics by course"
             value={selectedCourse}
             onChange={(e) => setSelectedCourse(e.target.value)}
             className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"

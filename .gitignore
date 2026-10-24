@@ -24,5 +24,13 @@ frontend/.git_backup/
 Untitled-1.json
 install.cmd
 .env*
+!backend/.env.example
+!frontend/.env.example
+
+# Legacy identity/camera captures are retained locally, not published.
+/Face-detection.png
+/Teacher-Dashboard.png
+/Chatbot.png
+/Quiz.png
 # Superseded browser capture after a result-release transition; not passing evidence.
 qa/admin-evidence/private-reviewed-results.png
